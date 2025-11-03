@@ -1,5 +1,16 @@
 # Deployment Status
 
+## 🆕 New Approach: Standalone Function App
+
+**Status**: Migrated from integrated Functions to standalone Azure Function App
+
+After repeated failures with integrated Azure Functions in Static Web Apps, we've migrated to a **separate Azure Function App** approach for better reliability and easier debugging.
+
+### Quick Links
+- [Quick Start Guide](./QUICK-START.md) - Get started in 5 steps
+- [Full Deployment Guide](./deployment-new-approach.md) - Complete setup instructions
+- [Migration Guide](./MIGRATION-GUIDE.md) - Migration steps and details
+
 ## ✅ Completed Steps
 
 ### 1. Azure Resources
@@ -7,60 +18,64 @@
 - ✅ Storage Account: `secairadar587d35` (Standard_LRS)
 - ✅ Static Web App: `secai-radar` (Free tier)
   - Default hostname: `purple-moss-0942f9e10.3.azurestaticapps.net`
+- ⏳ Function App: `secai-radar-api` (To be created - see [Quick Start](./QUICK-START.md))
 
 ### 2. DNS Configuration
 - ✅ CNAME record created: `secai-radar.zimax.net` → `purple-moss-0942f9e10.3.azurestaticapps.net`
 - ⏳ Custom domain verification pending (may take a few minutes)
 
 ### 3. GitHub Configuration
-- ✅ GitHub Actions workflow created (`.github/workflows/azure-static-web-apps.yml`)
+- ✅ GitHub Actions workflow for Static Web App (`.github/workflows/azure-static-web-apps.yml`)
+- ✅ GitHub Actions workflow for Function App (`.github/workflows/azure-functions-deploy.yml`)
 - ✅ Deployment token added to GitHub secrets: `AZURE_STATIC_WEB_APPS_API_TOKEN`
+- ⏳ Function App publish profile needed (see [Quick Start](./QUICK-START.md) Step 2)
 
 ### 4. Application Settings
-- ✅ `AzureWebJobsStorage` - Storage account connection string
-- ✅ `TABLES_CONN` - Storage account connection string
-- ✅ `BLOBS_CONN` - Storage account connection string
-- ✅ `BLOB_CONTAINER` - `assessments`
-- ✅ `TENANT_ID` - `NICO`
+- ✅ Static Web App settings configured
+- ⏳ Function App settings to be configured (see [Quick Start](./QUICK-START.md))
 
-## 🔄 Next Steps (Manual)
+## 🔄 Next Steps (Follow Quick Start)
 
-### 1. Custom Domain Verification
-1. Go to Azure Portal → Static Web App → `secai-radar` → Custom domains
-2. Verify `secai-radar.zimax.net` is listed
-3. Wait for DNS validation to complete (may take 5-30 minutes)
-4. SSL certificate will be automatically provisioned
+### 1. Create Function App
+Run the provisioning script:
+```bash
+cd scripts
+./create-function-app.sh
+```
 
-### 2. Authentication Setup (Entra ID)
-1. Go to Azure Portal → Static Web App → `secai-radar` → Authentication
-2. Click "Add identity provider"
-3. Select "Microsoft (Azure AD / Entra ID)"
-4. Choose "Create new app registration" or use existing
-5. Configure redirect URL: `https://secai-radar.zimax.net/.auth/login/aad/callback`
+### 2. Configure GitHub Secrets
+1. Get Function App publish profile (see [Quick Start](./QUICK-START.md) Step 2)
+2. Add to GitHub Secrets: `AZURE_FUNCTIONAPP_PUBLISH_PROFILE`
+3. Add Function App URL: `VITE_API_BASE` = `https://secai-radar-api.azurewebsites.net/api`
 
-### 3. GitHub Connection
-1. Go to Azure Portal → Static Web App → `secai-radar` → Deployment
-2. Verify GitHub connection is linked to `zimaxnet/secai-radar`
-3. Branch: `main`
-4. Build details:
-   - App location: `/web`
-   - API location: `/api`
-   - Output location: `dist`
+### 3. Deploy
+- Push to `main` branch or trigger workflows manually
+- Function App deploys when `api/**` files change
+- Static Web App deploys when `web/**` files change
 
-### 4. Trigger Deployment
-1. Push any commit to `main` branch (or commit is already pushed)
-2. Check GitHub Actions tab for workflow status
-3. Monitor deployment in Azure Portal
+### 4. Verify
+- Test Function App: `curl https://secai-radar-api.azurewebsites.net/api/domains`
+- Test Static Web App in browser
+- Check CORS is working (no errors in DevTools)
+- Monitor deployment in Azure Portal
 
 ## 📋 Verification Checklist
 
+### Static Web App
 - [ ] DNS CNAME record is propagated (check with `dig secai-radar.zimax.net CNAME`)
 - [ ] Custom domain shows as "Validated" in Azure Portal
 - [ ] SSL certificate is provisioned for custom domain
 - [ ] Entra ID authentication is configured
-- [ ] GitHub Actions workflow runs successfully
+- [ ] Static Web App deployment workflow runs successfully
 - [ ] Application accessible at `https://secai-radar.zimax.net`
-- [ ] API endpoints respond correctly
+
+### Function App
+- [ ] Function App created and accessible
+- [ ] Function App publish profile added to GitHub Secrets
+- [ ] Function App deployment workflow runs successfully
+- [ ] Function App URL configured in web app (`VITE_API_BASE`)
+- [ ] CORS configured correctly (no CORS errors in browser)
+- [ ] API endpoints respond correctly: `curl https://secai-radar-api.azurewebsites.net/api/domains`
 
 ## 🔗 Useful Links
 

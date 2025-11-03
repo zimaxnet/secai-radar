@@ -23,11 +23,14 @@ jobs:
 
       - name: Install & Build Web
         working-directory: web
+        env:
+          # Set API URL from secret or use default Function App URL
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE || 'https://secai-radar-api.azurewebsites.net/api' }}
         run: |
           npm ci
           npm run build
 
-      # Deploy Web + API to Azure Static Web Apps
+      # Deploy Web only (API is deployed separately as Function App)
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -35,5 +38,4 @@ jobs:
           action: "upload"
           app_location: "web"
           output_location: "dist"
-          api_location: "api"
-
+          # Removed api_location - API is now a separate Function App
