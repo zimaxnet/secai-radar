@@ -1,6 +1,6 @@
 {
   "auth": { 
-    "rolesSource": "staticwebapp.json"
+    "rolesSource": "DEFAULT"
   },
   "routes": [
     { "route": "/", "serve": "/index.html" },
