@@ -1,8 +1,19 @@
 {
-  "auth": { "rolesSource": "default" },
+  "auth": { 
+    "rolesSource": "staticwebapp.json"
+  },
   "routes": [
     { "route": "/", "serve": "/index.html" },
     { "route": "/tenant/*", "allowedRoles": ["authenticated"] }
   ],
-  "navigationFallback": { "rewrite": "/index.html" }
+  "navigationFallback": { 
+    "rewrite": "/index.html",
+    "exclude": ["/api/*"]
+  },
+  "responseOverrides": {
+    "401": {
+      "rewrite": "/.auth/login/aad",
+      "statusCode": 302
+    }
+  }
 }
