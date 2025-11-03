@@ -65,7 +65,7 @@ cd scripts
        - [ ] DNS CNAME record is propagated (check with `dig secai-radar.zimax.net CNAME`)
        - [ ] Custom domain shows as "Validated" in Azure Portal
        - [ ] SSL certificate is provisioned for custom domain
-       - [x] Entra ID authentication is configured (App Registration created, configuration sent)
+       - [x] Entra ID authentication is configured and enabled
        - [x] Static Web App deployment workflow runs successfully
        - [x] Application accessible at `https://purple-moss-0942f9e10.3.azurestaticapps.net`
 
