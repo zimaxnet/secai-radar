@@ -1,5 +1,5 @@
 {
-  "auth": { "rolesSource": "roles" },
+  "auth": { "rolesSource": "default" },
   "routes": [
     { "route": "/", "serve": "/index.html" },
     { "route": "/tenant/*", "allowedRoles": ["authenticated"] }
