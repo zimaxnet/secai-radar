@@ -28,12 +28,14 @@ curl -X PUT "$ENDPOINT" \
           "enabled": true,
           "registration": {
             "openIdIssuer": "https://login.microsoftonline.com/'${TENANT_ID}'/v2.0",
-            "clientIdSettingName": "MICROSOFT_PROVIDER_AUTHENTICATION_SECRET",
+            "clientId": "'${APP_ID}'",
             "clientSecretSettingName": "MICROSOFT_PROVIDER_AUTHENTICATION_SECRET"
           },
           "validation": {
             "jwtClaimChecks": {},
-            "allowedAudiences": []
+            "allowedAudiences": [
+              "'${APP_ID}'"
+            ]
           }
         }
       },
