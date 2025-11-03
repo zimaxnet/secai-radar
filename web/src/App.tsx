@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Link, useParams, Navigate } from 'react-router-dom'
 import Dashboard from './routes/Dashboard'
 import Controls from './routes/Controls'
@@ -33,11 +34,54 @@ function Shell() {
   )
 }
 
+function Home() {
+  const [domains, setDomains] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  
+  useEffect(() => {
+    setLoading(true)
+    fetch('/api/domains').then(r => r.json()).then(d => {
+      setDomains(d || [])
+    }).finally(() => setLoading(false))
+  }, [])
+  
+  const defaultTenant = (import.meta.env.VITE_DEFAULT_TENANT as string) || 'NICO'
+  
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="max-w-2xl w-full p-8 bg-white rounded-lg shadow">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">SecAI Radar</h1>
+        <p className="text-gray-600 mb-6">Azure security assessment platform</p>
+        
+        {loading && <div className="text-gray-500">Loading...</div>}
+        {domains.length > 0 && (
+          <div className="mb-6">
+            <p className="text-sm text-gray-700 mb-2">API is working! Found {domains.length} domains:</p>
+            <ul className="list-disc list-inside text-sm text-gray-600">
+              {domains.slice(0, 3).map((d: any) => (
+                <li key={d.code}>{d.code}: {d.name}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        <a 
+          href={`/tenant/${defaultTenant}/dashboard`}
+          className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Go to Dashboard →
+        </a>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const defaultTenant = (import.meta.env.VITE_DEFAULT_TENANT as string) || 'NICO'
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route path="/tenant/:id/*" element={<Shell />} />
         <Route path="*" element={<Navigate to={`/tenant/${defaultTenant}/dashboard`} replace />} />
       </Routes>

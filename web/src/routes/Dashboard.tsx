@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getSummary } from '../src/api'
+import { getSummary } from '../api'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts'
 
 interface Props { tenantId: string }

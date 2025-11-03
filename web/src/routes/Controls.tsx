@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getControls, importControls } from '../src/api'
+import { getControls, importControls } from '../api'
 import { useSearchParams } from 'react-router-dom'
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { z } from 'zod'

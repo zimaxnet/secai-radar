@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getGaps, postTools } from '../src/api'
+import { postTools } from '../api'
 
 interface Props { tenantId: string }
 
