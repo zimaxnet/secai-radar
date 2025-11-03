@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VendorTools",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "name", "vendor"],
+    "properties": {
+      "id": { "type": "string", "minLength": 1 },
+      "name": { "type": "string", "minLength": 1 },
+      "vendor": { "type": "string", "minLength": 1 },
+      "capabilities": { "type": "array", "items": { "type": "string" } },
+      "notes": { "type": "string" },
+      "links": { "type": "array", "items": { "type": "string", "format": "uri" } }
+    },
+    "additionalProperties": false
+  }
+}

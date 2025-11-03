@@ -1,0 +1,39 @@
+# SecAI Radar - Cursor Rules
+
+## Documentation Organization
+
+**CRITICAL**: All documentation must be strictly organized in the `docs/` folder.
+
+### Documentation Structure
+- **All documentation files** (`.md`, `.txt`, `.rst`, etc.) must be placed in `secai-radar/docs/`
+- **Architecture Decision Records (ADRs)**: `docs/adr/` directory
+- **Project briefs and context**: `docs/` root level
+- **Decision log**: `docs/decision-log.md`
+
+### Documentation Files
+- `SEC_AI_Radar_Brief.md` - High-level project brief and context
+- `decision-log.md` - Index of ADRs with statuses
+- `adr/` - Architecture Decision Records (numbered with leading zeros, e.g., `0001-*.md`)
+
+### Prohibited Locations
+- **NO** documentation files in `api/`, `web/`, or root project directories
+- **NO** standalone README files outside of `docs/` except for minimal module-level READMEs that link to main docs
+- **NO** scattered markdown files throughout the codebase
+
+### Module-Level READMEs
+If module-level READMEs (e.g., `api/README.md`, `web/README.md`) are needed, they should:
+- Be minimal and focused on quick-start/overview
+- Include links to comprehensive documentation in `docs/`
+- Not duplicate content that belongs in `docs/`
+
+### When Creating Documentation
+- Always create new documentation files in `docs/` or appropriate subdirectory
+- Update `docs/decision-log.md` when adding new ADRs
+- Follow the ADR template (`docs/adr/0000-template.md`) for architecture decisions
+- Use consistent naming conventions (kebab-case for files, clear prefixes for ADRs)
+
+### Enforcement
+- Any new documentation files should be placed in `docs/`
+- Refactor existing documentation to `docs/` if found elsewhere
+- Ensure all documentation references point to files in `docs/`
+
