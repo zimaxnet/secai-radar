@@ -62,7 +62,7 @@ export default function Controls({ tenantId }: Props) {
     const headerArr = headerLine.split(',').map(s => s.trim())
     const parsed = headerSchema.safeParse(headerArr)
     if (!parsed.success) {
-      setError(parsed.error.errors[0]?.message || 'Invalid CSV header')
+      setError(parsed.error.issues[0]?.message || 'Invalid CSV header')
       return
     }
     await importControls(tenantId, csv)

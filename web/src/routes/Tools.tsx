@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { postTools } from '../api'
 
 interface Props { tenantId: string }
