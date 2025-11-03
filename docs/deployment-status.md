@@ -18,7 +18,7 @@ After repeated failures with integrated Azure Functions in Static Web Apps, we'v
 - ✅ Storage Account: `secairadar587d35` (Standard_LRS)
 - ✅ Static Web App: `secai-radar` (Free tier)
   - Default hostname: `purple-moss-0942f9e10.3.azurestaticapps.net`
-- ⏳ Function App: `secai-radar-api` (To be created - see [Quick Start](./QUICK-START.md))
+- ✅ Function App: `secai-radar-api` (Deployed and working)
 
 ### 2. DNS Configuration
 - ✅ CNAME record created: `secai-radar.zimax.net` → `purple-moss-0942f9e10.3.azurestaticapps.net`
@@ -28,11 +28,11 @@ After repeated failures with integrated Azure Functions in Static Web Apps, we'v
 - ✅ GitHub Actions workflow for Static Web App (`.github/workflows/azure-static-web-apps.yml`)
 - ✅ GitHub Actions workflow for Function App (`.github/workflows/azure-functions-deploy.yml`)
 - ✅ Deployment token added to GitHub secrets: `AZURE_STATIC_WEB_APPS_API_TOKEN`
-- ⏳ Function App publish profile needed (see [Quick Start](./QUICK-START.md) Step 2)
+- ✅ Function App credentials added to GitHub secrets: `AZURE_CREDENTIALS`
 
 ### 4. Application Settings
 - ✅ Static Web App settings configured
-- ⏳ Function App settings to be configured (see [Quick Start](./QUICK-START.md))
+- ✅ Function App settings configured (CORS, storage connections, app settings)
 
 ## 🔄 Next Steps (Follow Quick Start)
 
@@ -69,13 +69,13 @@ cd scripts
 - [ ] Static Web App deployment workflow runs successfully
 - [ ] Application accessible at `https://secai-radar.zimax.net`
 
-### Function App
-- [ ] Function App created and accessible
-- [ ] Function App publish profile added to GitHub Secrets
-- [ ] Function App deployment workflow runs successfully
-- [ ] Function App URL configured in web app (`VITE_API_BASE`)
-- [ ] CORS configured correctly (no CORS errors in browser)
-- [ ] API endpoints respond correctly: `curl https://secai-radar-api.azurewebsites.net/api/domains`
+       ### Function App
+       - [x] Function App created and accessible
+       - [x] Function App credentials added to GitHub Secrets (`AZURE_CREDENTIALS`)
+       - [x] Function App deployment workflow runs successfully
+       - [x] Function App URL configured in web app (`VITE_API_BASE`)
+       - [x] CORS configured correctly (no CORS errors in browser)
+       - [x] API endpoints respond correctly: `curl https://secai-radar-api.azurewebsites.net/api/domains`
 
 ## 🔗 Useful Links
 
