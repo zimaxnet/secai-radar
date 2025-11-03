@@ -2,8 +2,7 @@
   "auth": { "rolesSource": "roles" },
   "routes": [
     { "route": "/", "serve": "/index.html" },
-    { "route": "/tenant/*", "allowedRoles": ["authenticated"] },
-    { "route": "/api/*", "allowedRoles": ["authenticated"] }
+    { "route": "/tenant/*", "allowedRoles": ["authenticated"] }
   ],
   "navigationFallback": { "rewrite": "/index.html" }
 }
