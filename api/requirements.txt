@@ -1,6 +1,6 @@
-azure-functions
-azure-data-tables
-azure-storage-blob
-pydantic
-fastjsonschema
-python-multipart
+azure-functions>=1.18.0
+azure-data-tables>=12.4.0
+azure-storage-blob>=12.19.0
+pydantic>=2.0.0
+fastjsonschema>=2.19.0
+python-multipart>=0.0.6

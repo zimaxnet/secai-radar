@@ -94,8 +94,8 @@ TENANT_ID=NICO
 ## CI/CD Workflow
 
 The `.github/workflows/azure-static-web-apps.yml` workflow will:
-- Build the React web app (Vite)
-- Install Python dependencies for API
+- Setup Python 3.12 and install API dependencies
+- Build the React web app (Vite) with Node.js 22
 - Deploy to Azure Static Web Apps on push to `main`
 - Preview deployments on pull requests
 
@@ -103,8 +103,8 @@ The `.github/workflows/azure-static-web-apps.yml` workflow will:
 
 ### Build Failures
 - Check GitHub Actions logs
-- Verify Node.js version (20) in workflow
-- Verify Python version (3.9) in workflow
+- Verify Node.js version (22) in workflow
+- Verify Python version (3.12) in workflow
 
 ### Authentication Issues
 - Verify Entra ID provider is configured

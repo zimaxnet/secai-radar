@@ -13,9 +13,10 @@
 
 ## Local dev
 1. Start Azurite (UseDevelopmentStorage=true) for Tables/Blobs.
-2. `python -m venv .venv && . .venv/bin/activate`
-3. `pip install -r requirements.txt`
-4. `func start`
+2. Ensure Python 3.12+ is installed
+3. `python -m venv .venv && . .venv/bin/activate`
+4. `pip install -r requirements.txt`
+5. `func start`
 
 ## Data model (Tables)
 - Controls: PartitionKey=`{tenant}|{domain}`, RowKey=`ControlID`
