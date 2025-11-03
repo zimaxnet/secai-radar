@@ -185,5 +185,72 @@ class TestScoring(unittest.TestCase):
         self.assertEqual(len(soft), 1)
         self.assertEqual(soft[0]["capabilityId"], "cap2")
 
+    def test_exact_minStrength_boundary(self):
+        """Test edge case where coverage exactly equals minStrength"""
+        reqs = [
+            {"capabilityId": "siem", "weight": 1.0, "minStrength": 0.7},
+        ]
+        tenant_tools = {"tool1": 0.875}  # 0.8 * 0.875 = 0.7 (exactly the threshold)
+        toolcap = {"tool1": {"siem": 0.8}}
+        coverage, hard, soft = compute_control_coverage(reqs, tenant_tools, toolcap)
+        self.assertAlmostEqual(coverage, 0.7, places=6)
+        self.assertEqual(len(hard), 0)
+        self.assertEqual(len(soft), 0)  # Should pass, not be a soft gap
+
+    def test_disabled_tool_excluded(self):
+        """Test that disabled tools (ConfigScore = 0) don't contribute"""
+        reqs = [
+            {"capabilityId": "siem", "weight": 1.0, "minStrength": 0.5},
+        ]
+        tenant_tools = {"tool1": 0.0}  # Disabled tool
+        toolcap = {"tool1": {"siem": 0.9}}
+        coverage, hard, soft = compute_control_coverage(reqs, tenant_tools, toolcap)
+        self.assertAlmostEqual(coverage, 0.0, places=6)
+        self.assertEqual(len(hard), 1)
+        self.assertEqual(len(soft), 0)
+
+    def test_high_weight_hard_gap_priority(self):
+        """Test that high-weight hard gaps are correctly identified"""
+        reqs = [
+            {"capabilityId": "critical-cap", "weight": 0.8, "minStrength": 0.6},
+            {"capabilityId": "minor-cap", "weight": 0.2, "minStrength": 0.6},
+        ]
+        tenant_tools = {"tool1": 0.8}
+        toolcap = {"tool1": {"minor-cap": 0.9}}  # Only minor-cap covered
+        coverage, hard, soft = compute_control_coverage(reqs, tenant_tools, toolcap)
+        self.assertAlmostEqual(coverage, 0.144, places=6)  # 0.2 * 0.9 * 0.8 = 0.144
+        self.assertEqual(len(hard), 1)
+        self.assertEqual(hard[0]["capabilityId"], "critical-cap")
+        self.assertEqual(hard[0]["weight"], 0.8)
+
+    def test_weights_sum_to_one_validation(self):
+        """Test that weights are handled correctly when they sum to 1.0"""
+        reqs = [
+            {"capabilityId": "cap1", "weight": 0.6, "minStrength": 0.5},
+            {"capabilityId": "cap2", "weight": 0.4, "minStrength": 0.5},
+        ]
+        tenant_tools = {"tool1": 1.0}
+        toolcap = {"tool1": {"cap1": 0.8, "cap2": 0.6}}
+        coverage, _, _ = compute_control_coverage(reqs, tenant_tools, toolcap)
+        # Coverage = (0.6 * 0.8 + 0.4 * 0.6) / 1.0 = 0.72
+        self.assertAlmostEqual(coverage, 0.72, places=6)
+
+    def test_mixed_hard_and_soft_gaps(self):
+        """Test scenario with both hard and soft gaps"""
+        reqs = [
+            {"capabilityId": "cap1", "weight": 0.4, "minStrength": 0.7},  # Hard gap
+            {"capabilityId": "cap2", "weight": 0.3, "minStrength": 0.7},  # Soft gap
+            {"capabilityId": "cap3", "weight": 0.3, "minStrength": 0.7},  # Pass
+        ]
+        tenant_tools = {"tool1": 0.8}
+        toolcap = {"tool1": {"cap2": 0.6, "cap3": 0.9}}  # cap2: 0.48 < 0.7, cap3: 0.72 >= 0.7
+        coverage, hard, soft = compute_control_coverage(reqs, tenant_tools, toolcap)
+        # Coverage = (0.4*0 + 0.3*0.48 + 0.3*0.72) / 1.0 = 0.36
+        self.assertAlmostEqual(coverage, 0.36, places=6)
+        self.assertEqual(len(hard), 1)
+        self.assertEqual(hard[0]["capabilityId"], "cap1")
+        self.assertEqual(len(soft), 1)
+        self.assertEqual(soft[0]["capabilityId"], "cap2")
+
 if __name__ == '__main__':
     unittest.main()
