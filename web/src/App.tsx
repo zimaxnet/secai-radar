@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useParams, Navigate } from 'react-router-dom'
-import Dashboard from './routes/Dashboard'
-import Controls from './routes/Controls'
-import Tools from './routes/Tools'
-import Gaps from './routes/Gaps'
+
+// Lazy load route components for code splitting
+const Dashboard = lazy(() => import('./routes/Dashboard'))
+const Controls = lazy(() => import('./routes/Controls'))
+const Tools = lazy(() => import('./routes/Tools'))
+const Gaps = lazy(() => import('./routes/Gaps'))
 
 function Shell() {
   const { id } = useParams()
@@ -21,13 +23,15 @@ function Shell() {
           </nav>
         </header>
         <main className="mt-4">
-          <Routes>
-            <Route path="dashboard" element={<Dashboard tenantId={tenantId} />} />
-            <Route path="controls" element={<Controls tenantId={tenantId} />} />
-            <Route path="tools" element={<Tools tenantId={tenantId} />} />
-            <Route path="gaps" element={<Gaps tenantId={tenantId} />} />
-            <Route path="*" element={<Navigate to={`/tenant/${tenantId}/dashboard`} replace />} />
-          </Routes>
+          <Suspense fallback={<div className="p-4 text-gray-600">Loading...</div>}>
+            <Routes>
+              <Route path="dashboard" element={<Dashboard tenantId={tenantId} />} />
+              <Route path="controls" element={<Controls tenantId={tenantId} />} />
+              <Route path="tools" element={<Tools tenantId={tenantId} />} />
+              <Route path="gaps" element={<Gaps tenantId={tenantId} />} />
+              <Route path="*" element={<Navigate to={`/tenant/${tenantId}/dashboard`} replace />} />
+            </Routes>
+          </Suspense>
         </main>
       </div>
     </div>
