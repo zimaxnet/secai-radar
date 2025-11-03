@@ -9,12 +9,16 @@ BLOBS_CONN = os.getenv("BLOBS_CONN")
 BLOB_CONTAINER = os.getenv("BLOB_CONTAINER", "assessments")
 
 def table_client(table_name: str):
+    if not TABLES_CONN:
+        raise ValueError("TABLES_CONN environment variable is not set")
     svc = TableServiceClient.from_connection_string(TABLES_CONN)
     try: svc.create_table_if_not_exists(table_name=table_name)
     except Exception: pass
     return svc.get_table_client(table_name)
 
 def blob_container():
+    if not BLOBS_CONN:
+        raise ValueError("BLOBS_CONN environment variable is not set")
     svc = BlobServiceClient.from_connection_string(BLOBS_CONN)
     try: svc.create_container(BLOB_CONTAINER)
     except Exception: pass
