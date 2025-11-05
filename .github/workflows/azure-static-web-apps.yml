@@ -39,3 +39,83 @@ jobs:
           app_location: "web"
           output_location: "dist"
           # Removed api_location - API is now a separate Function App
+
+      # Notify on failure with actionable details
+      - name: Notify on Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflowRun = context.payload.workflow_run || {
+              html_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              conclusion: 'failure'
+            };
+            
+            const commit = context.payload.head_commit || context.payload.commits?.[0] || {};
+            const commitMessage = commit.message || 'No commit message';
+            const commitAuthor = commit.author?.name || commit.author?.username || 'Unknown';
+            const commitUrl = commit.url || `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/commit/${context.sha}`;
+            
+            // Get workflow run details
+            const runDetails = await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
+            });
+            
+            // Get failed jobs
+            const jobs = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
+            });
+            
+            const failedJobs = jobs.data.jobs.filter(job => job.conclusion === 'failure');
+            const failedSteps = failedJobs.flatMap(job => 
+              job.steps?.filter(step => step.conclusion === 'failure').map(step => ({
+                job: job.name,
+                step: step.name,
+                conclusion: step.conclusion
+              })) || []
+            );
+            
+            // Create actionable notification
+            const issueBody = `## ❌ Workflow Failed: ${{ github.workflow }}
+
+### 🔍 Workflow Details
+- **Workflow**: ${{ github.workflow }}
+- **Branch**: ${{ github.ref_name }}
+- **Commit**: [${commitMessage.split('\n')[0]}](${commitUrl})
+- **Author**: ${commitAuthor}
+- **Run**: [View Failed Run](${workflowRun.html_url})
+- **Triggered by**: ${{ github.event_name }} (${{ github.actor }})
+
+### ❌ Failed Jobs/Steps
+${failedSteps.length > 0 ? failedSteps.map(step => `- **${step.job}** → ${step.step}`).join('\n') : '- Unable to determine failed steps'}
+
+### 🔧 Next Steps
+1. Review the [failed workflow run](${workflowRun.html_url}) for detailed error logs
+2. Check the failed step(s) above for specific error messages
+3. Fix the issue and push again
+
+### 📋 Common Issues
+- **Build failures**: Check Node.js version, dependencies, or build errors
+- **Deployment failures**: Verify Azure credentials and Static Web App settings
+- **Configuration errors**: Check secrets and environment variables
+
+---
+*This issue was automatically created by GitHub Actions to track the failed workflow run.*`;
+
+            // Create an issue to track the failure
+            try {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `❌ Workflow Failed: ${{ github.workflow }} - ${{ github.ref_name }}`,
+                body: issueBody,
+                labels: ['workflow-failure', 'needs-attention']
+              });
+              console.log('✅ Created issue for failed workflow');
+            } catch (error) {
+              console.log('⚠️ Could not create issue (may already exist or permissions issue):', error.message);
+            }
