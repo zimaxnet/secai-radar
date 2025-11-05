@@ -14,9 +14,16 @@ const REQUIRED_HEADERS = [
 
 const headerSchema = z.array(z.string()).refine(arr => {
   if (arr.length < REQUIRED_HEADERS.length) return false
-  // Require exact order for simplicity
   return REQUIRED_HEADERS.every((h, i) => arr[i] === h)
 }, { message: `CSV header must be: ${REQUIRED_HEADERS.join(',')}` })
+
+const getStatusBadge = (status: string) => {
+  const statusLower = status?.toLowerCase() || ''
+  if (statusLower === 'complete') return 'badge-success'
+  if (statusLower === 'inprogress' || statusLower === 'in progress') return 'badge-warning'
+  if (statusLower === 'notstarted' || statusLower === 'not started') return 'badge-error'
+  return 'badge-neutral'
+}
 
 export default function Controls({ tenantId }: Props) {
   const [rows, setRows] = useState<ControlRow[]>([])
@@ -25,6 +32,7 @@ export default function Controls({ tenantId }: Props) {
   const [params, setParams] = useSearchParams()
   const [error, setError] = useState<string | null>(null)
   const [okMsg, setOkMsg] = useState<string | null>(null)
+  const [showImport, setShowImport] = useState(false)
 
   const domain = params.get('domain') || ''
   const status = params.get('status') || ''
@@ -41,14 +49,41 @@ export default function Controls({ tenantId }: Props) {
   }, [tenantId, domain, status, q])
 
   const columns = useMemo<ColumnDef<ControlRow>[]>(() => ([
-    { header: 'ControlID', accessorKey: 'RowKey' },
-    { header: 'Domain', accessorKey: 'Domain' },
-    { header: 'Title', accessorKey: 'ControlTitle' },
-    { header: 'Status', accessorKey: 'Status' },
-    { header: 'Owner', accessorKey: 'Owner' },
+    { 
+      header: 'Control ID', 
+      accessorKey: 'RowKey',
+      cell: (info) => <span className="font-mono text-sm">{info.getValue() as string}</span>
+    },
+    { 
+      header: 'Domain', 
+      accessorKey: 'Domain',
+      cell: (info) => <span className="badge badge-neutral">{info.getValue() as string}</span>
+    },
+    { 
+      header: 'Title', 
+      accessorKey: 'ControlTitle',
+      cell: (info) => <span className="text-slate-900">{info.getValue() as string}</span>
+    },
+    { 
+      header: 'Status', 
+      accessorKey: 'Status',
+      cell: (info) => {
+        const status = info.getValue() as string
+        return <span className={`badge ${getStatusBadge(status)}`}>{status}</span>
+      }
+    },
+    { 
+      header: 'Owner', 
+      accessorKey: 'Owner',
+      cell: (info) => <span className="text-slate-600">{info.getValue() as string || '-'}</span>
+    },
   ]), [])
 
-  const table = useReactTable({ data: rows, columns, getCoreRowModel: getCoreRowModel() })
+  const table = useReactTable({ 
+    data: rows, 
+    columns, 
+    getCoreRowModel: getCoreRowModel() 
+  })
 
   const setFilter = (key: string, value: string) => {
     const next = new URLSearchParams(params)
@@ -65,58 +100,148 @@ export default function Controls({ tenantId }: Props) {
       setError(parsed.error.issues[0]?.message || 'Invalid CSV header')
       return
     }
-    await importControls(tenantId, csv)
-    setCsv('')
-    setOkMsg('Imported successfully')
-    const next = new URLSearchParams(params)
-    setParams(next)
+    try {
+      await importControls(tenantId, csv)
+      setCsv('')
+      setOkMsg('Controls imported successfully')
+      setShowImport(false)
+      // Refresh data
+      const d = await getControls(tenantId, { domain: domain || undefined, status: status || undefined, q: q || undefined })
+      setRows(d.items || [])
+    } catch (err) {
+      setError('Failed to import controls')
+    }
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Controls</h2>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-        <input className="border rounded p-2" placeholder="Domain (e.g., NET)" value={domain} onChange={e=>setFilter('domain', e.target.value)} />
-        <input className="border rounded p-2" placeholder="Status (Complete/InProgress/NotStarted)" value={status} onChange={e=>setFilter('status', e.target.value)} />
-        <input className="border rounded p-2 md:col-span-2" placeholder="Search (q)" value={q} onChange={e=>setFilter('q', e.target.value)} />
-      </div>
-      {loading && <div className="text-gray-500">Loading…</div>}
-
-      <div className="overflow-x-auto rounded border bg-white">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50">
-            {table.getHeaderGroups().map(hg => (
-              <tr key={hg.id}>
-                {hg.headers.map(h => (
-                  <th key={h.id} className="p-2 text-sm font-medium text-gray-600">
-                    {flexRender(h.column.columnDef.header, h.getContext())}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map(r => (
-              <tr key={r.id} className="border-t">
-                {r.getVisibleCells().map(c => (
-                  <td key={c.id} className="p-2 text-sm text-gray-800">
-                    {flexRender(c.column.columnDef.cell, c.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="space-y-2">
-        <div className="text-sm text-gray-700 font-medium">Import CSV</div>
-        {error && <div className="text-sm text-red-700 bg-red-50 border border-red-200 p-2 rounded">{error}</div>}
-        {okMsg && <div className="text-sm text-green-700 bg-green-50 border border-green-200 p-2 rounded">{okMsg}</div>}
-        <textarea className="w-full h-40 border rounded p-2 font-mono" value={csv} onChange={e=>setCsv(e.target.value)} placeholder={`Paste CSV here. Header must be:\n${REQUIRED_HEADERS.join(',')}`} />
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <button onClick={submitCsv} className="px-3 py-2 bg-blue-600 text-white rounded">Import</button>
+          <h1 className="text-2xl font-semibold text-slate-900">Controls</h1>
+          <p className="mt-1 text-sm text-slate-600">Security control assessment and management</p>
         </div>
+        <button
+          onClick={() => setShowImport(!showImport)}
+          className="btn-secondary"
+        >
+          {showImport ? 'Cancel Import' : 'Import CSV'}
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="card p-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Domain</label>
+            <input
+              className="input-field"
+              placeholder="e.g., NET"
+              value={domain}
+              onChange={e => setFilter('domain', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+            <input
+              className="input-field"
+              placeholder="Complete, InProgress, NotStarted"
+              value={status}
+              onChange={e => setFilter('status', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Search</label>
+            <input
+              className="input-field"
+              placeholder="Search controls..."
+              value={q}
+              onChange={e => setFilter('q', e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Import Section */}
+      {showImport && (
+        <div className="card p-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Import Controls</h2>
+          {error && <div className="alert alert-error mb-4">{error}</div>}
+          {okMsg && <div className="alert alert-success mb-4">{okMsg}</div>}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                CSV Content
+                <span className="ml-2 text-xs text-slate-500">(Header: {REQUIRED_HEADERS.join(', ')})</span>
+              </label>
+              <textarea
+                className="w-full h-48 input-field font-mono text-xs"
+                value={csv}
+                onChange={e => setCsv(e.target.value)}
+                placeholder={`Paste CSV here. Header must be:\n${REQUIRED_HEADERS.join(',')}`}
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <button onClick={submitCsv} className="btn-primary" disabled={!csv.trim()}>
+                Import Controls
+              </button>
+              <button onClick={() => { setCsv(''); setError(null); setOkMsg(null) }} className="btn-secondary">
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Results */}
+      <div className="card">
+        <div className="card-header">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-900">Control List</h2>
+            <span className="text-sm text-slate-600">{rows.length} controls</span>
+          </div>
+        </div>
+        {loading ? (
+          <div className="card-body">
+            <div className="flex items-center justify-center py-12">
+              <div className="spinner"></div>
+              <span className="ml-3 text-slate-600">Loading...</span>
+            </div>
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="card-body">
+            <div className="text-center py-12">
+              <p className="text-slate-600">No controls found</p>
+              <p className="text-sm text-slate-500 mt-1">Try adjusting your filters</p>
+            </div>
+          </div>
+        ) : (
+          <div className="table-container">
+            <table className="w-full">
+              <thead className="table-header">
+                {table.getHeaderGroups().map(hg => (
+                  <tr key={hg.id}>
+                    {hg.headers.map(h => (
+                      <th key={h.id} className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                        {flexRender(h.column.columnDef.header, h.getContext())}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody className="bg-white divide-y divide-slate-200">
+                {table.getRowModel().rows.map(r => (
+                  <tr key={r.id} className="table-row">
+                    {r.getVisibleCells().map(c => (
+                      <td key={c.id} className="px-6 py-4 whitespace-nowrap text-sm">
+                        {flexRender(c.column.columnDef.cell, c.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   )

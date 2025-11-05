@@ -1,5 +1,48 @@
 # SecAI Radar - Cursor Rules
 
+## Architecture Principles
+
+**CRITICAL**: Follow the architecture defined in `docs/blueprint.md`. This is the authoritative source for architectural guidance.
+
+### Five-Layer Architecture
+1. **Infrastructure Layer**: Containerized API + worker, background jobs, secure config/secrets
+2. **Model Layer**: Define model *roles* (not brands): `reasoning_model`, `classification_model`, `generation_model`
+3. **Data Layer**: Bronze (raw JSON), Silver (normalized records), Gold/RAG (embedded searchable chunks)
+4. **Orchestration Layer**: Multi-step AI workflows (plan → call tools → normalize → summarize → review)
+5. **Application Layer**: Web UI for browsing runs, viewing findings, downloading reports
+
+### Vendor-Agnostic and Hygienic Principles
+- **NO** hardcoded customer names, vendor names, or consulting firm names
+- Use generic names and placeholders in code and documentation
+- Model roles should be configurable via `config/models.yaml`, not hardcoded to specific providers
+- Framework definitions should be generic (CIS-like, but not branded)
+- All collectors, normalizers, and tools should use generic naming conventions
+
+### Model Configuration
+- Models are defined by **role** (reasoning, classification, generation), not by provider/brand
+- Configuration lives in `config/models.yaml`
+- Model selection should be configurable and swappable
+- Support multiple model providers behind the same interface
+
+### Data Layer Patterns
+- **Bronze**: Raw JSON from discovery/collectors (timestamped, immutable)
+- **Silver**: Normalized records with resource, domain, control, status
+- **Gold/RAG**: Text chunks of silver data, embedded and searchable
+- Maintain clear separation between layers
+- Support data lineage and traceability
+
+### Repository Structure
+Follow the proposed structure in `docs/blueprint.md`:
+- `config/` - `models.yaml`, `frameworks.yaml`
+- `src/api/` - REST endpoints
+- `src/orchestrator/` - Multi-step AI workflows
+- `src/collectors/` - Cloud discovery (generic names)
+- `src/normalizers/` - Bronze → Silver transformation
+- `src/rag/` - Embeddings and search
+- `src/report/` - Report assembly (Markdown/HTML/DOCX)
+- `ui/webapp/` - Front-end application
+- `examples/` - Sample assessment runs and report outputs
+
 ## Documentation Organization
 
 **CRITICAL**: All documentation must be strictly organized in the `docs/` folder.
@@ -9,14 +52,18 @@
 - **Architecture Decision Records (ADRs)**: `docs/adr/` directory
 - **Project briefs and context**: `docs/` root level
 - **Decision log**: `docs/decision-log.md`
+- **Primary architecture reference**: `docs/blueprint.md`
 
 ### Documentation Files
+- `blueprint.md` - **Primary architecture blueprint** (AI Stack Blueprint)
+- `data-model.md` - Bronze/Silver schema definitions
+- `report-template.md` - Generic assessment report template
 - `SEC_AI_Radar_Brief.md` - High-level project brief and context
 - `decision-log.md` - Index of ADRs with statuses
 - `adr/` - Architecture Decision Records (numbered with leading zeros, e.g., `0001-*.md`)
 
 ### Prohibited Locations
-- **NO** documentation files in `api/`, `web/`, or root project directories
+- **NO** documentation files in `api/`, `web/`, `src/`, or root project directories
 - **NO** standalone README files outside of `docs/` except for minimal module-level READMEs that link to main docs
 - **NO** scattered markdown files throughout the codebase
 
@@ -31,9 +78,33 @@ If module-level READMEs (e.g., `api/README.md`, `web/README.md`) are needed, the
 - Update `docs/decision-log.md` when adding new ADRs
 - Follow the ADR template (`docs/adr/0000-template.md`) for architecture decisions
 - Use consistent naming conventions (kebab-case for files, clear prefixes for ADRs)
+- Reference `docs/blueprint.md` for architectural decisions
 
 ### Enforcement
 - Any new documentation files should be placed in `docs/`
 - Refactor existing documentation to `docs/` if found elsewhere
 - Ensure all documentation references point to files in `docs/`
+- All architectural decisions should align with `docs/blueprint.md`
+
+## Code Quality and Standards
+
+### Naming Conventions
+- Use generic, vendor-agnostic names for all components
+- Avoid hardcoding customer-specific identifiers
+- Use configuration files for tenant/subscription-specific data
+- Follow kebab-case for files and directories
+- Use descriptive, role-based names for models and functions
+
+### Configuration Management
+- Store model configurations in `config/models.yaml`
+- Store framework definitions (controls/domains) in `config/frameworks.yaml`
+- Use environment variables for secrets and tenant-specific configs
+- Never hardcode API keys, credentials, or customer data
+
+### AI Integration
+- Use model roles (reasoning, classification, generation) rather than direct model references
+- Support configurable model selection
+- Implement orchestration layer for multi-step AI tasks
+- Support iterative "self-review" of AI outputs
+- Maintain explainability and traceability for all AI-generated content
 
