@@ -3,7 +3,7 @@ name: Deploy Wiki to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - wiki
     paths:
       - 'docs/wiki/**'
       - '.github/workflows/pages.yml'
