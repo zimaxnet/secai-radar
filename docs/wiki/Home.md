@@ -33,6 +33,7 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 ### For Developers
 - **[Architecture](/wiki/Architecture)** - System architecture overview
 - **[Contributing](/wiki/Contributing)** - Contributing to SecAI Radar
+- **[Development Workflow](/wiki/Development-Workflow)** - Working with main and wiki branches
 
 ### Help & Support
 - **[FAQ](/wiki/FAQ)** - Frequently asked questions
