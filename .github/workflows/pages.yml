@@ -31,25 +31,33 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
       
-      - name: Setup Jekyll
+      - name: Setup Jekyll (optional)
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1'
           bundler-cache: true
-      
-      - name: Build with Jekyll
-        run: |
-          cd docs/wiki
-          bundle install
-          bundle exec jekyll build --destination ../../_site
         continue-on-error: true
       
-      - name: Fallback to static files
-        if: failure()
+      - name: Build with Jekyll
+        id: jekyll-build
+        run: |
+          cd docs/wiki
+          if [ -f Gemfile ]; then
+            bundle install || true
+            bundle exec jekyll build --destination ../../_site || exit 1
+          else
+            exit 1
+          fi
+        continue-on-error: true
+      
+      - name: Prepare static site (fallback)
+        if: steps.jekyll-build.outcome == 'failure'
         run: |
           mkdir -p _site
-          cp -r docs/wiki/* _site/
-          rm -f _site/Gemfile _site/GITHUB-PAGES-SETUP.md _site/DEPLOYMENT-READY.md _site/GitHub-Pages-Deployment-Instructions.md
+          # Copy markdown files
+          cp -r docs/wiki/* _site/ 2>/dev/null || true
+          # Remove unwanted files
+          rm -f _site/Gemfile* _site/GITHUB-PAGES-SETUP.md _site/DEPLOYMENT-READY.md _site/GitHub-Pages-Deployment-Instructions.md _site/_config.yml 2>/dev/null || true
           # Ensure index file exists
           if [ ! -f _site/index.html ] && [ ! -f _site/index.md ]; then
             if [ -f _site/Home.md ]; then
@@ -57,6 +65,32 @@ jobs:
             elif [ -f _site/README.md ]; then
               cp _site/README.md _site/index.md
             fi
+          fi
+          # Create a simple HTML index if needed
+          if [ ! -f _site/index.html ]; then
+            cat > _site/index.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SecAI Radar Documentation</title>
+  <meta http-equiv="refresh" content="0; url=Home.html">
+</head>
+<body>
+  <p>Redirecting to <a href="Home.html">Home</a></p>
+</body>
+</html>
+EOF
+          fi
+          echo "_site directory created successfully"
+          ls -la _site/ | head -20
+      
+      - name: Ensure _site exists
+        if: steps.jekyll-build.outcome != 'failure'
+        run: |
+          if [ ! -d "_site" ]; then
+            echo "Error: _site directory does not exist after Jekyll build"
+            exit 1
           fi
       
       - name: Upload artifact
