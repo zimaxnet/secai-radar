@@ -33,10 +33,20 @@ export default function Controls({ tenantId }: Props) {
   useEffect(() => {
     let mounted = true
     setLoading(true)
-    getControls(tenantId, { domain: domain || undefined, status: status || undefined, q: q || undefined }).then(d => {
-      if (!mounted) return
-      setRows(d.items || [])
-    }).finally(() => setLoading(false))
+    setError(null) // Clear previous errors on new fetch
+    getControls(tenantId, { domain: domain || undefined, status: status || undefined, q: q || undefined })
+      .then(d => {
+        if (!mounted) return
+        setRows(d.items || [])
+      })
+      .catch(err => {
+        if (!mounted) return
+        setError(err.message || 'Failed to load controls')
+        setRows([])
+      })
+      .finally(() => {
+        if (mounted) setLoading(false)
+      })
     return () => { mounted = false }
   }, [tenantId, domain, status, q])
 
@@ -46,6 +56,29 @@ export default function Controls({ tenantId }: Props) {
     { header: 'Title', accessorKey: 'ControlTitle' },
     { header: 'Status', accessorKey: 'Status' },
     { header: 'Owner', accessorKey: 'Owner' },
+    { 
+      header: 'Reference', 
+      accessorKey: 'SourceRef',
+      cell: ({ row }) => {
+        const ref = row.original.SourceRef;
+        if (!ref || !ref.trim()) return <span className="text-gray-400">-</span>;
+        // Check if it's a URL
+        if (ref.trim().startsWith('http://') || ref.trim().startsWith('https://')) {
+          return (
+            <a 
+              href={ref.trim()} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-600 hover:underline text-sm"
+              title={ref.trim()}
+            >
+              🔗 Wiki
+            </a>
+          );
+        }
+        return <span className="text-sm text-gray-700">{ref}</span>;
+      }
+    },
   ]), [])
 
   const table = useReactTable({ data: rows, columns, getCoreRowModel: getCoreRowModel() })
@@ -57,19 +90,46 @@ export default function Controls({ tenantId }: Props) {
   }
 
   const submitCsv = async () => {
-    setError(null); setOkMsg(null)
-    const headerLine = (csv.split(/\r?\n/).find(l => l.trim().length > 0) || '').trim()
-    const headerArr = headerLine.split(',').map(s => s.trim())
-    const parsed = headerSchema.safeParse(headerArr)
-    if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message || 'Invalid CSV header')
-      return
+    setError(null)
+    setOkMsg(null)
+    setLoading(true)
+    
+    try {
+      // Validate CSV header
+      const headerLine = (csv.split(/\r?\n/).find(l => l.trim().length > 0) || '').trim()
+      const headerArr = headerLine.split(',').map(s => s.trim())
+      const parsed = headerSchema.safeParse(headerArr)
+      if (!parsed.success) {
+        setError(parsed.error.issues[0]?.message || 'Invalid CSV header')
+        setLoading(false)
+        return
+      }
+      
+      // Import controls
+      await importControls(tenantId, csv)
+      
+      // Refresh controls data after successful import
+      try {
+        const data = await getControls(tenantId, { domain: domain || undefined, status: status || undefined, q: q || undefined })
+        setRows(data.items || [])
+        setCsv('')
+        setOkMsg('Imported successfully')
+        // Update params to trigger refresh (this will also trigger useEffect, but we've already updated rows)
+        const next = new URLSearchParams(params)
+        setParams(next)
+      } catch (refreshError) {
+        // Import succeeded but refresh failed - show error but keep form open
+        setError(`Import succeeded, but failed to refresh data: ${refreshError instanceof Error ? refreshError.message : 'Unknown error'}`)
+        // Don't clear CSV or show success message since refresh failed
+        // The user can see the error and retry if needed
+      }
+    } catch (importError) {
+      // Import failed - show error, keep form open
+      setError(importError instanceof Error ? importError.message : 'Failed to import controls')
+      // Don't clear CSV or update params - user can retry
+    } finally {
+      setLoading(false)
     }
-    await importControls(tenantId, csv)
-    setCsv('')
-    setOkMsg('Imported successfully')
-    const next = new URLSearchParams(params)
-    setParams(next)
   }
 
   return (
