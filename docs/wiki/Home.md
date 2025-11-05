@@ -28,10 +28,13 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 ### For Administrators
 - **[Installation](/wiki/Installation)** - Installation and deployment
 - **[Configuration](/wiki/Configuration)** - System configuration
+- **[Key Vault Setup](/wiki/Key-Vault-Setup)** - Secure secret management
 - **[API Reference](/wiki/API-Reference)** - API documentation
 
 ### For Developers
 - **[Architecture](/wiki/Architecture)** - System architecture overview
+- **[AI Integration](/wiki/AI-Integration)** - AI-powered features and configuration
+- **[Tool Research and Mapping](/wiki/Tool-Research-and-Mapping)** - Dynamic tool research and control mapping
 - **[Contributing](/wiki/Contributing)** - Contributing to SecAI Radar
 - **[Development Workflow](/wiki/Development-Workflow)** - Working with main and wiki branches
 
@@ -73,6 +76,8 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 - AI-assisted security posture analysis
 - Evidence classification
 - Automated report generation
+- Tool research and capability mapping
+- Dynamic control-to-capability mapping across 340 controls
 
 ---
 
@@ -104,5 +109,5 @@ SecAI Radar is open-source. See the repository LICENSE file for details.
 
 ---
 
-**Last Updated**: 2025-01-15
+**Last Updated**: 2025-11-05
 
