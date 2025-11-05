@@ -1,5 +1,39 @@
 # SecAI Radar - Cursor Rules
 
+## Branch Structure Awareness
+
+**CRITICAL**: This repository has two main branches with different purposes:
+
+### `main` Branch (Default Development Branch)
+- **Purpose**: Application development and Azure deployment
+- **Deploys to**: Azure Static Web App (`secai-radar.zimax.net`)
+- **Documentation location**: `docs/` (excluding `docs/wiki/`)
+- **Workflows**: 
+  - `azure-static-web-apps.yml` - Deploys web app
+  - `azure-functions-deploy.yml` - Deploys API
+- **When working on**: Application features, API, web UI, developer documentation
+
+### `wiki` Branch (GitHub Pages Wiki)
+- **Purpose**: User-facing wiki documentation
+- **Deploys to**: GitHub Pages (`wiki.secai-radar.zimax.net`)
+- **Documentation location**: `docs/wiki/`
+- **Workflows**: `pages.yml` - Deploys wiki to GitHub Pages
+- **When working on**: User documentation, wiki content, GitHub Pages setup
+
+### Branch Workflow
+1. **Application development**: Always work on `main` branch
+2. **Wiki updates**: Switch to `wiki` branch, update `docs/wiki/`, push to `wiki`
+3. **Syncing application code**: Only sync from `main` to `wiki` if wiki needs updated code references
+4. **Documentation types**:
+   - Developer docs → `main` branch `docs/`
+   - User/wiki docs → `wiki` branch `docs/wiki/`
+
+### Context Awareness
+- When editing files in `docs/wiki/`, you're working on wiki content
+- When editing files in `docs/` (excluding `docs/wiki/`), you're working on developer docs
+- Application code (`api/`, `web/`) exists in both branches but is primarily developed in `main`
+- See `docs/BRANCH-STRUCTURE.md` for detailed branch relationship information
+
 ## Documentation Organization
 
 **CRITICAL**: All documentation must be strictly organized in the `docs/` folder.
@@ -9,11 +43,13 @@
 - **Architecture Decision Records (ADRs)**: `docs/adr/` directory
 - **Project briefs and context**: `docs/` root level
 - **Decision log**: `docs/decision-log.md`
+- **Wiki documentation**: `docs/wiki/` (only in `wiki` branch)
 
 ### Documentation Files
 - `SEC_AI_Radar_Brief.md` - High-level project brief and context
 - `decision-log.md` - Index of ADRs with statuses
 - `adr/` - Architecture Decision Records (numbered with leading zeros, e.g., `0001-*.md`)
+- `BRANCH-STRUCTURE.md` - Branch relationship and maintenance guide
 
 ### Prohibited Locations
 - **NO** documentation files in `api/`, `web/`, or root project directories
@@ -28,6 +64,8 @@ If module-level READMEs (e.g., `api/README.md`, `web/README.md`) are needed, the
 
 ### When Creating Documentation
 - Always create new documentation files in `docs/` or appropriate subdirectory
+- **Developer documentation**: Create in `main` branch `docs/`
+- **User/wiki documentation**: Create in `wiki` branch `docs/wiki/`
 - Update `docs/decision-log.md` when adding new ADRs
 - Follow the ADR template (`docs/adr/0000-template.md`) for architecture decisions
 - Use consistent naming conventions (kebab-case for files, clear prefixes for ADRs)
@@ -36,4 +74,5 @@ If module-level READMEs (e.g., `api/README.md`, `web/README.md`) are needed, the
 - Any new documentation files should be placed in `docs/`
 - Refactor existing documentation to `docs/` if found elsewhere
 - Ensure all documentation references point to files in `docs/`
+- Be aware of which branch you're on when creating documentation
 
