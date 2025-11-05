@@ -1,0 +1,62 @@
+name: Deploy Wiki to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/wiki/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Setup Jekyll
+        uses: rubygems/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+      
+      - name: Build with Jekyll
+        run: |
+          cd docs/wiki
+          bundle install
+          bundle exec jekyll build --destination ../../_site/wiki
+        continue-on-error: true
+      
+      - name: Fallback to static files
+        if: failure()
+        run: |
+          mkdir -p _site/wiki
+          cp -r docs/wiki/* _site/wiki/
+          rm -f _site/wiki/Gemfile _site/wiki/GITHUB-PAGES-SETUP.md _site/wiki/DEPLOYMENT-READY.md _site/wiki/GitHub-Pages-Deployment-Instructions.md
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+

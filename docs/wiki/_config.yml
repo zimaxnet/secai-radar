@@ -1,0 +1,65 @@
+# Jekyll Configuration for SecAI Radar Wiki
+title: SecAI Radar Documentation
+description: Complete documentation for SecAI Radar cloud security assessment platform
+url: https://secai-radar.zimax.net
+baseurl: "/wiki"
+
+# Theme
+theme: jekyll-theme-minimal
+
+# Plugins
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Navigation
+navigation:
+  - title: Home
+    url: /wiki/
+  - title: Getting Started
+    url: /wiki/Getting-Started
+  - title: User Guide
+    url: /wiki/User-Guide
+  - title: Dashboard
+    url: /wiki/Dashboard-Guide
+  - title: Controls
+    url: /wiki/Controls-Guide
+  - title: Tools
+    url: /wiki/Tools-Guide
+  - title: Gaps
+    url: /wiki/Gaps-Guide
+  - title: API Reference
+    url: /wiki/API-Reference
+  - title: Architecture
+    url: /wiki/Architecture
+  - title: Installation
+    url: /wiki/Installation
+  - title: Configuration
+    url: /wiki/Configuration
+  - title: FAQ
+    url: /wiki/FAQ
+  - title: Troubleshooting
+    url: /wiki/Troubleshooting
+  - title: Glossary
+    url: /wiki/Glossary
+  - title: Contributing
+    url: /wiki/Contributing
+
+# Site structure
+permalink: /wiki/:title/
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+
+# Exclude
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+
