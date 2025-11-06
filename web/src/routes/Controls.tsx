@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { getControls, importControls } from '../api'
 import { useSearchParams } from 'react-router-dom'
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
@@ -51,8 +52,36 @@ export default function Controls({ tenantId }: Props) {
   }, [tenantId, domain, status, q])
 
   const columns = useMemo<ColumnDef<ControlRow>[]>(() => ([
-    { header: 'ControlID', accessorKey: 'RowKey' },
-    { header: 'Domain', accessorKey: 'Domain' },
+    { 
+      header: 'ControlID', 
+      accessorKey: 'RowKey',
+      cell: ({ row }) => {
+        const controlId = row.original.RowKey;
+        return (
+          <Link 
+            to={`/tenant/${tenantId}/control/${controlId}`}
+            className="text-blue-600 hover:underline font-medium"
+          >
+            {controlId}
+          </Link>
+        );
+      }
+    },
+    { 
+      header: 'Domain', 
+      accessorKey: 'Domain',
+      cell: ({ row }) => {
+        const domain = row.original.Domain || row.original.PartitionKey?.split('|')[1] || '';
+        return (
+          <Link 
+            to={`/tenant/${tenantId}/domain/${domain}`}
+            className="text-blue-600 hover:underline"
+          >
+            {domain}
+          </Link>
+        );
+      }
+    },
     { header: 'Title', accessorKey: 'ControlTitle' },
     { header: 'Status', accessorKey: 'Status' },
     { header: 'Owner', accessorKey: 'Owner' },
@@ -79,7 +108,7 @@ export default function Controls({ tenantId }: Props) {
         return <span className="text-sm text-gray-700">{ref}</span>;
       }
     },
-  ]), [])
+  ]), [tenantId])
 
   const table = useReactTable({ data: rows, columns, getCoreRowModel: getCoreRowModel() })
 

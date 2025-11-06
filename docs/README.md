@@ -3,6 +3,8 @@
 This folder contains the working documentation for the SecAI Radar project.
 
 - `SEC_AI_Radar_Brief.md` — high-level build brief you can load into Cursor context.
+- `PROMPTING-GUIDE.md` — Advanced prompting principles and templates for SecAI Radar development (ensures highest quality, accuracy, and explainability).
+- `PROMPTING-QUICK-REF.md` — Quick reference card for common prompting patterns.
 - `adr/` — Architecture Decision Records (ADRs): short, dated notes capturing key technical decisions and their rationale.
 - `decision-log.md` — index of ADRs with statuses.
 - `deployment.md` — Azure Static Web Apps deployment guide.

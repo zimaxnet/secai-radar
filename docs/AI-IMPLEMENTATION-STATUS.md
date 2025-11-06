@@ -70,18 +70,18 @@ If the wiki mentions a "5-layer architecture with AI models", this is **not impl
 - ⏳ Control detail page (planned)
 - ⏳ Enhanced explainability UI
 
-### Phase 3: Evidence & Reports ⏳ **NOT STARTED**
-- ⏳ Evidence uploads
-- ⏳ Evidence classification (manual - no AI)
-- ⏳ Report generation (manual - no AI)
-- ⏳ Excel export
+### Phase 3: Evidence & Reports 🟡 **PARTIAL**
+- ⏳ Evidence uploads (Blob Storage integration pending)
+- ✅ Evidence classification (AI endpoint ready)
+- ✅ Report generation (AI-powered executive summary)
+- ⏳ Excel export (planned)
 
-### Phase 4: AI Features ⏳ **NOT STARTED**
-- ⏳ LLM integration for reasoning
-- ⏳ AI-powered evidence classification
-- ⏳ AI-generated recommendations
-- ⏳ Automated report generation with AI
-- ⏳ RAG/Embedding for semantic search
+### Phase 4: AI Features ✅ **COMPLETE**
+- ✅ LLM integration for reasoning (Azure OpenAI)
+- ✅ AI-powered evidence classification
+- ✅ AI-generated recommendations (control and gap-specific)
+- ✅ Automated report generation with AI
+- ❌ RAG/Embedding for semantic search (future)
 
 ---
 
@@ -137,42 +137,53 @@ If the wiki mentions a "5-layer architecture with AI models", this is **not impl
 |-----------|--------|----------------|
 | Scoring Engine | ✅ Complete | ❌ Rule-based (no AI) |
 | Gap Analysis | ✅ Complete | ✅ Optional AI recommendations (`?ai=true`) |
-| Recommendations | ✅ Basic + AI | ✅ AI-powered recommendations available |
+| AI Recommendations Endpoint | ✅ Complete | ✅ Full control/gap recommendations with context |
 | AI Service Module | ✅ Complete | ✅ Azure OpenAI integration ready |
-| Evidence Classification | ⏳ Planned | ✅ AI classification method ready |
-| Report Generation | ⏳ Planned | ✅ AI summary generation ready |
-| Natural Language | ✅ Partial | ✅ LLM integration implemented |
+| Evidence Classification | ✅ Complete | ✅ AI classification endpoint available |
+| Report Generation | ✅ Complete | ✅ AI executive summary generation ready |
+| Frontend AI Integration | ✅ Complete | ✅ AI toggle and recommendations display in Gaps view |
+| Natural Language | ✅ Complete | ✅ LLM integration implemented |
 | RAG/Semantic Search | ❌ Not Started | ❌ No embeddings yet |
 
-**Overall AI Implementation: ~25%** (Foundation + AI service module created, ready for integration)
+**Overall AI Implementation: ~75%** (Core AI features complete, ready for evidence upload integration)
 
 ---
 
-## 🚀 Path to AI Implementation
+## 🚀 AI Implementation Progress
 
-### Phase 1: Add LLM Integration (Quick Wins)
-1. **Add OpenAI SDK** to `requirements.txt`
-2. **Create AI service module** in `api/shared/`
-3. **Implement recommendation enhancement**:
-   - Take rule-based recommendations
-   - Send to GPT-4 with context
-   - Generate natural language explanations
+### ✅ Phase 1: LLM Integration (COMPLETE)
+1. ✅ **OpenAI SDK** added to `requirements.txt`
+2. ✅ **AI service module** created in `api/shared/ai_service.py`
+3. ✅ **Recommendation enhancement** implemented:
+   - Rule-based recommendations enhanced with AI
+   - Natural language explanations for gaps
+   - Control-specific recommendations with full context
 
-### Phase 2: Evidence Classification
-1. **Add vision model support** (GPT-4V or similar)
-2. **Create evidence classification endpoint**
-3. **Auto-classify uploaded evidence**
+### ✅ Phase 2: Evidence Classification (COMPLETE)
+1. ✅ **Evidence classification endpoint** created (`/api/tenant/{tenantId}/evidence/classify`)
+2. ✅ **AI classification** for evidence types (screenshot, config, log, policy, report, other)
+3. ✅ **Metadata extraction** (sensitivity level, content type, confidence)
 
-### Phase 3: Report Generation
-1. **Create report generation endpoint**
-2. **Use LLM to generate executive summaries**
-3. **Generate narrative reports from structured data**
+### ✅ Phase 3: Report Generation (COMPLETE)
+1. ✅ **Report generation endpoint** created (`/api/tenant/{tenantId}/report`)
+2. ✅ **AI executive summary** generation
+3. ✅ **Structured report** with summary data and gaps
 
-### Phase 4: Full AI Stack (If Needed)
-1. **Set up model serving infrastructure**
-2. **Implement RAG/embedding layer**
-3. **Build orchestration workflows**
-4. **Create AI assistant interface**
+### ✅ Phase 4: Frontend Integration (COMPLETE)
+1. ✅ **AI toggle** in Gaps view
+2. ✅ **AI recommendations display** with loading states
+3. ✅ **API client** functions for AI endpoints
+
+### ⏳ Phase 5: Evidence Upload Integration (NEXT)
+1. ⏳ **Evidence upload endpoint** (Blob Storage integration)
+2. ⏳ **Auto-classify on upload** (use evidence classification endpoint)
+3. ⏳ **Evidence UI** in Control Detail page
+
+### ❌ Phase 6: Full AI Stack (Future)
+1. ❌ **Model serving infrastructure** (if needed)
+2. ❌ **RAG/embedding layer** for semantic search
+3. ❌ **Orchestration workflows** for complex analysis
+4. ❌ **AI assistant interface** for natural language queries
 
 ---
 
@@ -200,6 +211,6 @@ If the wiki mentions a "5-layer architecture with AI models", this is **not impl
 
 ---
 
-**Last Updated**: 2025-11-05  
-**Status**: Foundation complete, AI features not yet implemented
+**Last Updated**: 2025-01-XX  
+**Status**: Core AI features complete! AI recommendations, evidence classification, and report generation are ready. Next: integrate evidence uploads with auto-classification.
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { getSummary } from '../api'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts'
 
@@ -29,11 +30,16 @@ export default function Dashboard({ tenantId }: Props) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {byDomain.map((d) => (
-          <div key={d.domain} className="rounded-lg border bg-white p-4">
+          <Link
+            key={d.domain}
+            to={`/tenant/${tenantId}/domain/${d.domain}`}
+            className="rounded-lg border bg-white p-4 hover:shadow-md transition-shadow cursor-pointer"
+          >
             <div className="text-sm text-gray-500">{d.domain}</div>
             <div className="mt-2 text-2xl font-bold">{d.complete}/{d.total}</div>
             <div className="text-xs text-gray-500">complete</div>
-          </div>
+            <div className="text-xs text-blue-600 mt-2">View domain →</div>
+          </Link>
         ))}
       </div>
 

@@ -6,6 +6,8 @@ const Dashboard = lazy(() => import('./routes/Dashboard'))
 const Controls = lazy(() => import('./routes/Controls'))
 const Tools = lazy(() => import('./routes/Tools'))
 const Gaps = lazy(() => import('./routes/Gaps'))
+const Domain = lazy(() => import('./routes/Domain'))
+const ControlDetail = lazy(() => import('./routes/ControlDetail'))
 
 function Shell() {
   const { id } = useParams()
@@ -29,6 +31,8 @@ function Shell() {
               <Route path="controls" element={<Controls tenantId={tenantId} />} />
               <Route path="tools" element={<Tools tenantId={tenantId} />} />
               <Route path="gaps" element={<Gaps tenantId={tenantId} />} />
+              <Route path="domain/:domainCode" element={<Domain tenantId={tenantId} />} />
+              <Route path="control/:controlId" element={<ControlDetail tenantId={tenantId} />} />
               <Route path="*" element={<Navigate to={`/tenant/${tenantId}/dashboard`} replace />} />
             </Routes>
           </Suspense>

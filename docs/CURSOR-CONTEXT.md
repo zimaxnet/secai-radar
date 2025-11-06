@@ -16,6 +16,8 @@ Cursor automatically detects which branch you're on. To verify:
 
 Cursor uses these files for context:
 - `.cursorrules` - Contains branch structure awareness and documentation rules
+- `docs/PROMPTING-GUIDE.md` - Advanced prompting principles for SecAI Radar development
+- `docs/PROMPTING-QUICK-REF.md` - Quick reference for common prompting patterns
 - Files you open in the editor
 - Files in your current workspace
 
