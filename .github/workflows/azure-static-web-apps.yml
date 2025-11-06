@@ -80,15 +80,15 @@ jobs:
             );
             
             // Create actionable notification
-            const issueBody = `## ❌ Workflow Failed: ${{ github.workflow }}
+            const issueBody = `## ❌ Workflow Failed: ${context.workflow}
 
 ### 🔍 Workflow Details
-- **Workflow**: ${{ github.workflow }}
-- **Branch**: ${{ github.ref_name }}
+- **Workflow**: ${context.workflow}
+- **Branch**: ${context.ref.replace('refs/heads/', '')}
 - **Commit**: [${commitMessage.split('\n')[0]}](${commitUrl})
 - **Author**: ${commitAuthor}
 - **Run**: [View Failed Run](${workflowRun.html_url})
-- **Triggered by**: ${{ github.event_name }} (${{ github.actor }})
+- **Triggered by**: ${context.eventName} (${context.actor})
 
 ### ❌ Failed Jobs/Steps
 ${failedSteps.length > 0 ? failedSteps.map(step => `- **${step.job}** → ${step.step}`).join('\n') : '- Unable to determine failed steps'}
@@ -111,7 +111,7 @@ ${failedSteps.length > 0 ? failedSteps.map(step => `- **${step.job}** → ${step
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `❌ Workflow Failed: ${{ github.workflow }} - ${{ github.ref_name }}`,
+                title: `❌ Workflow Failed: ${context.workflow} - ${context.ref.replace('refs/heads/', '')}`,
                 body: issueBody,
                 labels: ['workflow-failure', 'needs-attention']
               });
