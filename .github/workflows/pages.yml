@@ -45,6 +45,10 @@ jobs:
           if [ -f Gemfile ]; then
             bundle install || true
             bundle exec jekyll build --destination ../../_site || exit 1
+            # Ensure CNAME is copied to _site root
+            if [ -f CNAME ]; then
+              cp CNAME ../../_site/CNAME
+            fi
           else
             exit 1
           fi
@@ -56,17 +60,25 @@ jobs:
           mkdir -p _site
           # Copy markdown files
           cp -r docs/wiki/* _site/ 2>/dev/null || true
+          # Copy CNAME to root if it exists
+          if [ -f docs/wiki/CNAME ]; then
+            cp docs/wiki/CNAME _site/CNAME
+          fi
           # Remove unwanted files
-          rm -f _site/Gemfile* _site/GITHUB-PAGES-SETUP.md _site/DEPLOYMENT-READY.md _site/GitHub-Pages-Deployment-Instructions.md _site/_config.yml 2>/dev/null || true
-          # Ensure index file exists
+          rm -f _site/Gemfile* _site/GITHUB-PAGES-SETUP.md _site/DEPLOYMENT-READY.md _site/GitHub-Pages-Deployment-Instructions.md 2>/dev/null || true
+          # Ensure index file exists - prioritize index.md, then Home.md
           if [ ! -f _site/index.html ] && [ ! -f _site/index.md ]; then
-            if [ -f _site/Home.md ]; then
+            if [ -f _site/index.md ]; then
+              echo "index.md already exists"
+            elif [ -f _site/Home.md ]; then
               cp _site/Home.md _site/index.md
+              echo "Created index.md from Home.md"
             elif [ -f _site/README.md ]; then
               cp _site/README.md _site/index.md
+              echo "Created index.md from README.md"
             fi
           fi
-          # Create a simple HTML index if needed
+          # Create a simple HTML index that redirects to Home
           if [ ! -f _site/index.html ]; then
             cat > _site/index.html << 'EOF'
 <!DOCTYPE html>
@@ -74,16 +86,21 @@ jobs:
 <head>
   <meta charset="utf-8">
   <title>SecAI Radar Documentation</title>
-  <meta http-equiv="refresh" content="0; url=Home.html">
+  <meta http-equiv="refresh" content="0; url=Home">
+  <link rel="canonical" href="https://wiki.secai-radar.zimax.net/Home">
 </head>
 <body>
-  <p>Redirecting to <a href="Home.html">Home</a></p>
+  <p>Redirecting to <a href="Home">Home</a></p>
+  <script>window.location.href = 'Home';</script>
 </body>
 </html>
 EOF
+            echo "Created index.html redirect"
           fi
           echo "_site directory created successfully"
           ls -la _site/ | head -20
+          echo "CNAME file check:"
+          ls -la _site/CNAME 2>/dev/null || echo "CNAME not found in _site"
       
       - name: Ensure _site exists
         if: steps.jekyll-build.outcome != 'failure'
