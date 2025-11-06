@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getControlsByDomain, getDomains, getGaps, getSummary } from '../api'
+import { getControlsByDomain, getDomains, getGaps } from '../api'
 
 interface Props { tenantId: string }
 
@@ -39,7 +39,6 @@ export default function Domain({ tenantId }: Props) {
   const [controls, setControls] = useState<any[]>([])
   const [domainInfo, setDomainInfo] = useState<any>(null)
   const [gaps, setGaps] = useState<Record<string, any>>({})
-  const [summary, setSummary] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState<string>('')
 
@@ -71,13 +70,6 @@ export default function Domain({ tenantId }: Props) {
         }
       })
       setGaps(gapsMap)
-    })
-
-    // Load summary for domain progress
-    getSummary(tenantId).then(d => {
-      if (!mounted) return
-      const domainSummary = d.byDomain?.find((s: any) => s.domain === domainCode)
-      setSummary(domainSummary)
     })
 
     setLoading(false)
