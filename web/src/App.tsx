@@ -2,12 +2,17 @@ import { useState, useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useParams, Navigate } from 'react-router-dom'
 
 // Lazy load route components for code splitting
+const Landing = lazy(() => import('./routes/Landing'))
+const Assessments = lazy(() => import('./routes/Assessments'))
+const AssessmentSetup = lazy(() => import('./routes/AssessmentSetup'))
+const AssessmentOverview = lazy(() => import('./routes/AssessmentOverview'))
 const Dashboard = lazy(() => import('./routes/Dashboard'))
 const Controls = lazy(() => import('./routes/Controls'))
 const Tools = lazy(() => import('./routes/Tools'))
 const Gaps = lazy(() => import('./routes/Gaps'))
 const Domain = lazy(() => import('./routes/Domain'))
 const ControlDetail = lazy(() => import('./routes/ControlDetail'))
+const Report = lazy(() => import('./routes/Report'))
 
 function Shell() {
   const { id } = useParams()
@@ -15,25 +20,31 @@ function Shell() {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto p-4">
-        <header className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">SecAI Radar</h1>
+        <header className="flex items-center justify-between mb-4">
+          <Link to="/" className="text-2xl font-bold text-gray-900 hover:text-blue-600">
+            SecAI Radar
+          </Link>
           <nav className="flex gap-4 text-blue-600">
-            <Link to={`/tenant/${tenantId}/dashboard`} className="hover:underline">Dashboard</Link>
+            <Link to={`/tenant/${tenantId}/assessment`} className="hover:underline">Assessment</Link>
             <Link to={`/tenant/${tenantId}/controls`} className="hover:underline">Controls</Link>
             <Link to={`/tenant/${tenantId}/tools`} className="hover:underline">Tools</Link>
             <Link to={`/tenant/${tenantId}/gaps`} className="hover:underline">Gaps</Link>
+            <Link to={`/tenant/${tenantId}/report`} className="hover:underline">Report</Link>
           </nav>
         </header>
         <main className="mt-4">
           <Suspense fallback={<div className="p-4 text-gray-600">Loading...</div>}>
             <Routes>
+              <Route path="setup" element={<AssessmentSetup tenantId={tenantId} />} />
+              <Route path="assessment" element={<AssessmentOverview tenantId={tenantId} />} />
               <Route path="dashboard" element={<Dashboard tenantId={tenantId} />} />
               <Route path="controls" element={<Controls tenantId={tenantId} />} />
               <Route path="tools" element={<Tools tenantId={tenantId} />} />
               <Route path="gaps" element={<Gaps tenantId={tenantId} />} />
+              <Route path="report" element={<Report tenantId={tenantId} />} />
               <Route path="domain/:domainCode" element={<Domain tenantId={tenantId} />} />
               <Route path="control/:controlId" element={<ControlDetail tenantId={tenantId} />} />
-              <Route path="*" element={<Navigate to={`/tenant/${tenantId}/dashboard`} replace />} />
+              <Route path="*" element={<Navigate to={`/tenant/${tenantId}/assessment`} replace />} />
             </Routes>
           </Suspense>
         </main>
@@ -42,56 +53,14 @@ function Shell() {
   )
 }
 
-function Home() {
-  const [domains, setDomains] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  
-  useEffect(() => {
-    setLoading(true)
-    fetch('/api/domains').then(r => r.json()).then(d => {
-      setDomains(d || [])
-    }).finally(() => setLoading(false))
-  }, [])
-  
-  const defaultTenant = (import.meta.env.VITE_DEFAULT_TENANT as string) || 'NICO'
-  
-  return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="max-w-2xl w-full p-8 bg-white rounded-lg shadow">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">SecAI Radar</h1>
-        <p className="text-gray-600 mb-6">Azure security assessment platform</p>
-        
-        {loading && <div className="text-gray-500">Loading...</div>}
-        {domains.length > 0 && (
-          <div className="mb-6">
-            <p className="text-sm text-gray-700 mb-2">API is working! Found {domains.length} domains:</p>
-            <ul className="list-disc list-inside text-sm text-gray-600">
-              {domains.slice(0, 3).map((d: any) => (
-                <li key={d.code}>{d.code}: {d.name}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        
-        <a 
-          href={`/tenant/${defaultTenant}/dashboard`}
-          className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Go to Dashboard →
-        </a>
-      </div>
-    </div>
-  )
-}
-
 function App() {
-  const defaultTenant = (import.meta.env.VITE_DEFAULT_TENANT as string) || 'NICO'
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/assessments" element={<Assessments />} />
         <Route path="/tenant/:id/*" element={<Shell />} />
-        <Route path="*" element={<Navigate to={`/tenant/${defaultTenant}/dashboard`} replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )

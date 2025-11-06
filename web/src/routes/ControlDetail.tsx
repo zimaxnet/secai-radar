@@ -89,9 +89,17 @@ export default function ControlDetail({ tenantId }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <Link to={`/tenant/${tenantId}/domain/${domain}`} className="text-blue-600 hover:underline text-sm">
-            ← Back to {domain} Domain
-          </Link>
+          <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
+            <Link to={`/tenant/${tenantId}/assessment`} className="hover:text-blue-600 hover:underline">
+              Assessment
+            </Link>
+            <span>/</span>
+            <Link to={`/tenant/${tenantId}/domain/${domain}`} className="hover:text-blue-600 hover:underline">
+              {domain}
+            </Link>
+            <span>/</span>
+            <span className="text-gray-900 font-medium">{control.ControlID}</span>
+          </div>
           <h1 className="text-2xl font-bold text-gray-900 mt-2">{control.ControlID}</h1>
           <p className="text-lg text-gray-700 mt-1">{control.ControlTitle}</p>
         </div>

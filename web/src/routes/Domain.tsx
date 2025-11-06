@@ -103,8 +103,8 @@ export default function Domain({ tenantId }: Props) {
     <div className="space-y-6">
       {/* Domain Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg p-6">
-        <Link to={`/tenant/${tenantId}/dashboard`} className="text-blue-200 hover:text-white text-sm mb-2 inline-block">
-          ← Back to Dashboard
+        <Link to={`/tenant/${tenantId}/assessment`} className="text-blue-200 hover:text-white text-sm mb-2 inline-block">
+          ← Back to Assessment Overview
         </Link>
         <h1 className="text-3xl font-bold mb-2">{domainCode}: {domainName}</h1>
         <p className="text-blue-100 text-lg">{description}</p>
