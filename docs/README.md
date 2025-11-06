@@ -15,6 +15,14 @@ This folder contains the essential documentation for the SecAI Radar MVP.
 - `model-integration.md` — Model Layer integration guide (GPT-5-chat configuration and usage).
 - **`implementation-plan.md`** — **Comprehensive implementation plan** for all 5 layers of the AI stack.
 
+### Infrastructure & Security
+
+- **`DNS-SECURITY-GUIDE.md`** — **Complete DNS security guide** covering DNSSEC, CAA records, monitoring, and best practices for secai-radar.zimax.net.
+- **`DNS-QUICK-REFERENCE.md`** — Quick reference for DNS security commands, troubleshooting, and common tasks.
+- **`DNS-AZURE-COMPLETED.md`** — **Implementation summary** of completed DNS security improvements in Azure.
+- **`DNS-IMPROVEMENTS-SUMMARY.md`** — Prioritized list of DNS security improvements with cost estimates.
+- `COST-ESTIMATION.md` — Monthly infrastructure cost breakdown for Azure resources.
+
 ### User Documentation (Wiki)
 
 - **`wiki/`** — **Complete wiki documentation** for users, administrators, and developers.
