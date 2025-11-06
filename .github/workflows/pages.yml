@@ -80,21 +80,20 @@ jobs:
           fi
           # Create a simple HTML index that redirects to Home
           if [ ! -f _site/index.html ]; then
-            cat > _site/index.html << 'EOF'
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>SecAI Radar Documentation</title>
-  <meta http-equiv="refresh" content="0; url=Home">
-  <link rel="canonical" href="https://wiki.secai-radar.zimax.net/Home">
-</head>
-<body>
-  <p>Redirecting to <a href="Home">Home</a></p>
-  <script>window.location.href = 'Home';</script>
-</body>
-</html>
-EOF
+            printf '%s\n' \
+              '<!DOCTYPE html>' \
+              '<html>' \
+              '<head>' \
+              '  <meta charset="utf-8">' \
+              '  <title>SecAI Radar Documentation</title>' \
+              '  <meta http-equiv="refresh" content="0; url=Home">' \
+              '  <link rel="canonical" href="https://wiki.secai-radar.zimax.net/Home">' \
+              '</head>' \
+              '<body>' \
+              '  <p>Redirecting to <a href="Home">Home</a></p>' \
+              '  <script>window.location.href = '"'"'Home'"'"';</script>' \
+              '</body>' \
+              '</html>' > _site/index.html
             echo "Created index.html redirect"
           fi
           echo "_site directory created successfully"
