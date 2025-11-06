@@ -7,23 +7,66 @@ Complete guide to using SecAI Radar for cloud security assessments.
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Navigation](#navigation)
-3. [Dashboard](#dashboard)
-4. [Controls](#controls)
-5. [Tools](#tools)
-6. [Gaps](#gaps)
-7. [Best Practices](#best-practices)
+2. [Getting Started](#getting-started)
+3. [Complete User Journey](#complete-user-journey)
+4. [Navigation](#navigation)
+5. [Dashboard](#dashboard)
+6. [Controls](#controls)
+7. [Tools](#tools)
+8. [Gaps](#gaps)
+9. [Report Generation](#report-generation)
+10. [Best Practices](#best-practices)
 
 ---
 
 ## Overview
 
-SecAI Radar provides a web-based interface for managing cloud security assessments. The application is organized into four main sections:
+SecAI Radar provides a web-based interface for managing cloud security assessments using the SecAI Framework. The application guides users through a complete assessment journey from initial setup to final report generation.
 
-- **Dashboard**: Overview of security posture
-- **Controls**: Security control assessment and management
-- **Tools**: Security tool configuration
-- **Gaps**: Capability coverage analysis
+### Key Features
+
+- **Vendor-Neutral Assessment**: Capability-driven approach that works with any security tool stack
+- **Complete Journey**: From landing page to assessment completion
+- **Domain-Based Workflow**: Work through 12 security domains systematically
+- **AI-Powered Insights**: Get recommendations and gap analysis
+- **Evidence Management**: Upload and classify evidence for each control
+- **Progress Tracking**: Visual progress indicators at all levels
+
+---
+
+## Getting Started
+
+### First Time Users
+
+1. **Visit the Landing Page**: Learn about SecAI Framework and the assessment process
+2. **Start New Assessment**: Create a new tenant/assessment
+3. **Complete Setup Wizard**: Configure tools and select domains
+4. **Begin Assessment**: Work through domains and controls
+
+### Returning Users
+
+1. **Continue Assessment**: Select existing assessment from the assessments page
+2. **Resume Work**: Continue where you left off
+3. **Review Progress**: Check overall progress and next actions
+
+For a complete walkthrough, see the [User Journey](User-Journey) guide.
+
+---
+
+## Complete User Journey
+
+The SecAI Radar assessment follows a structured journey:
+
+1. **Landing & Introduction** - Learn about SecAI Framework
+2. **Assessment Selection** - Choose or create an assessment
+3. **Assessment Setup** - Configure tools and scope
+4. **Assessment Overview** - Central hub with progress tracking
+5. **Domain Assessment** - Work through security domains
+6. **Control Assessment** - Complete individual controls
+7. **Gap Review** - Review and address identified gaps
+8. **Report Generation** - Generate final assessment report
+
+See the [User Journey](User-Journey) page for detailed information about each phase.
 
 ---
 
