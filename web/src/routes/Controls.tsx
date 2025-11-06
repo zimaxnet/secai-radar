@@ -163,7 +163,19 @@ export default function Controls({ tenantId }: Props) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Controls</h2>
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg p-6">
+        <h1 className="text-3xl font-bold mb-2">Controls</h1>
+        <p className="text-blue-100">View and manage all security controls. Click a control ID to see details, or click a domain to view the domain assessment page.</p>
+      </div>
+      
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="text-sm font-semibold text-blue-900 mb-2">💡 Tip</div>
+        <p className="text-sm text-blue-800">
+          For a better assessment experience, use the <Link to={`/tenant/${tenantId}/dashboard`} className="font-medium underline">Dashboard</Link> to navigate by domain. 
+          Each domain page shows controls with descriptions, framework mappings, and progress tracking.
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
         <input className="border rounded p-2" placeholder="Domain (e.g., NET)" value={domain} onChange={e=>setFilter('domain', e.target.value)} />
         <input className="border rounded p-2" placeholder="Status (Complete/InProgress/NotStarted)" value={status} onChange={e=>setFilter('status', e.target.value)} />

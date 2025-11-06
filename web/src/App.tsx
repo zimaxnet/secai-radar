@@ -18,10 +18,10 @@ function Shell() {
         <header className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">SecAI Radar</h1>
           <nav className="flex gap-4 text-blue-600">
-            <Link to={`/tenant/${tenantId}/dashboard`}>Dashboard</Link>
-            <Link to={`/tenant/${tenantId}/controls`}>Controls</Link>
-            <Link to={`/tenant/${tenantId}/tools`}>Tools</Link>
-            <Link to={`/tenant/${tenantId}/gaps`}>Gaps</Link>
+            <Link to={`/tenant/${tenantId}/dashboard`} className="hover:underline">Dashboard</Link>
+            <Link to={`/tenant/${tenantId}/controls`} className="hover:underline">Controls</Link>
+            <Link to={`/tenant/${tenantId}/tools`} className="hover:underline">Tools</Link>
+            <Link to={`/tenant/${tenantId}/gaps`} className="hover:underline">Gaps</Link>
           </nav>
         </header>
         <main className="mt-4">
