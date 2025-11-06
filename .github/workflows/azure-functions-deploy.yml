@@ -94,39 +94,40 @@ jobs:
             );
             
             // Create actionable notification
-            const issueBody = `## ❌ Workflow Failed: ${context.workflow}
-
-### 🔍 Workflow Details
-- **Workflow**: ${context.workflow}
-- **Branch**: ${context.ref.replace('refs/heads/', '')}
-- **Commit**: [${commitMessage.split('\n')[0]}](${commitUrl})
-- **Author**: ${commitAuthor}
-- **Run**: [View Failed Run](${workflowRun.html_url})
-- **Triggered by**: ${context.eventName} (${context.actor})
-
-### ❌ Failed Jobs/Steps
-${failedSteps.length > 0 ? failedSteps.map(step => `- **${step.job}** → ${step.step}`).join('\n') : '- Unable to determine failed steps'}
-
-### 🔧 Next Steps
-1. Review the [failed workflow run](${workflowRun.html_url}) for detailed error logs
-2. Check the failed step(s) above for specific error messages
-3. Fix the issue and push again
-
-### 📋 Common Issues
-- **Python/dependency errors**: Check requirements.txt and Python version
-- **Azure authentication**: Verify AZURE_CREDENTIALS secret
-- **Function App deployment**: Check Function App name and publish settings
-- **Installation errors**: Verify Azure Functions Core Tools installation
-
----
-*This issue was automatically created by GitHub Actions to track the failed workflow run.*`;
+            const branchName = context.ref.replace('refs/heads/', '');
+            const commitTitle = commitMessage.split('\n')[0];
+            const stepsList = failedSteps.length > 0 
+              ? failedSteps.map(step => '- **' + step.job + '** → ' + step.step).join('\n')
+              : '- Unable to determine failed steps';
+            
+            const issueBody = '## ❌ Workflow Failed: ' + context.workflow + '\n\n' +
+              '### 🔍 Workflow Details\n' +
+              '- **Workflow**: ' + context.workflow + '\n' +
+              '- **Branch**: ' + branchName + '\n' +
+              '- **Commit**: [' + commitTitle + '](' + commitUrl + ')\n' +
+              '- **Author**: ' + commitAuthor + '\n' +
+              '- **Run**: [View Failed Run](' + workflowRun.html_url + ')\n' +
+              '- **Triggered by**: ' + context.eventName + ' (' + context.actor + ')\n\n' +
+              '### ❌ Failed Jobs/Steps\n' +
+              stepsList + '\n\n' +
+              '### 🔧 Next Steps\n' +
+              '1. Review the [failed workflow run](' + workflowRun.html_url + ') for detailed error logs\n' +
+              '2. Check the failed step(s) above for specific error messages\n' +
+              '3. Fix the issue and push again\n\n' +
+              '### 📋 Common Issues\n' +
+              '- **Python/dependency errors**: Check requirements.txt and Python version\n' +
+              '- **Azure authentication**: Verify AZURE_CREDENTIALS secret\n' +
+              '- **Function App deployment**: Check Function App name and publish settings\n' +
+              '- **Installation errors**: Verify Azure Functions Core Tools installation\n\n' +
+              '---\n' +
+              '*This issue was automatically created by GitHub Actions to track the failed workflow run.*';
 
             // Create an issue to track the failure
             try {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `❌ Workflow Failed: ${context.workflow} - ${context.ref.replace('refs/heads/', '')}`,
+                title: '❌ Workflow Failed: ' + context.workflow + ' - ' + branchName,
                 body: issueBody,
                 labels: ['workflow-failure', 'needs-attention']
               });
