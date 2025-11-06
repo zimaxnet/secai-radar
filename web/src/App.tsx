@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useParams, Navigate } from 'react-router-dom'
 
 // Lazy load route components for code splitting

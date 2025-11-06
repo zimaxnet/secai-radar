@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { getSummary, getDomains, getGaps } from '../api'
 
 interface Props { tenantId: string }
 
 export default function AssessmentOverview({ tenantId }: Props) {
   const [summary, setSummary] = useState<any>(null)
-  const [domains, setDomains] = useState<any[]>([])
   const [gaps, setGaps] = useState<any>(null)
   const [loading, setLoading] = useState(false)
 
@@ -18,10 +17,9 @@ export default function AssessmentOverview({ tenantId }: Props) {
       getSummary(tenantId),
       getDomains(),
       getGaps(tenantId)
-    ]).then(([summaryData, domainsData, gapsData]) => {
+    ]).then(([summaryData, , gapsData]) => {
       if (!mounted) return
       setSummary(summaryData)
-      setDomains(domainsData || [])
       setGaps(gapsData)
     }).finally(() => {
       if (mounted) setLoading(false)

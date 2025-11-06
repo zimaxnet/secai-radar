@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 interface Props { tenantId: string }
 
 export default function Report({ tenantId }: Props) {
   const [report, setReport] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [includeAI, setIncludeAI] = useState(true)
 

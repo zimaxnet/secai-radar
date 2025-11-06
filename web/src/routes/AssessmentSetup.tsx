@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { getDomains } from '../api'
 
 interface Props { tenantId: string }
@@ -15,7 +15,6 @@ export default function AssessmentSetup({ tenantId }: Props) {
   const [currentStep, setCurrentStep] = useState(1)
   const [domains, setDomains] = useState<any[]>([])
   const [selectedDomains, setSelectedDomains] = useState<Set<string>>(new Set())
-  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
