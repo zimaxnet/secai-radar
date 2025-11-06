@@ -1,8 +1,8 @@
 # Jekyll Configuration for SecAI Radar Wiki
 title: SecAI Radar Documentation
 description: Complete documentation for SecAI Radar cloud security assessment platform
-url: https://secai-radar.zimax.net
-baseurl: "/wiki"
+url: https://wiki.secai-radar.zimax.net
+baseurl: ""
 
 # Theme
 theme: jekyll-theme-minimal
@@ -15,38 +15,45 @@ plugins:
 # Navigation
 navigation:
   - title: Home
-    url: /wiki/
+    url: /
   - title: Getting Started
-    url: /wiki/Getting-Started
+    url: /Getting-Started
   - title: User Guide
-    url: /wiki/User-Guide
+    url: /User-Guide
+  - title: User Journey
+    url: /User-Journey
   - title: Dashboard
-    url: /wiki/Dashboard-Guide
+    url: /Dashboard-Guide
   - title: Controls
-    url: /wiki/Controls-Guide
+    url: /Controls-Guide
   - title: Tools
-    url: /wiki/Tools-Guide
+    url: /Tools-Guide
   - title: Gaps
-    url: /wiki/Gaps-Guide
+    url: /Gaps-Guide
   - title: API Reference
-    url: /wiki/API-Reference
+    url: /API-Reference
   - title: Architecture
-    url: /wiki/Architecture
+    url: /Architecture
   - title: Installation
-    url: /wiki/Installation
+    url: /Installation
   - title: Configuration
-    url: /wiki/Configuration
+    url: /Configuration
   - title: FAQ
-    url: /wiki/FAQ
+    url: /FAQ
   - title: Troubleshooting
-    url: /wiki/Troubleshooting
+    url: /Troubleshooting
   - title: Glossary
-    url: /wiki/Glossary
+    url: /Glossary
   - title: Contributing
-    url: /wiki/Contributing
+    url: /Contributing
 
 # Site structure
-permalink: /wiki/:title/
+permalink: /:title/
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
 
 # Markdown settings
 markdown: kramdown

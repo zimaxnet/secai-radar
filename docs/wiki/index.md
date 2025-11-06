@@ -1,8 +1,3 @@
----
-layout: default
-title: SecAI Radar Documentation
----
-
 # SecAI Radar Documentation
 
 Welcome to the SecAI Radar documentation wiki.
@@ -23,26 +18,28 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 ## Quick Links
 
 ### For Users
-- **[Getting Started](/wiki/Getting-Started)** - Quick start guide
-- **[User Guide](/wiki/User-Guide)** - Complete user documentation
-- **[Dashboard Guide](/wiki/Dashboard-Guide)** - Understanding the dashboard
-- **[Controls Guide](/wiki/Controls-Guide)** - Managing security controls
-- **[Tools Guide](/wiki/Tools-Guide)** - Configuring security tools
-- **[Gaps Guide](/wiki/Gaps-Guide)** - Understanding security gaps
+- **[Getting Started](Getting-Started)** - Quick start guide
+- **[User Guide](User-Guide)** - Complete user documentation
+- **[User Journey](User-Journey)** - Complete assessment journey from start to finish
+- **[Dashboard Guide](Dashboard-Guide)** - Understanding the dashboard
+- **[Controls Guide](Controls-Guide)** - Managing security controls
+- **[Tools Guide](Tools-Guide)** - Configuring security tools
+- **[Gaps Guide](Gaps-Guide)** - Understanding security gaps
 
 ### For Administrators
-- **[Installation](/wiki/Installation)** - Installation and deployment
-- **[Configuration](/wiki/Configuration)** - System configuration
-- **[API Reference](/wiki/API-Reference)** - API documentation
+- **[Installation](Installation)** - Installation and deployment
+- **[Configuration](Configuration)** - System configuration
+- **[API Reference](API-Reference)** - API documentation
 
 ### For Developers
-- **[Architecture](/wiki/Architecture)** - System architecture overview
-- **[Contributing](/wiki/Contributing)** - Contributing to SecAI Radar
+- **[Architecture](Architecture)** - System architecture overview
+- **[AI Integration](AI-Integration)** - AI-powered features
+- **[Contributing](Contributing)** - Contributing to SecAI Radar
 
 ### Help & Support
-- **[FAQ](/wiki/FAQ)** - Frequently asked questions
-- **[Troubleshooting](/wiki/Troubleshooting)** - Common issues and solutions
-- **[Glossary](/wiki/Glossary)** - Terms and definitions
+- **[FAQ](FAQ)** - Frequently asked questions
+- **[Troubleshooting](Troubleshooting)** - Common issues and solutions
+- **[Glossary](Glossary)** - Terms and definitions
 
 ---
 
@@ -90,7 +87,7 @@ SecAI Radar follows a **5-layer architecture**:
 4. **Orchestration Layer** - Multi-step AI workflows
 5. **Application Layer** - Web UI for browsing runs and reports
 
-See **[Architecture](/wiki/Architecture)** for detailed information.
+See **[Architecture](Architecture)** for detailed information.
 
 ---
 
@@ -98,7 +95,7 @@ See **[Architecture](/wiki/Architecture)** for detailed information.
 
 - **Documentation**: Browse this wiki for detailed guides
 - **Issues**: Report bugs or request features on GitHub
-- **Questions**: Check the [FAQ](/wiki/FAQ) for common questions
+- **Questions**: Check the [FAQ](FAQ) for common questions
 
 ---
 
@@ -108,5 +105,5 @@ SecAI Radar is open-source. See the repository LICENSE file for details.
 
 ---
 
-**Last Updated**: 2025-01-15
+**Last Updated**: 2025-01-27
 
