@@ -3,7 +3,7 @@
 SecAI Radar uses a branch-based deployment strategy:
 
 - **`main` branch**: Contains the main application (web app, API, core functionality)
-- **`wiki` branch**: Contains the wiki documentation and GitHub Pages deployment
+- **`gh-pages` branch**: Contains the wiki documentation and GitHub Pages deployment
 
 ---
 
@@ -28,7 +28,7 @@ SecAI Radar uses a branch-based deployment strategy:
 
 ---
 
-### Wiki Branch (`wiki`)
+### Documentation Branch (`gh-pages`)
 
 **Purpose**: Wiki documentation and GitHub Pages
 
@@ -41,7 +41,7 @@ SecAI Radar uses a branch-based deployment strategy:
 
 **Deployment**: Deploys to GitHub Pages
 
-**URL**: `https://secai-radar.zimax.net/wiki` (subdirectory)
+**URL**: `https://wiki.secai-radar.zimax.net` (custom subdomain)
 
 ---
 
@@ -56,8 +56,8 @@ SecAI Radar uses a branch-based deployment strategy:
 
 ### Wiki Deployment
 
-**Workflow**: `.github/workflows/pages.yml` (on `wiki` branch)
-- **Trigger**: Push to `wiki` branch
+**Workflow**: `.github/workflows/pages.yml` (on `gh-pages` branch)
+- **Trigger**: Push to `gh-pages` branch
 - **Deploys**: Wiki to GitHub Pages
 - **Location**: `secai-radar.zimax.net/wiki` subdirectory
 
@@ -78,7 +78,7 @@ TTL: 3600
 
 **How it works**:
 - Main app: `https://secai-radar.zimax.net` (root)
-- Wiki: `https://secai-radar.zimax.net/wiki` (subdirectory)
+- Wiki: `https://wiki.secai-radar.zimax.net` (custom subdomain)
 
 Both resolve to the same GitHub Pages domain, with path-based routing handling the separation.
 
@@ -104,8 +104,8 @@ git push origin main
 ### Making Changes to Wiki
 
 ```bash
-# Switch to wiki branch
-git checkout wiki
+# Switch to gh-pages branch
+git checkout gh-pages
 
 # Make changes to docs/wiki/
 # ... edit files ...
@@ -113,7 +113,7 @@ git checkout wiki
 # Commit and push
 git add docs/wiki/
 git commit -m "Update wiki documentation"
-git push origin wiki
+git push origin gh-pages
 ```
 
 ---
@@ -131,7 +131,7 @@ main branch
 │   └── azure-functions-deploy.yml    # Deploy API
 └── ...                     # Other app files
 
-wiki branch
+gh-pages branch
 ├── docs/wiki/              # Wiki documentation
 │   ├── _config.yml         # Jekyll configuration
 │   ├── CNAME               # Custom domain

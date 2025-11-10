@@ -26,7 +26,7 @@ SecAI Radar uses a **dual-branch strategy** that allows seamless development of 
 - Fixing application bugs
 - Working on architecture decisions
 
-### `wiki` Branch - Public Documentation
+### `gh-pages` Branch - Public Documentation
 
 **Purpose**: User-facing documentation published via GitHub Pages
 
@@ -77,9 +77,9 @@ git push origin main
 **When you need to update the wiki**:
 
 ```bash
-# Switch to wiki branch
-git checkout wiki
-git pull origin wiki
+# Switch to gh-pages branch
+git checkout gh-pages
+git pull origin gh-pages
 
 # Edit wiki documentation in docs/wiki/
 # For example:
@@ -90,14 +90,14 @@ git pull origin wiki
 # Commit and push
 git add docs/wiki/
 git commit -m "Update wiki documentation"
-git push origin wiki
+git push origin gh-pages
 
 # Switch back to main when done
 git checkout main
 ```
 
 **What happens**:
-- Changes are committed to `wiki` branch
+- Changes are committed to `gh-pages` branch
 - GitHub Actions workflow automatically builds and deploys to GitHub Pages
 - Wiki is updated at `wiki.secai-radar.zimax.net`
 - Custom domain SSL certificate is automatically maintained
@@ -114,8 +114,8 @@ git add .
 git commit -m "Add new feature"
 git push origin main
 
-# 2. Switch to wiki branch
-git checkout wiki
+# 2. Switch to gh-pages branch
+git checkout gh-pages
 
 # 3. Update wiki documentation
 # Edit docs/wiki/ files as needed
@@ -123,7 +123,7 @@ git checkout wiki
 # 4. Commit wiki changes
 git add docs/wiki/
 git commit -m "Document new feature in wiki"
-git push origin wiki
+git push origin gh-pages
 
 # 5. Return to main for continued development
 git checkout main
@@ -152,7 +152,7 @@ git commit -m "Fix bug description"
 git push origin main
 
 # 5. Return to wiki to finish documentation
-git checkout wiki
+git checkout gh-pages
 git stash pop  # If you used stash
 # Continue editing wiki docs
 ```
@@ -191,8 +191,8 @@ git stash pop  # If you used stash
 **How to sync**:
 
 ```bash
-# On wiki branch
-git checkout wiki
+# On gh-pages branch
+git checkout gh-pages
 
 # Merge latest from main
 git merge main --no-edit
@@ -200,8 +200,8 @@ git merge main --no-edit
 # Resolve any conflicts if they occur
 # (Usually minimal since wiki mainly has docs changes)
 
-# Push updated wiki branch
-git push origin wiki
+# Push updated gh-pages branch
+git push origin gh-pages
 ```
 
 **Note**: Most of the time, you won't need to sync. The wiki primarily contains documentation, not code references.
@@ -215,7 +215,7 @@ git push origin wiki
 
 ### 2. Use Descriptive Commit Messages
 - `main`: "Add user authentication feature"
-- `wiki`: "Document user authentication in Getting Started guide"
+- `gh-pages`: "Document user authentication in Getting Started guide"
 
 ### 3. Keep Branches in Sync (When Needed)
 - Sync application code only if wiki needs updated references
@@ -237,18 +237,18 @@ git push origin wiki
 2. Develop feature in `api/` and `web/`
 3. Test locally
 4. Commit and push to `main`
-5. Switch to `wiki` branch
+5. Switch to `gh-pages` branch
 6. Update user documentation
 7. Commit and push to `wiki`
 
 ### Scenario 2: Documentation Updates Only
-1. Switch to `wiki` branch
+1. Switch to `gh-pages` branch
 2. Edit `docs/wiki/` files
 3. Commit and push to `wiki`
 4. Stay on `wiki` or switch back to `main`
 
 ### Scenario 3: Bug Fix During Documentation
-1. On `wiki` branch, commit or stash changes
+1. On `gh-pages` branch, commit or stash changes
 2. Switch to `main` branch
 3. Fix bug
 4. Commit and push to `main`
@@ -257,7 +257,7 @@ git push origin wiki
 ### Scenario 4: API Changes Requiring Docs Update
 1. Update API in `main` branch
 2. Commit and push to `main`
-3. Switch to `wiki` branch
+3. Switch to `gh-pages` branch
 4. Update API documentation in `docs/wiki/API-Reference.md`
 5. Commit and push to `wiki`
 
@@ -270,7 +270,7 @@ git branch
 
 # Switch to correct branch
 git checkout main    # or
-git checkout wiki
+git checkout gh-pages
 ```
 
 ### "I have uncommitted changes when switching"
@@ -286,12 +286,12 @@ git checkout <other-branch>
 ```
 
 ### "Wiki doesn't show my changes"
-- Check that you pushed to `wiki` branch
+- Check that you pushed to `gh-pages` branch
 - Check GitHub Actions workflow status
 - Wait a few minutes for GitHub Pages to build and deploy
 
 ### "I need code from main in wiki"
-- Use `git merge main` on wiki branch
+- Use `git merge main` on gh-pages branch
 - Or cherry-pick specific commits
 - Only do this when necessary
 

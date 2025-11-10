@@ -37,7 +37,7 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 - **[AI Integration](AI-Integration)** - AI-powered features and configuration
 - **[Tool Research and Mapping](Tool-Research-and-Mapping)** - Dynamic tool research and control mapping
 - **[Contributing](Contributing)** - Contributing to SecAI Radar
-- **[Development Workflow](Development-Workflow)** - Working with main and wiki branches
+- **[Development Workflow](Development-Workflow)** - Working with main and gh-pages branches
 
 ### Help & Support
 - **[FAQ](FAQ)** - Frequently asked questions
