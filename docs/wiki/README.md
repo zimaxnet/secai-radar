@@ -1,3 +1,9 @@
+---
+layout: default
+title: Readme
+permalink: /README/
+---
+
 # SecAI Radar Wiki Documentation
 
 This directory contains comprehensive wiki documentation for SecAI Radar, ready for GitHub Pages or GitHub Wiki.

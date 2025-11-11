@@ -1,3 +1,9 @@
+---
+layout: default
+title: Azure Dns Verification
+permalink: /AZURE-DNS-VERIFICATION/
+---
+
 # Azure DNS Verification and Configuration
 
 Complete guide for verifying and configuring DNS in Azure for SecAI Radar.

@@ -1,3 +1,9 @@
+---
+layout: default
+title: Branch Structure
+permalink: /BRANCH-STRUCTURE/
+---
+
 # Branch Structure
 
 SecAI Radar uses a branch-based deployment strategy:

@@ -1,3 +1,9 @@
+---
+layout: default
+title: Home
+permalink: /Home/
+---
+
 # SecAI Radar - Documentation Wiki
 
 Welcome to the SecAI Radar documentation wiki. This wiki provides comprehensive guidance for users, administrators, and developers working with SecAI Radar.

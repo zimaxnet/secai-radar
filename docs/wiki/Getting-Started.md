@@ -1,3 +1,9 @@
+---
+layout: default
+title: Getting Started
+permalink: /Getting-Started/
+---
+
 # Getting Started with SecAI Radar
 
 This guide will help you get started with SecAI Radar quickly.

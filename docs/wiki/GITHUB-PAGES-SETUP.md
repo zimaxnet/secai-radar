@@ -1,3 +1,9 @@
+---
+layout: default
+title: Github Pages Setup
+permalink: /GITHUB-PAGES-SETUP/
+---
+
 # GitHub Pages Setup Instructions
 
 This guide explains how to publish the SecAI Radar wiki to GitHub Pages at `secai-radar.zimax.net/wiki` (as a subdirectory of the main app domain).

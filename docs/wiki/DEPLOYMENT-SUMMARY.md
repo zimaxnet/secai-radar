@@ -1,3 +1,9 @@
+---
+layout: default
+title: Deployment Summary
+permalink: /DEPLOYMENT-SUMMARY/
+---
+
 # GitHub Pages Deployment Summary
 
 Complete setup summary for deploying SecAI Radar wiki to `secai-radar.zimax.net/wiki`.

@@ -1,3 +1,9 @@
+---
+layout: default
+title: Installation
+permalink: /Installation/
+---
+
 # Installation Guide
 
 Complete installation guide for SecAI Radar.

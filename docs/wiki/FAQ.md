@@ -1,3 +1,9 @@
+---
+layout: default
+title: Faq
+permalink: /FAQ/
+---
+
 # Frequently Asked Questions (FAQ)
 
 Common questions and answers about SecAI Radar.

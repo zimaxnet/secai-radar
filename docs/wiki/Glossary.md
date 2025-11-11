@@ -1,3 +1,9 @@
+---
+layout: default
+title: Glossary
+permalink: /Glossary/
+---
+
 # Glossary
 
 Terms and definitions for SecAI Radar.

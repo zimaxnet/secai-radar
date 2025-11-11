@@ -1,3 +1,9 @@
+---
+layout: default
+title: Github Pages Deployment Instructions
+permalink: /GitHub-Pages-Deployment-Instructions/
+---
+
 # GitHub Pages Deployment Instructions
 
 Quick reference for deploying SecAI Radar wiki to `secai-radar.zimax.net`.

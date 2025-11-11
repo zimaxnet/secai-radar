@@ -1,3 +1,9 @@
+---
+layout: default
+title: Troubleshooting
+permalink: /Troubleshooting/
+---
+
 # Troubleshooting Guide
 
 Common issues and solutions for SecAI Radar.

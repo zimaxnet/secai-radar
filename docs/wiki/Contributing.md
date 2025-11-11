@@ -1,3 +1,9 @@
+---
+layout: default
+title: Contributing
+permalink: /Contributing/
+---
+
 # Contributing to SecAI Radar
 
 Thank you for your interest in contributing to SecAI Radar! This guide will help you get started.

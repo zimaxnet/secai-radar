@@ -1,3 +1,9 @@
+---
+layout: default
+title: Gaps Guide
+permalink: /Gaps-Guide/
+---
+
 # Gaps Guide
 
 Complete guide to understanding and analyzing security gaps in SecAI Radar.

@@ -1,3 +1,9 @@
+---
+layout: default
+title: User Journey
+permalink: /User-Journey/
+---
+
 # Complete User Journey
 
 > **Complete end-to-end user journey for conducting a SecAI Framework assessment from start to finish**

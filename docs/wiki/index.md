@@ -1,3 +1,9 @@
+---
+layout: default
+title: Index
+permalink: /index/
+---
+
 # SecAI Radar Documentation
 
 Welcome to the SecAI Radar documentation wiki.

@@ -1,3 +1,9 @@
+---
+layout: default
+title: Tools Guide
+permalink: /Tools-Guide/
+---
+
 # Tools Guide
 
 Complete guide to configuring security tools in SecAI Radar.

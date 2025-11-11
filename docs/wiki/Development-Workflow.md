@@ -1,3 +1,9 @@
+---
+layout: default
+title: Development Workflow
+permalink: /Development-Workflow/
+---
+
 # Development Workflow
 
 ## Overview

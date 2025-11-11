@@ -1,3 +1,9 @@
+---
+layout: default
+title: Key Vault Setup
+permalink: /Key-Vault-Setup/
+---
+
 # Azure Key Vault Setup
 
 ## Overview

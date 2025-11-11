@@ -1,3 +1,9 @@
+---
+layout: default
+title: User Guide
+permalink: /User-Guide/
+---
+
 # SecAI Radar User Guide
 
 Complete guide to using SecAI Radar for cloud security assessments.

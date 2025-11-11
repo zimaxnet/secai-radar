@@ -1,3 +1,9 @@
+---
+layout: default
+title: Ai Integration
+permalink: /AI-Integration/
+---
+
 # AI Integration
 
 ## Overview

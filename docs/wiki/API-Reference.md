@@ -1,3 +1,9 @@
+---
+layout: default
+title: Api Reference
+permalink: /API-Reference/
+---
+
 # API Reference
 
 Complete API documentation for SecAI Radar.

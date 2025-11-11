@@ -1,3 +1,9 @@
+---
+layout: default
+title: Architecture
+permalink: /Architecture/
+---
+
 # Architecture Overview
 
 Complete architecture overview for SecAI Radar.

@@ -1,3 +1,9 @@
+---
+layout: default
+title: Dashboard Guide
+permalink: /Dashboard-Guide/
+---
+
 # Dashboard Guide
 
 Complete guide to understanding and using the SecAI Radar Dashboard.

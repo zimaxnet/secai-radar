@@ -1,3 +1,9 @@
+---
+layout: default
+title: Configuration
+permalink: /Configuration/
+---
+
 # Configuration Guide
 
 Complete configuration guide for SecAI Radar.

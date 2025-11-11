@@ -1,3 +1,9 @@
+---
+layout: default
+title: Controls Guide
+permalink: /Controls-Guide/
+---
+
 # Controls Guide
 
 Complete guide to managing security controls in SecAI Radar.

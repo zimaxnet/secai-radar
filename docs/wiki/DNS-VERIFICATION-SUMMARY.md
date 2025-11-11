@@ -1,3 +1,9 @@
+---
+layout: default
+title: Dns Verification Summary
+permalink: /DNS-VERIFICATION-SUMMARY/
+---
+
 # DNS Verification Summary
 
 Complete verification report for Azure DNS configuration for SecAI Radar.

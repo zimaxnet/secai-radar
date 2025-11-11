@@ -1,3 +1,9 @@
+---
+layout: default
+title: Dns Status
+permalink: /DNS-STATUS/
+---
+
 # DNS Status Report
 
 Current DNS configuration status for SecAI Radar.

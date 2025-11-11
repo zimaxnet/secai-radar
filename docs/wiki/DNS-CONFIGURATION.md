@@ -1,3 +1,9 @@
+---
+layout: default
+title: Dns Configuration
+permalink: /DNS-CONFIGURATION/
+---
+
 # DNS Configuration for SecAI Radar
 
 DNS configuration guide for the main app and wiki.

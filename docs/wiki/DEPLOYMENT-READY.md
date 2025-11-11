@@ -1,3 +1,9 @@
+---
+layout: default
+title: Deployment Ready
+permalink: /DEPLOYMENT-READY/
+---
+
 # ✅ GitHub Pages Deployment - Ready to Deploy
 
 All files are configured and ready for GitHub Pages deployment to `secai-radar.zimax.net`.
