@@ -3,6 +3,9 @@ layout: default
 title: Dns Configuration
 ---
 
+> **Update (2025-11):** The wiki now publishes at `https://zimaxnet.github.io/secai-radar/`. References to the former `/wiki` subdirectory are retained for historical context.
+
+
 # DNS Configuration for SecAI Radar
 
 DNS configuration guide for the main app and wiki.
@@ -12,7 +15,7 @@ DNS configuration guide for the main app and wiki.
 ## Domain Structure
 
 - **Main App**: `secai-radar.zimax.net` (root domain)
-- **Wiki**: `secai-radar.zimax.net/wiki` (subdirectory on same domain)
+- **Wiki**: `zimaxnet.github.io/secai-radar` (GitHub Pages project site)
 
 ---
 
@@ -44,7 +47,7 @@ TTL: 3600
 ## How It Works
 
 1. **Main App**: Deployed to `secai-radar.zimax.net` (root)
-2. **Wiki**: Deployed to `secai-radar.zimax.net/wiki` (subdirectory)
+2. **Wiki**: Deployed to `zimaxnet.github.io/secai-radar` (GitHub Pages project site)
 
 Both use the same:
 - DNS record (CNAME to `your-username.github.io`)
@@ -67,7 +70,7 @@ Both use the same:
 - **Source**: `docs/wiki/` directory
 - **Custom Domain**: `secai-radar.zimax.net` (same as main app)
 - **CNAME**: Points to `secai-radar.zimax.net` (same as main app)
-- **Path**: `/wiki` subdirectory
+- **Path**: `GitHub Pages project site
 
 ---
 
@@ -79,7 +82,7 @@ The main app should be deployed to the root of `secai-radar.zimax.net`.
 
 ### Wiki Deployment
 
-The wiki is deployed to `_site/wiki/` subdirectory, making it available at `secai-radar.zimax.net/wiki`.
+The wiki is deployed to `_site/wiki/` subdirectory, making it available at `zimaxnet.github.io/secai-radar`.
 
 ---
 
@@ -102,7 +105,7 @@ Visit: `https://secai-radar.zimax.net`
 
 ### Check Wiki
 
-Visit: `https://secai-radar.zimax.net/wiki`
+Visit: `https://zimaxnet.github.io/secai-radar`
 
 ---
 
@@ -133,7 +136,7 @@ Visit: `https://secai-radar.zimax.net/wiki`
 
 1. **Same Domain**: Both app and wiki use `secai-radar.zimax.net`
 2. **Single DNS Record**: Only one CNAME record needed
-3. **Path-Based Routing**: Wiki is at `/wiki` subdirectory
+3. **Path-Based Routing**: Wiki is at `GitHub Pages project site
 4. **Separate Deployments**: Main app and wiki deploy separately
 5. **Shared SSL**: Same SSL certificate for both
 

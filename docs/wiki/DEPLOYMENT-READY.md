@@ -3,6 +3,9 @@ layout: default
 title: Deployment Ready
 ---
 
+> **Update (2025-11):** The wiki now publishes at `https://zimaxnet.github.io/secai-radar/`. References to the former `/wiki` subdirectory are retained for historical context.
+
+
 # ✅ GitHub Pages Deployment - Ready to Deploy
 
 All files are configured and ready for GitHub Pages deployment to `secai-radar.zimax.net`.
@@ -94,7 +97,7 @@ Visit `https://secai-radar.zimax.net` after DNS propagates.
 - [ ] Add CNAME DNS record
 - [ ] Wait for DNS propagation
 - [ ] Verify deployment in Actions tab
-- [ ] Test site at `https://secai-radar.zimax.net/wiki`
+- [ ] Test site at `https://zimaxnet.github.io/secai-radar`
 - [ ] Verify HTTPS is working
 - [ ] Test all wiki pages
 
@@ -148,11 +151,11 @@ All wiki pages are in `docs/wiki/`:
 
 After deployment, the wiki will be available at:
 
-- **Wiki URL**: `https://secai-radar.zimax.net/wiki`
-- **Homepage**: `https://secai-radar.zimax.net/wiki/Home`
-- **All Pages**: `https://secai-radar.zimax.net/wiki/{PageName}`
+- **Wiki URL**: `https://zimaxnet.github.io/secai-radar`
+- **Homepage**: `https://zimaxnet.github.io/secai-radar/Home`
+- **All Pages**: `https://zimaxnet.github.io/secai-radar/{PageName}`
 
-**Note**: The wiki is served as a subdirectory `/wiki` on the main app domain `secai-radar.zimax.net`.
+**Note**: The wiki is served as a independent project site on the main app domain `secai-radar.zimax.net`.
 
 ---
 

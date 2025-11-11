@@ -16,12 +16,11 @@ SecAI Radar uses a **dual-branch strategy** that allows seamless development of 
 **Purpose**: Primary development branch for the SecAI Radar application
 
 **Contains**:
-- Application code (`api/`, `web/`)
-- Developer documentation (`docs/` excluding `docs/wiki/`)
-- Azure deployment workflows
-- Development tools and scripts
+- Wiki documentation (`docs/wiki/`)
+- Application code (for reference, synced from main)
+- GitHub Pages deployment workflow
 
-**Deploys to**: Azure Static Web App at `secai-radar.zimax.net`
+**Deploys to**: GitHub Pages at `https://zimaxnet.github.io/secai-radar/`
 
 **When to use**:
 - Developing new features
@@ -39,9 +38,8 @@ SecAI Radar uses a **dual-branch strategy** that allows seamless development of 
 - Wiki documentation (`docs/wiki/`)
 - Application code (for reference, synced from main)
 - GitHub Pages deployment workflow
-- Custom domain configuration
 
-**Deploys to**: GitHub Pages at `wiki.secai-radar.zimax.net`
+**Deploys to**: GitHub Pages at `https://zimaxnet.github.io/secai-radar/`
 
 **When to use**:
 - Updating user documentation
@@ -104,7 +102,7 @@ git checkout main
 **What happens**:
 - Changes are committed to `gh-pages` branch
 - GitHub Actions workflow automatically builds and deploys to GitHub Pages
-- Wiki is updated at `wiki.secai-radar.zimax.net`
+- Wiki is updated at `https://zimaxnet.github.io/secai-radar/`
 - Custom domain SSL certificate is automatically maintained
 
 ## Switching Contexts

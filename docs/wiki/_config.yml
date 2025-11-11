@@ -1,7 +1,7 @@
 # Jekyll Configuration for SecAI Radar Wiki
 title: SecAI Radar Documentation
 description: Complete documentation for SecAI Radar cloud security assessment platform
-url: https://wiki.secai-radar.zimax.net
+url: https://zimaxnet.github.io/secai-radar
 baseurl: ""
 
 # Theme

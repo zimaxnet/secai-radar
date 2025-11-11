@@ -3,6 +3,9 @@ layout: default
 title: Azure Dns Verification
 ---
 
+> **Update (2025-11):** The wiki now publishes at `https://zimaxnet.github.io/secai-radar/`. References to the former `/wiki` subdirectory are retained for historical context.
+
+
 # Azure DNS Verification and Configuration
 
 Complete guide for verifying and configuring DNS in Azure for SecAI Radar.
@@ -131,7 +134,7 @@ Expected output should show:
 ### 3. Test Domain Access
 
 - **Main App**: `https://secai-radar.zimax.net`
-- **Wiki**: `https://secai-radar.zimax.net/wiki`
+- **Wiki**: `https://zimaxnet.github.io/secai-radar`
 
 ---
 

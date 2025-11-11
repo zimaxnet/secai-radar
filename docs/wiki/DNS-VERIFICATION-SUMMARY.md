@@ -3,6 +3,9 @@ layout: default
 title: Dns Verification Summary
 ---
 
+> **Update (2025-11):** The wiki now publishes at `https://zimaxnet.github.io/secai-radar/`. References to the former `/wiki` subdirectory are retained for historical context.
+
+
 # DNS Verification Summary
 
 Complete verification report for Azure DNS configuration for SecAI Radar.
@@ -64,7 +67,7 @@ az network dns record-set cname show \
 
 ### Domain Structure
 - **Main App**: `https://secai-radar.zimax.net` (root domain)
-- **Wiki**: `https://secai-radar.zimax.net/wiki` (subdirectory)
+- **Wiki**: `https://zimaxnet.github.io/secai-radar` (GitHub Pages project site)
 
 ### DNS Record Configuration
 ```
@@ -96,7 +99,7 @@ TTL: 3600
    - Verify CNAME file in repository
 5. **Test Access**:
    - Main App: `https://secai-radar.zimax.net`
-   - Wiki: `https://secai-radar.zimax.net/wiki`
+   - Wiki: `https://zimaxnet.github.io/secai-radar`
 
 ---
 
@@ -172,7 +175,7 @@ host -t CNAME secai-radar.zimax.net
 
 ### Target Domains
 - **Main App**: `secai-radar.zimax.net`
-- **Wiki**: `secai-radar.zimax.net/wiki`
+- **Wiki**: `zimaxnet.github.io/secai-radar`
 
 ---
 

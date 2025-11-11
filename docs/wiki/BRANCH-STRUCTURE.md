@@ -40,13 +40,12 @@ SecAI Radar uses a branch-based deployment strategy:
 **Contains**:
 - Wiki documentation (`docs/wiki/`)
 - GitHub Pages configuration (`docs/wiki/_config.yml`)
-- CNAME file (`docs/wiki/CNAME`)
 - GitHub Pages deployment workflow:
   - `.github/workflows/pages.yml` (deploys wiki to GitHub Pages)
 
 **Deployment**: Deploys to GitHub Pages
 
-**URL**: `https://wiki.secai-radar.zimax.net` (custom subdomain)
+**URL**: `https://zimaxnet.github.io/secai-radar` (custom subdomain)
 
 ---
 
@@ -64,28 +63,16 @@ SecAI Radar uses a branch-based deployment strategy:
 **Workflow**: `.github/workflows/pages.yml` (on `gh-pages` branch)
 - **Trigger**: Push to `gh-pages` branch
 - **Deploys**: Wiki to GitHub Pages
-- **Location**: `secai-radar.zimax.net/wiki` subdirectory
+- **Location**: `https://zimaxnet.github.io/secai-radar/`
 
 ---
 
 ## DNS Configuration
 
-### Single CNAME Record
+- **Main app**: The custom domain `secai-radar.zimax.net` routes traffic to the Azure Static Web App.
+- **Wiki**: `https://zimaxnet.github.io/secai-radar/` serves the documentation directly from GitHub Pages (no custom domain).
 
-Both the main app and wiki use the **same domain** (`secai-radar.zimax.net`) with **one CNAME record**:
-
-```
-Type: CNAME
-Name: secai-radar
-Value: zimaxnet.github.io
-TTL: 3600
-```
-
-**How it works**:
-- Main app: `https://secai-radar.zimax.net` (root)
-- Wiki: `https://wiki.secai-radar.zimax.net` (custom subdomain)
-
-Both resolve to the same GitHub Pages domain, with path-based routing handling the separation.
+This separation keeps production traffic pointed at Azure while the wiki remains a GitHub-managed property.
 
 ---
 
@@ -139,7 +126,6 @@ main branch
 gh-pages branch
 ├── docs/wiki/              # Wiki documentation
 │   ├── _config.yml         # Jekyll configuration
-│   ├── CNAME               # Custom domain
 │   ├── index.md            # Home page
 │   └── ...                 # Other wiki pages
 └── .github/workflows/
@@ -161,8 +147,7 @@ gh-pages branch
 ## Important Notes
 
 1. **Same Domain**: Both app and wiki use `secai-radar.zimax.net`
-2. **Single CNAME**: Only one DNS record needed for both
-3. **Path Routing**: Wiki is accessed via `/wiki` subdirectory
+3. **Path Routing**: Wiki is accessed via `GitHub Pages project site
 4. **Independent Updates**: Changes to app don't affect wiki and vice versa
 5. **GitHub Pages**: Wiki deployment is handled by GitHub Pages workflow
 

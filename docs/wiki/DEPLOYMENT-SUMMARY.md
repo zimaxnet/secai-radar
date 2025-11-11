@@ -3,9 +3,12 @@ layout: default
 title: Deployment Summary
 ---
 
+> **Update (2025-11):** The wiki now publishes at `https://zimaxnet.github.io/secai-radar/`. References to the former `/wiki` subdirectory are retained for historical context.
+
+
 # GitHub Pages Deployment Summary
 
-Complete setup summary for deploying SecAI Radar wiki to `secai-radar.zimax.net/wiki`.
+Complete setup summary for deploying SecAI Radar wiki to `zimaxnet.github.io/secai-radar`.
 
 ---
 
@@ -16,7 +19,7 @@ All files are configured and ready for deployment:
 ### Domain Structure
 
 - **Main App**: `secai-radar.zimax.net` (root domain)
-- **Wiki**: `secai-radar.zimax.net/wiki` (subdirectory on same domain)
+- **Wiki**: `zimaxnet.github.io/secai-radar` (GitHub Pages project site)
 
 ### Files Configured
 
@@ -29,10 +32,10 @@ All files are configured and ready for deployment:
 
 ### Build Configuration
 
-- **Build Output**: `_site/wiki/` (subdirectory)
+- **Build Output**: `_site/wiki/` (GitHub Pages project site)
 - **Base URL**: `/wiki`
 - **Domain**: `secai-radar.zimax.net`
-- **Wiki URL**: `https://secai-radar.zimax.net/wiki`
+- **Wiki URL**: `https://zimaxnet.github.io/secai-radar`
 
 ---
 
@@ -59,7 +62,7 @@ git push origin main
 3. Check **Enforce HTTPS**
 4. Click **Save**
 
-**Note**: This is the same domain as the main app. The wiki will be at `/wiki` subdirectory.
+**Note**: This is the same domain as the main app. The wiki will be at `GitHub Pages project site.
 
 ### Step 4: Verify DNS
 
@@ -83,7 +86,7 @@ TTL: 3600
 
 ### Step 6: Verify
 
-Visit: `https://secai-radar.zimax.net/wiki`
+Visit: `https://zimaxnet.github.io/secai-radar`
 
 ---
 
@@ -91,21 +94,21 @@ Visit: `https://secai-radar.zimax.net/wiki`
 
 After deployment, the wiki will be available at:
 
-- **Wiki Home**: `https://secai-radar.zimax.net/wiki/`
-- **Getting Started**: `https://secai-radar.zimax.net/wiki/Getting-Started`
-- **User Guide**: `https://secai-radar.zimax.net/wiki/User-Guide`
-- **Dashboard Guide**: `https://secai-radar.zimax.net/wiki/Dashboard-Guide`
-- **Controls Guide**: `https://secai-radar.zimax.net/wiki/Controls-Guide`
-- **Tools Guide**: `https://secai-radar.zimax.net/wiki/Tools-Guide`
-- **Gaps Guide**: `https://secai-radar.zimax.net/wiki/Gaps-Guide`
-- **API Reference**: `https://secai-radar.zimax.net/wiki/API-Reference`
-- **Architecture**: `https://secai-radar.zimax.net/wiki/Architecture`
-- **Installation**: `https://secai-radar.zimax.net/wiki/Installation`
-- **Configuration**: `https://secai-radar.zimax.net/wiki/Configuration`
-- **FAQ**: `https://secai-radar.zimax.net/wiki/FAQ`
-- **Troubleshooting**: `https://secai-radar.zimax.net/wiki/Troubleshooting`
-- **Glossary**: `https://secai-radar.zimax.net/wiki/Glossary`
-- **Contributing**: `https://secai-radar.zimax.net/wiki/Contributing`
+- **Wiki Home**: `https://zimaxnet.github.io/secai-radar/`
+- **Getting Started**: `https://zimaxnet.github.io/secai-radar/Getting-Started`
+- **User Guide**: `https://zimaxnet.github.io/secai-radar/User-Guide`
+- **Dashboard Guide**: `https://zimaxnet.github.io/secai-radar/Dashboard-Guide`
+- **Controls Guide**: `https://zimaxnet.github.io/secai-radar/Controls-Guide`
+- **Tools Guide**: `https://zimaxnet.github.io/secai-radar/Tools-Guide`
+- **Gaps Guide**: `https://zimaxnet.github.io/secai-radar/Gaps-Guide`
+- **API Reference**: `https://zimaxnet.github.io/secai-radar/API-Reference`
+- **Architecture**: `https://zimaxnet.github.io/secai-radar/Architecture`
+- **Installation**: `https://zimaxnet.github.io/secai-radar/Installation`
+- **Configuration**: `https://zimaxnet.github.io/secai-radar/Configuration`
+- **FAQ**: `https://zimaxnet.github.io/secai-radar/FAQ`
+- **Troubleshooting**: `https://zimaxnet.github.io/secai-radar/Troubleshooting`
+- **Glossary**: `https://zimaxnet.github.io/secai-radar/Glossary`
+- **Contributing**: `https://zimaxnet.github.io/secai-radar/Contributing`
 
 ---
 
@@ -130,7 +133,7 @@ After deployment, the wiki will be available at:
 - **Source**: GitHub Actions workflow
 - **Build Output**: `_site/wiki/` subdirectory
 - **Domain**: `secai-radar.zimax.net`
-- **Path**: `/wiki` subdirectory
+- **Path**: `GitHub Pages project site
 
 ---
 
@@ -141,7 +144,7 @@ After deployment, the wiki will be available at:
 - [ ] Configured custom domain: `secai-radar.zimax.net`
 - [ ] Verified DNS is configured (same as main app)
 - [ ] GitHub Actions workflow deployed successfully
-- [ ] Wiki accessible at `https://secai-radar.zimax.net/wiki`
+- [ ] Wiki accessible at `https://zimaxnet.github.io/secai-radar`
 - [ ] All internal links work correctly
 - [ ] HTTPS is working (green lock icon)
 
@@ -194,10 +197,10 @@ All wiki pages are in `docs/wiki/`:
 After deployment:
 
 - **Main App**: `https://secai-radar.zimax.net`
-- **Wiki**: `https://secai-radar.zimax.net/wiki`
-- **All Pages**: `https://secai-radar.zimax.net/wiki/{PageName}`
+- **Wiki**: `https://zimaxnet.github.io/secai-radar`
+- **All Pages**: `https://zimaxnet.github.io/secai-radar/{PageName}`
 
-Both use the same domain (`secai-radar.zimax.net`) with the wiki at the `/wiki` subdirectory.
+Both use the same domain (`secai-radar.zimax.net`) with the wiki at the `GitHub Pages project site.
 
 ---
 

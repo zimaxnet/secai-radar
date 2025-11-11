@@ -3,6 +3,9 @@ layout: default
 title: Dns Status
 ---
 
+> **Update (2025-11):** The wiki now publishes at `https://zimaxnet.github.io/secai-radar/`. References to the former `/wiki` subdirectory are retained for historical context.
+
+
 # DNS Status Report
 
 Current DNS configuration status for SecAI Radar.
@@ -65,7 +68,7 @@ The domain `secai-radar.zimax.net` does not currently resolve to GitHub Pages.
 - **Status**: ⏳ Waiting for DNS configuration
 
 ### Wiki
-- **URL**: `https://secai-radar.zimax.net/wiki`
+- **URL**: `https://zimaxnet.github.io/secai-radar`
 - **Status**: ⏳ Waiting for DNS configuration
 
 ---
