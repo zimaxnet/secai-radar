@@ -66,41 +66,57 @@ jobs:
           fi
           # Remove unwanted files
           rm -f _site/Gemfile* _site/GITHUB-PAGES-SETUP.md _site/DEPLOYMENT-READY.md _site/GitHub-Pages-Deployment-Instructions.md 2>/dev/null || true
-          # Ensure index file exists - prioritize index.md, then Home.md
-          if [ ! -f _site/index.html ] && [ ! -f _site/index.md ]; then
-            if [ -f _site/index.md ]; then
-              echo "index.md already exists"
-            elif [ -f _site/Home.md ]; then
-              cp _site/Home.md _site/index.md
-              echo "Created index.md from Home.md"
-            elif [ -f _site/README.md ]; then
-              cp _site/README.md _site/index.md
-              echo "Created index.md from README.md"
-            fi
-          fi
-          # Create a simple HTML index that redirects to Home
-          if [ ! -f _site/index.html ]; then
-            printf '%s\n' \
-              '<!DOCTYPE html>' \
-              '<html>' \
-              '<head>' \
-              '  <meta charset="utf-8">' \
-              '  <title>SecAI Radar Documentation</title>' \
-              '  <meta http-equiv="refresh" content="0; url=Home">' \
-              '  <link rel="canonical" href="https://wiki.secai-radar.zimax.net/Home">' \
-              '</head>' \
-              '<body>' \
-              '  <p>Redirecting to <a href="Home">Home</a></p>' \
-              '  <script>window.location.href = '"'"'Home'"'"';</script>' \
-              '</body>' \
-              '</html>' > _site/index.html
-            echo "Created index.html redirect"
-          fi
+          # Convert markdown files to static HTML when Jekyll is unavailable
+          pip install --quiet 'markdown>=3.5,<3.6'
+          python - <<'PY'
+          from pathlib import Path
+          import markdown
+          import re
+
+          site = Path('_site')
+
+          def rewrite_links(text: str) -> str:
+              pattern = re.compile(r"\[([^\]]+)\]\(([^\)]+)\)")
+              def repl(match: re.Match) -> str:
+                  label, target = match.group(1), match.group(2)
+                  if target.startswith(('http://', 'https://', 'mailto:', '#')):
+                      return match.group(0)
+                  if target.endswith('.html'):
+                      return match.group(0)
+                  if target.endswith('.md'):
+                      target = target[:-3] + '.html'
+                      return f"[{label}]({target})"
+                  return f"[{label}]({target}.html)"
+              return pattern.sub(repl, text)
+
+          def render_markdown(source: Path, destination: Path) -> None:
+              text = source.read_text(encoding='utf-8')
+              text = rewrite_links(text)
+              title_match = re.search(r'^#\s+(.+)', text, flags=re.MULTILINE)
+              title = title_match.group(1).strip() if title_match else destination.stem
+              html_body = markdown.markdown(
+                  text,
+                  extensions=['extra', 'toc', 'tables', 'fenced_code']
+              )
+              template = """<!DOCTYPE html>\n<html lang='en'>\n<head>\n  <meta charset='utf-8' />\n  <title>{title}</title>\n  <meta name='viewport' content='width=device-width, initial-scale=1' />\n  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.min.css' integrity='sha512-0lS5mW+CtyUbiYSrbYIwkd79tryJi3nwoZ+LOrF8lJHkliAQhS4ohmqQVWpW0P8Ym1+H3E0ZCty0uBonHZC3xg==' crossorigin='anonymous' referrerpolicy='no-referrer' />\n  <style>body{{margin:2rem;}} header{{margin-bottom:2rem;}} nav a{{margin-right:1rem;}}</style>\n</head>\n<body>\n  <header>\n    <h1>{title}</h1>\n    <nav><a href='index.html'>Home</a></nav>\n  </header>\n  <main>{body}</main>\n  <footer><p>Generated from Markdown on GitHub Actions.</p></footer>\n</body>\n</html>\n"""
+              destination.write_text(template.format(title=title, body=html_body), encoding='utf-8')
+
+          for md_file in site.glob('*.md'):
+              render_markdown(md_file, md_file.with_suffix('.html'))
+
+          index_html = site / 'index.html'
+          index_md_html = (site / 'index.md').with_suffix('.html')
+          home_html = site / 'Home.html'
+          if index_md_html.exists():
+              index_html.write_text(index_md_html.read_text(encoding='utf-8'), encoding='utf-8')
+          elif home_html.exists():
+              redirect = """<!DOCTYPE html>\n<html lang='en'>\n<head>\n  <meta charset='utf-8' />\n  <meta http-equiv='refresh' content='0; url=Home.html' />\n  <title>SecAI Radar Documentation</title>\n</head>\n<body>\n  <p>Redirecting to <a href='Home.html'>Home</a>…</p>\n</body>\n</html>\n"""
+              index_html.write_text(redirect, encoding='utf-8')
+          PY
           echo "_site directory created successfully"
           ls -la _site/ | head -20
           echo "CNAME file check:"
           ls -la _site/CNAME 2>/dev/null || echo "CNAME not found in _site"
-      
       - name: Ensure _site exists
         if: steps.jekyll-build.outcome != 'failure'
         run: |
@@ -108,6 +124,19 @@ jobs:
             echo "Error: _site directory does not exist after Jekyll build"
             exit 1
           fi
+      - name: Normalize static output
+        run: |
+          if [ -f "_site/index/index.html" ]; then
+            cp _site/index/index.html _site/index.html
+          elif [ -f "_site/Home/index.html" ] && [ ! -f "_site/index.html" ]; then
+            cp _site/Home/index.html _site/index.html
+          fi
+          if [ -f "_site/index.html" ]; then
+            printf "Created/confirmed root index.html"
+          else
+            echo "Warning: root index.html still missing"
+          fi
+          find _site -name "*.md" -delete || true
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
