@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 
+const demoTenantId = (import.meta.env.VITE_DEFAULT_TENANT as string) || 'NICO'
+
 export default function Landing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -15,18 +17,21 @@ export default function Landing() {
           <p className="text-lg text-gray-600 mb-8">
             Based on the SecAI Framework — Capability-driven, explainable, and actionable security assessments
           </p>
-          <div className="flex gap-4 justify-center">
+          <p className="text-base text-gray-500 mb-12">
+            Want to see it in action? Launch the interactive demo loaded with sanitized sample data and explore every screen before you commit.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
             <Link
-              to="/assessments"
+              to={`/tenant/${demoTenantId}/assessment`}
               className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
             >
-              Start New Assessment
+              Explore Interactive Demo
             </Link>
             <Link
               to="/assessments"
               className="px-8 py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
             >
-              Continue Assessment
+              Start New Assessment
             </Link>
           </div>
         </div>
@@ -161,6 +166,68 @@ export default function Landing() {
               ))}
             </div>
           </div>
+
+          {/* Demo Journey */}
+          <div className="bg-white rounded-lg shadow-lg p-8 mt-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Walk the Demo Experience</h2>
+            <p className="text-gray-700 mb-8">
+              Jump into the preloaded demo tenant to explore every step of the assessment lifecycle. Each station below links directly into the app so you can move at your own pace.
+            </p>
+            <div className="grid gap-6 md:grid-cols-2">
+              {[
+                {
+                  title: '1. Assessment Overview',
+                  description: 'See top-line readiness scores, recent updates, and tenant metadata.',
+                  to: `/tenant/${demoTenantId}/assessment`,
+                },
+                {
+                  title: '2. Dashboard',
+                  description: 'Drill into domain-level coverage, capability scores, and trendlines.',
+                  to: `/tenant/${demoTenantId}/dashboard`,
+                },
+                {
+                  title: '3. Domains & Controls',
+                  description: 'Open any domain, review control evidence, and inspect the mapped artifacts.',
+                  to: `/tenant/${demoTenantId}/domain/NET`,
+                },
+                {
+                  title: '4. Control Detail',
+                  description: 'Trace requirements, observations, gaps, and imported Azure evidence for a single control.',
+                  to: `/tenant/${demoTenantId}/control/SEC-NET-0001`,
+                },
+                {
+                  title: '5. Tool Inventory',
+                  description: 'Review how each security tool maps to capabilities with explainable scoring.',
+                  to: `/tenant/${demoTenantId}/tools`,
+                },
+                {
+                  title: '6. Gap Analysis',
+                  description: 'Prioritize remediation with grouped hard and soft gaps plus AI recommendations.',
+                  to: `/tenant/${demoTenantId}/gaps`,
+                },
+                {
+                  title: '7. Executive Report',
+                  description: 'Preview the generated summary, recommendations, and import-ready datasets.',
+                  to: `/tenant/${demoTenantId}/report`,
+                },
+              ].map(step => (
+                <Link
+                  key={step.title}
+                  to={step.to}
+                  className="group border border-gray-200 rounded-lg p-6 hover:border-blue-500 hover:shadow-lg transition-all bg-gradient-to-br from-white to-gray-50"
+                >
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600">{step.title}</h3>
+                  <p className="text-gray-700 mb-4">{step.description}</p>
+                  <span className="text-blue-600 font-semibold group-hover:translate-x-1 inline-flex items-center transition-transform">
+                    Launch &rarr;
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-8 text-gray-600 text-sm">
+              Demo content is generated from the sanitized SecAI framework dataset and refreshed regularly to mirror the latest automation pipeline.
+            </div>
+          </div>
         </div>
 
         {/* CTA Section */}
@@ -177,6 +244,9 @@ export default function Landing() {
             >
               Start Assessment →
             </Link>
+            <p className="text-sm text-blue-100 mt-4">
+              Prefer to explore first? Use the demo journey above to experience every screen with pre-populated data.
+            </p>
           </div>
         </div>
       </div>
