@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Controls Guide
-permalink: /Controls-Guide/
 ---
 
 # Controls Guide
@@ -216,4 +215,3 @@ SEC-IDM-0001,IDM,Multi-Factor Authentication,Enable MFA for all users,Is MFA ena
 ---
 
 **Related Guides**: [User Guide](/wiki/User-Guide) | [Dashboard Guide](/wiki/Dashboard-Guide)
-

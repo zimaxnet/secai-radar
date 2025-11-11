@@ -1,7 +1,6 @@
 ---
 layout: default
 title: User Guide
-permalink: /User-Guide/
 ---
 
 # SecAI Radar User Guide
@@ -314,4 +313,3 @@ Before importing controls:
 ---
 
 **Need Help?** See [FAQ](/wiki/FAQ) or [Troubleshooting](/wiki/Troubleshooting) for assistance.
-

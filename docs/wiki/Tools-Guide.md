@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Tools Guide
-permalink: /Tools-Guide/
 ---
 
 # Tools Guide
@@ -237,4 +236,3 @@ Tools contribute to control coverage based on:
 ---
 
 **Related Guides**: [Gaps Guide](/wiki/Gaps-Guide) | [User Guide](/wiki/User-Guide)
-

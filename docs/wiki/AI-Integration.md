@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Ai Integration
-permalink: /AI-Integration/
 ---
 
 # AI Integration
@@ -141,4 +140,3 @@ API key is retrieved from Key Vault secret: `azure-openai-api-key`
 - [Tool Research and Mapping](/wiki/Tool-Research-and-Mapping)
 - [Gaps Guide](/wiki/Gaps-Guide)
 - [API Reference](/wiki/API-Reference)
-

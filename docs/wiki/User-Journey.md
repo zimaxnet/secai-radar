@@ -1,7 +1,6 @@
 ---
 layout: default
 title: User Journey
-permalink: /User-Journey/
 ---
 
 # Complete User Journey
@@ -426,4 +425,3 @@ An assessment is complete when:
 ---
 
 **This journey ensures consultants and customers can successfully complete a SecAI Framework assessment from start to finish, with clear guidance, professional presentation, and complete functionality.**
-

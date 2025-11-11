@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Github Pages Setup
-permalink: /GITHUB-PAGES-SETUP/
 ---
 
 # GitHub Pages Setup Instructions

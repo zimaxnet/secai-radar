@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Troubleshooting
-permalink: /Troubleshooting/
 ---
 
 # Troubleshooting Guide
@@ -344,4 +343,3 @@ Include:
 ---
 
 **Related**: [FAQ](/wiki/FAQ) | [Installation](/wiki/Installation) | [Configuration](/wiki/Configuration)
-

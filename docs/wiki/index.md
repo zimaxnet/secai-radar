@@ -112,4 +112,3 @@ SecAI Radar is open-source. See the repository LICENSE file for details.
 ---
 
 **Last Updated**: 2025-01-27
-

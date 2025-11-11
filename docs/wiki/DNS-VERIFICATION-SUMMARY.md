@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Dns Verification Summary
-permalink: /DNS-VERIFICATION-SUMMARY/
 ---
 
 # DNS Verification Summary
@@ -180,4 +179,3 @@ host -t CNAME secai-radar.zimax.net
 **Last Verified**: $(date)
 **Verification Script**: `scripts/verify-dns.sh`
 **Configuration Script**: `scripts/configure-dns.sh`
-

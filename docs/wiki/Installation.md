@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Installation
-permalink: /Installation/
 ---
 
 # Installation Guide
@@ -257,4 +256,3 @@ For installation issues:
 ---
 
 **Related**: [Configuration](/wiki/Configuration) | [Getting Started](/wiki/Getting-Started)
-

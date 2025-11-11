@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Development Workflow
-permalink: /Development-Workflow/
 ---
 
 # Development Workflow
@@ -312,4 +311,3 @@ The dual-branch strategy provides:
 - **Context-aware tooling** that understands your workflow
 
 You can freely develop the application on `main` and update public documentation on `wiki`—all from the same repository, with seamless context switching as needed.
-

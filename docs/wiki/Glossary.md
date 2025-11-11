@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Glossary
-permalink: /Glossary/
 ---
 
 # Glossary
@@ -243,4 +242,3 @@ Design principle ensuring no hardcoded vendor names or dependencies.
 ---
 
 **Related**: [Architecture](/wiki/Architecture) | [User Guide](/wiki/User-Guide)
-

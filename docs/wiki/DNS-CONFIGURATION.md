@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Dns Configuration
-permalink: /DNS-CONFIGURATION/
 ---
 
 # DNS Configuration for SecAI Radar
@@ -141,4 +140,3 @@ Visit: `https://secai-radar.zimax.net/wiki`
 ---
 
 **Related**: [GitHub-Pages-Deployment-Instructions.md](GitHub-Pages-Deployment-Instructions.md) | [GITHUB-PAGES-SETUP.md](GITHUB-PAGES-SETUP.md)
-

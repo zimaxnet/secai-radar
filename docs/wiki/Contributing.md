@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Contributing
-permalink: /Contributing/
 ---
 
 # Contributing to SecAI Radar
@@ -277,4 +276,3 @@ By contributing, you agree that your contributions will be licensed under the sa
 ---
 
 **Related**: [Architecture](/wiki/Architecture) | [Getting Started](/wiki/Getting-Started)
-

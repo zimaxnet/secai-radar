@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Github Pages Deployment Instructions
-permalink: /GitHub-Pages-Deployment-Instructions/
 ---
 
 # GitHub Pages Deployment Instructions
@@ -143,4 +142,3 @@ If automatic deployment doesn't work:
 ---
 
 **For detailed instructions, see**: [GITHUB-PAGES-SETUP.md](GITHUB-PAGES-SETUP.md)
-

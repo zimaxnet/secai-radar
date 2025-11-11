@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Dashboard Guide
-permalink: /Dashboard-Guide/
 ---
 
 # Dashboard Guide
@@ -183,4 +182,3 @@ Multi-series radar chart showing:
 ---
 
 **Related Guides**: [Controls Guide](/wiki/Controls-Guide) | [Gaps Guide](/wiki/Gaps-Guide)
-

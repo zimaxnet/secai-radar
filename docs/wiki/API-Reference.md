@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Api Reference
-permalink: /API-Reference/
 ---
 
 # API Reference
@@ -394,4 +393,3 @@ For API support:
 ---
 
 **Related**: [Architecture](/wiki/Architecture) | [Installation](/wiki/Installation)
-

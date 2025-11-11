@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Getting Started
-permalink: /Getting-Started/
 ---
 
 # Getting Started with SecAI Radar
@@ -137,4 +136,3 @@ Navigate to **Gaps** page to:
 ---
 
 **Need Help?** Check the [FAQ](/wiki/FAQ) or [Troubleshooting](/wiki/Troubleshooting) guides.
-

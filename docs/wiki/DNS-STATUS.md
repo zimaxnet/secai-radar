@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Dns Status
-permalink: /DNS-STATUS/
 ---
 
 # DNS Status Report
@@ -106,4 +105,3 @@ az network dns record-set cname show \
 
 **Last Verified**: $(date)
 **Status**: DNS configuration required
-

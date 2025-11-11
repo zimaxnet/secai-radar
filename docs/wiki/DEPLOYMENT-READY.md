@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Deployment Ready
-permalink: /DEPLOYMENT-READY/
 ---
 
 # ✅ GitHub Pages Deployment - Ready to Deploy
@@ -168,4 +167,3 @@ After deployment, the wiki will be available at:
 **Status**: ✅ Ready to deploy
 
 **Last Updated**: 2025-01-15
-

@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Faq
-permalink: /FAQ/
 ---
 
 # Frequently Asked Questions (FAQ)
@@ -282,4 +281,3 @@ Report bugs on the GitHub Issues page. Include:
 ---
 
 **Still have questions?** Check the [Troubleshooting](/wiki/Troubleshooting) guide or open an issue on GitHub.
-

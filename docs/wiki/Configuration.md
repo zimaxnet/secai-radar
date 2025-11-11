@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Configuration
-permalink: /Configuration/
 ---
 
 # Configuration Guide
@@ -310,4 +309,3 @@ See example configurations in:
 ---
 
 **Related**: [Installation](/wiki/Installation) | [Model Integration](../model-integration.md)
-

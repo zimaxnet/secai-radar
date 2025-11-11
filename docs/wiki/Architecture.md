@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Architecture
-permalink: /Architecture/
 ---
 
 # Architecture Overview
@@ -355,4 +354,3 @@ User Action → UI → API → Data Layer
 ---
 
 **Related**: [Installation](/wiki/Installation) | [Configuration](/wiki/Configuration)
-

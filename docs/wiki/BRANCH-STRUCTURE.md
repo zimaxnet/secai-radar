@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Branch Structure
-permalink: /BRANCH-STRUCTURE/
 ---
 
 # Branch Structure
@@ -170,4 +169,3 @@ gh-pages branch
 ---
 
 **Related**: [DNS-CONFIGURATION.md](DNS-CONFIGURATION.md) | [GITHUB-PAGES-SETUP.md](GITHUB-PAGES-SETUP.md)
-

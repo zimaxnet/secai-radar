@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Azure Dns Verification
-permalink: /AZURE-DNS-VERIFICATION/
 ---
 
 # Azure DNS Verification and Configuration
@@ -248,4 +247,3 @@ az network dns record-set cname delete \
 ---
 
 **Related**: [DNS-CONFIGURATION.md](DNS-CONFIGURATION.md) | [GitHub-Pages-Deployment-Instructions.md](GitHub-Pages-Deployment-Instructions.md)
-

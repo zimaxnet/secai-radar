@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Deployment Summary
-permalink: /DEPLOYMENT-SUMMARY/
 ---
 
 # GitHub Pages Deployment Summary
@@ -205,4 +204,3 @@ Both use the same domain (`secai-radar.zimax.net`) with the wiki at the `/wiki` 
 **Status**: ✅ Ready to deploy
 
 **Last Updated**: 2025-01-15
-

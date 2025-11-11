@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Gaps Guide
-permalink: /Gaps-Guide/
 ---
 
 # Gaps Guide
@@ -263,4 +262,3 @@ Best tool for each capability is selected:
 ---
 
 **Related Guides**: [Tools Guide](/wiki/Tools-Guide) | [User Guide](/wiki/User-Guide)
-

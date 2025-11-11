@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Readme
-permalink: /README/
 ---
 
 # SecAI Radar Wiki Documentation
@@ -210,4 +209,3 @@ See [Contributing](Contributing.md) for guidelines on contributing to the wiki.
 ---
 
 **Last Updated**: 2025-01-15
-
