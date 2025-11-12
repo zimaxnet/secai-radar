@@ -32,10 +32,23 @@ SecAI Radar integrates Azure OpenAI to provide AI-powered features for security 
 - FAQ quick actions and guided tour shortcuts
 - Backend endpoint: `POST /api/tenant/{tenantId}/ai/help`
 
+### 🛰️ Realtime Voice Proxy
+- Allows the web UI to stream microphone audio to Azure OpenAI Realtime (`gpt-realtime`).
+- Azure Function: `POST /api/realtime/session`
+  - Body: `{ "sdpOffer": "..." }`
+  - Returns: SDP answer text used to complete the WebRTC handshake.
+- Required environment variables:
+  - `AZURE_OPENAI_REALTIME_ENDPOINT`
+  - `AZURE_OPENAI_REALTIME_KEY`
+  - `AZURE_OPENAI_REALTIME_DEPLOYMENT` (defaults to `gpt-realtime`)
+  - Optional: `AZURE_OPENAI_REALTIME_API_VERSION` (defaults `2024-10-01-preview`)
+  - Optional: `REALTIME_PROXY_ALLOWED_ORIGIN` for CORS tightening
+
 ### 🗣️ Voice Interaction
-- Browser speech-to-text for capturing questions hands-free
-- Spoken playback of AI answers via Speech Synthesis
-- Requires browsers that expose the Web Speech API
+- Uses WebRTC to connect the browser to Azure OpenAI `gpt-realtime`.
+- Voice mode is opt-in via the help assistant microphone toggle; typed chat continues to use `gpt-5-chat`.
+- Browser prerequisites: WebRTC support (Chromium, Safari 17+) and microphone permission.
+- Audio responses stream directly from Azure Realtime; text responses remain available in the transcript for accessibility.
 
 ### 📈 AI Usage Telemetry
 - Token consumption surfaced directly in the Gaps view when AI mode is enabled
@@ -115,6 +128,17 @@ POST /api/tenant/{tenantId}/ai/help
 ```
 
 Returns an Azure OpenAI answer tailored to the active screen.
+
+### Realtime Session Handshake
+
+```bash
+POST /api/realtime/session
+{
+  "sdpOffer": "v=0..."
+}
+```
+
+Returns the SDP answer used to establish a WebRTC session with Azure OpenAI `gpt-realtime`.
 
 ### AI Usage Summary
 

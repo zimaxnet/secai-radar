@@ -50,8 +50,8 @@ function Shell() {
             </Routes>
           </Suspense>
         </main>
+        <HelpAssistant />
       </div>
-      <HelpAssistant />
     </div>
   )
 }

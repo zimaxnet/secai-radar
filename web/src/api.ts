@@ -45,6 +45,20 @@ export const getAIHelp = (tenant=TENANT, question: string, context: Record<strin
     body: JSON.stringify({ question, context })
   }).then(r => r.json());
 
+export const createRealtimeSession = async (sdpOffer: string, options?: { deployment?: string }) => {
+  const response = await fetch(`${API}/realtime/session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sdpOffer, deployment: options?.deployment })
+  });
+
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(text || response.statusText);
+  }
+  return text;
+};
+
 export const getControl = (tenant=TENANT, controlId: string) => 
   fetch(`${API}/tenant/${tenant}/controls?q=${controlId}`).then(r=>r.json()).then(d => d.items?.[0]);
 

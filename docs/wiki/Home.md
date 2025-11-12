@@ -81,9 +81,9 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 - FAQ shortcuts and AI usage telemetry
 
 ### 🗣️ Voice Interaction
-- Browser speech-to-text for hands-free questioning
-- Text-to-speech playback of AI responses
-- Works in Chromium-based browsers and Safari with Web Speech API support
+- Opt-in microphone mode streams audio to Azure OpenAI `gpt-realtime`
+- Spoken replies play back instantly while typed chat still uses `gpt-5-chat`
+- Supported in modern Chromium browsers and Safari 17+ with WebRTC enabled
 
 ### 🤖 AI-Powered Analysis
 - AI-assisted security posture analysis

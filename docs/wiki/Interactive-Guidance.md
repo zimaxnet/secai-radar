@@ -46,20 +46,47 @@ This page describes the in-app onboarding tour, contextual help assistant, and v
 
 ## Voice Interaction
 
-### Voice Input
-- Utilises the browser **Web Speech API** (`SpeechRecognition` / `webkitSpeechRecognition`)
-- Supported in Chromium-based browsers and Safari (when SpeechRecognition is enabled)
-- Microphone button toggles recognition; transcript is appended to the chat prompt
-- Gracefully degrades when the API is unavailable (button hidden)
+### Architecture
+- When the microphone toggle is enabled, the browser opens a **WebRTC** session to an Azure Function proxy.
+- The proxy forwards the Session Description (SDP) to the **Azure OpenAI `gpt-realtime`** deployment.
+- Audio streams directly to the model; responses stream back as synthesized speech.
+- Typed questions still route through `gpt-5-chat` via the existing `/ai/help` endpoint.
 
-### Voice Output
-- Uses browser **Speech Synthesis API** (`speechSynthesis`)
-- Speaks Azure OpenAI answers automatically after each response
-- Cancels previous utterances when a new answer arrives
+### Endpoints & Configuration
+- **Proxy endpoint**: `POST /api/realtime/session`
+  - Body: `{ "sdpOffer": string, "deployment": "gpt-realtime" }`
+  - Headers: `Content-Type: application/json`
+  - Returns: SDP answer (`text/plain`)
+- Environment variables required in the Function App:
+  - `AZURE_OPENAI_REALTIME_ENDPOINT` (e.g., `https://<resource>.cognitiveservices.azure.com/openai/realtime`)
+  - `AZURE_OPENAI_REALTIME_KEY`
+  - `AZURE_OPENAI_REALTIME_DEPLOYMENT` (defaults to `gpt-realtime`)
+  - Optional: `REALTIME_PROXY_ALLOWED_ORIGIN` for stricter CORS
 
-### Accessibility
-- Users can disable autoplay speech via browser settings
-- Transcript remains visible in the assistant for reference
+### Browser Support
+- Works on Chromium-based browsers (Edge, Chrome) and Safari 17+ where WebRTC + microphone access is available.
+- If WebRTC is unavailable or permission is denied, the microphone button is disabled and users can fall back to typed questions.
+- Audio playback uses an `<audio>` element injected by the assistant; no plugins required.
+
+### Using Voice Mode
+1. Open the help assistant (`?` button) and click the microphone.
+2. Grant microphone access when prompted.
+3. Speak naturally; responses stream back using the model's synthesized voice.
+4. Click the microphone again to end the session. The assistant reverts to text-only mode automatically when the panel closes.
+
+### Costs & Monitoring
+- Azure bills Realtime usage per audio minute—track consumption via the Azure OpenAI metrics blade.
+- The proxy logs session metadata (tenant, route, timestamps) for auditing; raw audio is not persisted.
+- Consider setting alerts on the `gpt-realtime` deployment if you expect heavy voice usage.
+
+### Accessibility Notes
+- Text responses remain available in the transcript; users can still rely on browser speech synthesis for typed answers.
+- Voice mode requires user consent for microphone access—document this in onboarding material for end users.
+
+### Troubleshooting
+- **Voice button disabled**: Browser lacks WebRTC support or microphone permission was denied.
+- **No audio playback**: Ensure autoplay isn’t blocked and the site is allowed to play sound.
+- **Connection drops**: Check network firewalls—WebRTC requires outbound UDP/TCP.
 
 ---
 

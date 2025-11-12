@@ -1,6 +1,6 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import { getAIHelp } from '../api'
+import { createRealtimeSession, getAIHelp } from '../api'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -54,9 +54,14 @@ export default function HelpAssistant() {
   const [isLoading, setIsLoading] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
-  const [isRecording, setIsRecording] = useState(false)
-  const [voiceSupported, setVoiceSupported] = useState(false)
-  const recognitionRef = useRef<any>(null)
+  const [voiceState, setVoiceState] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle')
+  const [voiceError, setVoiceError] = useState<string | null>(null)
+  const [realtimeSupported, setRealtimeSupported] = useState(false)
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null)
+  const mediaStreamRef = useRef<MediaStream | null>(null)
+  const remoteAudioRef = useRef<HTMLAudioElement | null>(null)
+  const dataChannelRef = useRef<RTCDataChannel | null>(null)
+  const realtimeDeployment = (import.meta.env.VITE_REALTIME_DEPLOYMENT as string | undefined) || undefined
   const tenantId = params.id || (import.meta.env.VITE_DEFAULT_TENANT as string) || 'NICO'
 
   const context = useMemo(() => derivePageContext(location.pathname), [location.pathname])
@@ -76,66 +81,179 @@ export default function HelpAssistant() {
     })
   }, [context.page, isOpen])
 
-  // Setup voice capabilities (browser Web Speech API)
-  useEffect(() => {
-    const SpeechRecognitionConstructor =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (SpeechRecognitionConstructor) {
-      setVoiceSupported(true)
-      const recognition = new SpeechRecognitionConstructor()
-      recognition.lang = 'en-US'
-      recognition.interimResults = false
-      recognition.maxAlternatives = 1
-
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = event.results[0][0].transcript
-        setInput(prev => `${prev}${prev ? ' ' : ''}${transcript}`)
-        setIsRecording(false)
-      }
-
-      recognition.onerror = () => {
-        setIsRecording(false)
-      }
-
-      recognition.onend = () => {
-        setIsRecording(false)
-      }
-
-      recognitionRef.current = recognition
+  const detectRealtimeSupport = useCallback(() => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return false
     }
-
-    return () => {
-      if (recognitionRef.current?.stop) {
-        recognitionRef.current.stop()
-      }
-      recognitionRef.current = null
-    }
+    const hasPeer = 'RTCPeerConnection' in window || 'webkitRTCPeerConnection' in window
+    const hasMedia = !!navigator.mediaDevices?.getUserMedia
+    return hasPeer && hasMedia
   }, [])
 
-  const speakText = (text: string) => {
-    if (!('speechSynthesis' in window)) {
-      return
-    }
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = 'en-US'
-    utterance.rate = 1
-    window.speechSynthesis.cancel()
-    window.speechSynthesis.speak(utterance)
-  }
+  useEffect(() => {
+    setRealtimeSupported(detectRealtimeSupport())
+  }, [detectRealtimeSupport])
 
-  const handleVoiceToggle = () => {
-    if (!recognitionRef.current) return
-    if (isRecording) {
-      recognitionRef.current.stop()
-      setIsRecording(false)
-    } else {
+  const stopVoiceSession = useCallback((options: { preserveError?: boolean } = {}) => {
+    dataChannelRef.current?.close()
+    dataChannelRef.current = null
+
+    peerConnectionRef.current?.close()
+    peerConnectionRef.current = null
+
+    mediaStreamRef.current?.getTracks().forEach(track => track.stop())
+    mediaStreamRef.current = null
+
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = null
+    }
+
+    if (!options.preserveError) {
+      setVoiceError(null)
+    }
+    setVoiceState('idle')
+  }, [])
+
+  useEffect(() => () => stopVoiceSession(), [stopVoiceSession])
+
+  const sendRealtimeInstructions = useCallback(() => {
+    if (dataChannelRef.current?.readyState === 'open') {
+      const instructions = `You are the SecAI Radar help assistant. The user is currently on the ${context.page} page. ${context.description}`
       try {
-        recognitionRef.current.start()
-        setIsRecording(true)
-      } catch (error) {
-        setIsRecording(false)
+        dataChannelRef.current.send(JSON.stringify({
+          type: 'response.create',
+          response: {
+            instructions,
+            modalities: ['audio'],
+          },
+        }))
+      } catch (err) {
+        console.warn('Failed to send realtime instructions', err)
       }
     }
+  }, [context.description, context.page])
+
+  useEffect(() => {
+    if (voiceState === 'connected') {
+      sendRealtimeInstructions()
+    }
+  }, [voiceState, sendRealtimeInstructions])
+
+  useEffect(() => {
+    if (!isOpen && voiceState !== 'idle') {
+      stopVoiceSession()
+    }
+  }, [isOpen, voiceState, stopVoiceSession])
+
+  const waitForIceGathering = useCallback((pc: RTCPeerConnection) => {
+    if (pc.iceGatheringState === 'complete') {
+      return Promise.resolve(pc.localDescription?.sdp ?? '')
+    }
+
+    return new Promise<string>((resolve) => {
+      const checkState = () => {
+        if (pc.iceGatheringState === 'complete') {
+          pc.removeEventListener('icegatheringstatechange', checkState)
+          resolve(pc.localDescription?.sdp ?? '')
+        }
+      }
+
+      pc.addEventListener('icegatheringstatechange', checkState)
+      setTimeout(() => {
+        pc.removeEventListener('icegatheringstatechange', checkState)
+        resolve(pc.localDescription?.sdp ?? '')
+      }, 2000)
+    })
+  }, [])
+
+  const startVoiceSession = useCallback(async () => {
+    if (!realtimeSupported) {
+      setVoiceError('Voice interaction is not available in this browser.')
+      return
+    }
+
+    if (voiceState === 'connecting' || voiceState === 'connected') {
+      return
+    }
+
+    setVoiceError(null)
+    setVoiceState('connecting')
+
+    try {
+      const PeerConnectionCtor = (window as any).RTCPeerConnection || (window as any).webkitRTCPeerConnection
+      const pc: RTCPeerConnection = PeerConnectionCtor ? new PeerConnectionCtor() : new RTCPeerConnection()
+      peerConnectionRef.current = pc
+
+      pc.ontrack = (event) => {
+        if (remoteAudioRef.current) {
+          remoteAudioRef.current.srcObject = event.streams[0]
+        }
+      }
+
+      pc.onconnectionstatechange = () => {
+        if (pc.connectionState === 'connected') {
+          setVoiceState('connected')
+        }
+        if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+          setVoiceError('Voice connection lost.')
+          stopVoiceSession({ preserveError: true })
+          setVoiceState('error')
+        }
+      }
+
+      pc.ondatachannel = (event) => {
+        const channel = event.channel
+        channel.onmessage = (messageEvent) => {
+          // Future enhancement: surface realtime transcripts or metadata in the UI.
+          console.debug('Realtime event:', messageEvent.data)
+        }
+      }
+
+      const controlChannel = pc.createDataChannel('oai-events')
+      dataChannelRef.current = controlChannel
+      controlChannel.onopen = () => {
+        sendRealtimeInstructions()
+      }
+      controlChannel.onmessage = (event) => {
+        console.debug('Realtime message:', event.data)
+      }
+
+      const localStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      mediaStreamRef.current = localStream
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream))
+
+      const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: false })
+      await pc.setLocalDescription(offer)
+
+      const localSdp = await waitForIceGathering(pc)
+      if (!localSdp) {
+        throw new Error('Unable to gather local SDP information.')
+      }
+
+      const answerSdp = await createRealtimeSession(localSdp, { deployment: realtimeDeployment })
+      const answer: RTCSessionDescriptionInit = { type: 'answer', sdp: answerSdp }
+      await pc.setRemoteDescription(answer)
+
+      setMessages(prev => ([
+        ...prev,
+        { role: 'assistant', content: '🎤 Voice assistant is ready. Start speaking when you are ready and click the mic to stop.' }
+      ]))
+      setVoiceState('connected')
+    } catch (error: any) {
+      console.error('Failed to start voice session', error)
+      setVoiceError(error?.message || 'Failed to start voice session.')
+      stopVoiceSession({ preserveError: true })
+      setVoiceState('error')
+    }
+  }, [realtimeDeployment, realtimeSupported, sendRealtimeInstructions, stopVoiceSession, voiceState, waitForIceGathering])
+
+  const handleVoiceToggle = async () => {
+    if (voiceState === 'connected' || voiceState === 'connecting') {
+      stopVoiceSession()
+      return
+    }
+
+    await startVoiceSession()
   }
 
   const handleSubmit = async (event: FormEvent) => {
@@ -159,7 +277,7 @@ export default function HelpAssistant() {
         ...prev,
         { role: 'assistant', content: answer }
       ])
-      speakText(answer)
+      // speakText(answer) // This function is no longer used for voice
     } catch (error: any) {
       setMessages(prev => [
         ...prev,
@@ -261,18 +379,20 @@ export default function HelpAssistant() {
               <div className="mt-2 flex justify-between items-center">
                 <div className="flex items-center gap-2 text-xs text-gray-400">
                   <span>AI answers use Azure OpenAI</span>
-                  {voiceSupported && (
+                  {realtimeSupported && (
                     <button
                       type="button"
                       onClick={handleVoiceToggle}
                       className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${
-                        isRecording
+                        voiceState === 'connected'
                           ? 'border-red-500 text-red-600 bg-red-50'
-                          : 'border-gray-300 text-gray-500 hover:bg-gray-100'
+                          : voiceState === 'connecting'
+                            ? 'border-blue-400 text-blue-600 bg-blue-50 animate-pulse'
+                            : 'border-gray-300 text-gray-500 hover:bg-gray-100'
                       }`}
-                      aria-label="Toggle voice input"
+                      aria-label={voiceState === 'connected' ? 'Stop voice assistant' : 'Start voice assistant'}
                     >
-                      🎤
+                      {voiceState === 'connected' ? '■' : '🎤'}
                     </button>
                   )}
                 </div>
@@ -285,9 +405,24 @@ export default function HelpAssistant() {
                 </button>
               </div>
             </form>
+
+            {voiceState !== 'idle' && (
+              <div className="px-4 pb-3 text-xs text-gray-500">
+                {voiceState === 'connecting' && 'Connecting to voice assistant…'}
+                {voiceState === 'connected' && 'Voice assistant active. Your microphone is live.'}
+                {voiceState === 'error' && voiceError}
+              </div>
+            )}
+
+            {!realtimeSupported && (
+              <div className="px-4 pb-3 text-xs text-gray-500">
+                Voice mode requires a WebRTC-enabled browser with microphone access.
+              </div>
+            )}
           </div>
         )}
       </div>
+      <audio ref={remoteAudioRef} className="hidden" autoPlay />
     </div>
   )
 }
