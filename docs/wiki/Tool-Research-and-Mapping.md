@@ -1,8 +1,3 @@
----
-layout: default
-title: Tool Research And Mapping
----
-
 # Tool Research and Dynamic Control Mapping
 
 ## Overview
@@ -190,3 +185,4 @@ The researched tools can be:
 - [AI Integration](/wiki/AI-Integration)
 - [Tools Guide](/wiki/Tools-Guide)
 - [API Reference](/wiki/API-Reference)
+

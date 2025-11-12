@@ -1,8 +1,3 @@
----
-layout: default
-title: Home
----
-
 # SecAI Radar - Documentation Wiki
 
 Welcome to the SecAI Radar documentation wiki. This wiki provides comprehensive guidance for users, administrators, and developers working with SecAI Radar.
@@ -23,31 +18,28 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 ## Quick Links
 
 ### For Users
-- **[Getting Started](Getting-Started)** - Quick start guide
-- **[User Guide](User-Guide)** - Complete user documentation
-- **[User Journey](User-Journey)** - Complete assessment journey from start to finish
-- **[Dashboard Guide](Dashboard-Guide)** - Understanding the dashboard
-- **[Controls Guide](Controls-Guide)** - Managing security controls
-- **[Tools Guide](Tools-Guide)** - Configuring security tools
-- **[Gaps Guide](Gaps-Guide)** - Understanding security gaps
+- **[Getting Started](/wiki/Getting-Started)** - Quick start guide
+- **[User Guide](/wiki/User-Guide)** - Complete user documentation
+- **[Dashboard Guide](/wiki/Dashboard-Guide)** - Understanding the dashboard
+- **[Controls Guide](/wiki/Controls-Guide)** - Managing security controls
+- **[Tools Guide](/wiki/Tools-Guide)** - Configuring security tools
+- **[Gaps Guide](/wiki/Gaps-Guide)** - Understanding security gaps
+- **[Interactive Guidance](/wiki/Interactive-Guidance)** - Tours, help assistant, and voice support
 
 ### For Administrators
-- **[Installation](Installation)** - Installation and deployment
-- **[Configuration](Configuration)** - System configuration
-- **[Key Vault Setup](Key-Vault-Setup)** - Secure secret management
-- **[API Reference](API-Reference)** - API documentation
+- **[Installation](/wiki/Installation)** - Installation and deployment
+- **[Configuration](/wiki/Configuration)** - System configuration
+- **[API Reference](/wiki/API-Reference)** - API documentation
 
 ### For Developers
-- **[Architecture](Architecture)** - System architecture overview
-- **[AI Integration](AI-Integration)** - AI-powered features and configuration
-- **[Tool Research and Mapping](Tool-Research-and-Mapping)** - Dynamic tool research and control mapping
-- **[Contributing](Contributing)** - Contributing to SecAI Radar
-- **[Development Workflow](Development-Workflow)** - Working with main and gh-pages branches
+- **[Architecture](/wiki/Architecture)** - System architecture overview
+- **[Contributing](/wiki/Contributing)** - Contributing to SecAI Radar
+- **[Development Workflow](/wiki/Development-Workflow)** - Working with main and wiki branches
 
 ### Help & Support
-- **[FAQ](FAQ)** - Frequently asked questions
-- **[Troubleshooting](Troubleshooting)** - Common issues and solutions
-- **[Glossary](Glossary)** - Terms and definitions
+- **[FAQ](/wiki/FAQ)** - Frequently asked questions
+- **[Troubleshooting](/wiki/Troubleshooting)** - Common issues and solutions
+- **[Glossary](/wiki/Glossary)** - Terms and definitions
 
 ---
 
@@ -78,12 +70,25 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 - Soft gap analysis (configuration issues)
 - Remediation recommendations
 
+### 🧭 Guided Onboarding
+- First-run tour powered by React Joyride
+- Scripted demo mode that walks the landing ➜ assessment ➜ dashboard ➜ gaps ➜ report journey
+- “Restart tour” and “Run guided demo” shortcuts in the help assistant
+
+### 💬 Conversational Assistant
+- Floating in-app help widget with Azure OpenAI answers
+- Context-aware guidance based on the screen you are viewing
+- FAQ shortcuts and AI usage telemetry
+
+### 🗣️ Voice Interaction
+- Opt-in microphone mode streams audio to Azure OpenAI `gpt-realtime`
+- Spoken replies play back instantly while typed chat still uses `gpt-5-chat`
+- Supported in modern Chromium browsers and Safari 17+ with WebRTC enabled
+
 ### 🤖 AI-Powered Analysis
 - AI-assisted security posture analysis
 - Evidence classification
 - Automated report generation
-- Tool research and capability mapping
-- Dynamic control-to-capability mapping across 340 controls
 
 ---
 
@@ -97,7 +102,7 @@ SecAI Radar follows a **5-layer architecture**:
 4. **Orchestration Layer** - Multi-step AI workflows
 5. **Application Layer** - Web UI for browsing runs and reports
 
-See **[Architecture](Architecture)** for detailed information.
+See **[Architecture](/wiki/Architecture)** for detailed information.
 
 ---
 
@@ -105,7 +110,7 @@ See **[Architecture](Architecture)** for detailed information.
 
 - **Documentation**: Browse this wiki for detailed guides
 - **Issues**: Report bugs or request features on GitHub
-- **Questions**: Check the [FAQ](FAQ) for common questions
+- **Questions**: Check the [FAQ](/wiki/FAQ) for common questions
 
 ---
 
@@ -115,4 +120,5 @@ SecAI Radar is open-source. See the repository LICENSE file for details.
 
 ---
 
-**Last Updated**: 2025-01-27
+**Last Updated**: 2025-11-12
+

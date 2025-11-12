@@ -1,8 +1,3 @@
----
-layout: default
-title: Ai Integration
----
-
 # AI Integration
 
 ## Overview
@@ -30,6 +25,35 @@ SecAI Radar integrates Azure OpenAI to provide AI-powered features for security 
 - AI-generated executive summaries
 - Automated report content generation
 - Customizable report formats
+
+### 💬 Help Assistant
+- Floating in-app widget with Azure OpenAI responses
+- Context-aware prompts built from current route metadata
+- FAQ quick actions and guided tour shortcuts
+- Backend endpoint: `POST /api/tenant/{tenantId}/ai/help`
+
+### 🛰️ Realtime Voice Proxy
+- Allows the web UI to stream microphone audio to Azure OpenAI Realtime (`gpt-realtime`).
+- Azure Function: `POST /api/realtime/session`
+  - Body: `{ "sdpOffer": "..." }`
+  - Returns: SDP answer text used to complete the WebRTC handshake.
+- Required environment variables:
+  - `AZURE_OPENAI_REALTIME_ENDPOINT`
+  - `AZURE_OPENAI_REALTIME_KEY`
+  - `AZURE_OPENAI_REALTIME_DEPLOYMENT` (defaults to `gpt-realtime`)
+  - Optional: `AZURE_OPENAI_REALTIME_API_VERSION` (defaults `2024-10-01-preview`)
+  - Optional: `REALTIME_PROXY_ALLOWED_ORIGIN` for CORS tightening
+
+### 🗣️ Voice Interaction
+- Uses WebRTC to connect the browser to Azure OpenAI `gpt-realtime`.
+- Voice mode is opt-in via the help assistant microphone toggle; typed chat continues to use `gpt-5-chat`.
+- Browser prerequisites: WebRTC support (Chromium, Safari 17+) and microphone permission.
+- Audio responses stream directly from Azure Realtime; text responses remain available in the transcript for accessibility.
+
+### 📈 AI Usage Telemetry
+- Token consumption surfaced directly in the Gaps view when AI mode is enabled
+- Data captured in Azure Table Storage (`AiUsage` table)
+- REST endpoint: `GET /api/tenant/{tenantId}/ai/usage`
 
 ## Configuration
 
@@ -90,6 +114,40 @@ POST /api/tool-research
 
 Researches multiple tools and maps them to all 340 controls.
 
+### Contextual Help
+
+```bash
+POST /api/tenant/{tenantId}/ai/help
+{
+  "question": "How do I interpret hard gaps?",
+  "context": {
+    "page": "Gaps",
+    "pathname": "/tenant/NICO/gaps"
+  }
+}
+```
+
+Returns an Azure OpenAI answer tailored to the active screen.
+
+### Realtime Session Handshake
+
+```bash
+POST /api/realtime/session
+{
+  "sdpOffer": "v=0..."
+}
+```
+
+Returns the SDP answer used to establish a WebRTC session with Azure OpenAI `gpt-realtime`.
+
+### AI Usage Summary
+
+```bash
+GET /api/tenant/{tenantId}/ai/usage
+```
+
+Returns token totals, run counts, and per-model breakdown for transparency and cost control.
+
 ## AI Service Configuration
 
 The AI service uses these environment variables:
@@ -134,9 +192,15 @@ API key is retrieved from Key Vault secret: `azure-openai-api-key`
 - Check API key has proper permissions
 - Review AI service logs for errors
 
+### Help assistant shows "AI service not available"
+- Confirm `azure-openai-api-key` exists in Key Vault
+- Ensure the Function App identity has `Key Vault Secrets User`
+- Verify `/api/tenant/{tenantId}/ai/help` returns a 200 when called from Postman or curl
+
 ## Related Documentation
 
 - [Key Vault Setup](/wiki/Key-Vault-Setup)
 - [Tool Research and Mapping](/wiki/Tool-Research-and-Mapping)
 - [Gaps Guide](/wiki/Gaps-Guide)
 - [API Reference](/wiki/API-Reference)
+

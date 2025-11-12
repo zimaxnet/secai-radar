@@ -1,8 +1,3 @@
----
-layout: default
-title: Key Vault Setup
----
-
 # Azure Key Vault Setup
 
 ## Overview
@@ -153,3 +148,4 @@ if kv:
 
 - [Tool Research and Mapping](/wiki/Tool-Research-and-Mapping)
 - [AI Integration](/wiki/AI-Integration)
+
