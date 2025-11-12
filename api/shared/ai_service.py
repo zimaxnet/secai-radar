@@ -201,8 +201,9 @@ Explain why this gap matters and what should be done to address it."""
         self,
         tenant_id: str,
         summary_data: Dict,
-        gaps_summary: List[Dict]
-    ) -> str:
+        gaps_summary: List[Dict],
+        include_usage: bool = False
+    ) -> str | tuple[str, Optional[Dict]]:
         """
         Generate executive summary for an assessment report
         
@@ -252,14 +253,18 @@ Write a 3-4 paragraph executive summary covering:
             temperature=0.8,
             max_tokens=2048
         )
-        
-        return response.choices[0].message.content
+        text = response.choices[0].message.content
+        if include_usage:
+            usage = getattr(response, "usage", None)
+            return text, usage
+        return text
     
     def classify_evidence(
         self,
         evidence_description: str,
-        file_name: Optional[str] = None
-    ) -> Dict[str, str]:
+        file_name: Optional[str] = None,
+        include_usage: bool = False
+    ) -> Dict[str, str] | tuple[Dict[str, str], Optional[Dict]]:
         """
         Classify evidence type and extract metadata
         
@@ -317,14 +322,18 @@ Respond with JSON:
                 content = content.split("```json")[1].split("```")[0].strip()
             elif "```" in content:
                 content = content.split("```")[1].split("```")[0].strip()
-            return json.loads(content)
+            parsed = json.loads(content)
         except:
-            return {
+            parsed = {
                 "category": "other",
                 "sensitivity_level": "internal",
                 "content_type": "unknown",
                 "confidence": 0.0
             }
+        if include_usage:
+            usage = getattr(response, "usage", None)
+            return parsed, usage
+        return parsed
     
     def close(self):
         """Close the client connection"""

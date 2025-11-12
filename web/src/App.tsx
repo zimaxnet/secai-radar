@@ -1,5 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Link, useParams, Navigate } from 'react-router-dom'
+import OnboardingTour from './components/OnboardingTour'
+import HelpAssistant from './components/HelpAssistant'
 
 // Lazy load route components for code splitting
 const Landing = lazy(() => import('./routes/Landing'))
@@ -49,6 +51,7 @@ function Shell() {
           </Suspense>
         </main>
       </div>
+      <HelpAssistant />
     </div>
   )
 }
@@ -56,6 +59,7 @@ function Shell() {
 function App() {
   return (
     <BrowserRouter>
+      <OnboardingTour />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/assessments" element={<Assessments />} />

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { getGaps, getAIRecommendation } from '../api'
+import { useCallback, useEffect, useState } from 'react'
+import { getGaps, getAIRecommendation, getAIUsageSummary } from '../api'
 
 interface Props { tenantId: string }
 
@@ -8,6 +8,33 @@ export default function Gaps({ tenantId }: Props) {
   const [loading, setLoading] = useState(false)
   const [aiEnabled, setAiEnabled] = useState(false)
   const [aiRecommendations, setAiRecommendations] = useState<Record<string, { loading: boolean; text?: string; error?: string }>>({})
+  const [usageLoading, setUsageLoading] = useState(false)
+  const [usageSummary, setUsageSummary] = useState<any>(null)
+  const [usageError, setUsageError] = useState<string | null>(null)
+
+  const refreshUsage = useCallback(async () => {
+    if (!aiEnabled) {
+      setUsageSummary(null)
+      setUsageError(null)
+      return
+    }
+    setUsageLoading(true)
+    setUsageError(null)
+    try {
+      const summary = await getAIUsageSummary(tenantId)
+      if (summary?.error) {
+        setUsageError(summary.error)
+        setUsageSummary(null)
+      } else {
+        setUsageSummary(summary)
+      }
+    } catch (err: any) {
+      setUsageError(err?.message || 'Failed to load AI usage metrics')
+      setUsageSummary(null)
+    } finally {
+      setUsageLoading(false)
+    }
+  }, [aiEnabled, tenantId])
 
   useEffect(() => {
     let mounted = true
@@ -29,6 +56,10 @@ export default function Gaps({ tenantId }: Props) {
     return () => { mounted = false }
   }, [tenantId, aiEnabled])
 
+  useEffect(() => {
+    refreshUsage()
+  }, [refreshUsage])
+
   const loadAIRecommendation = async (controlId: string) => {
     if (aiRecommendations[controlId]) return // Already loaded
     
@@ -39,6 +70,7 @@ export default function Gaps({ tenantId }: Props) {
         ...prev,
         [controlId]: { loading: false, text: result.recommendation }
       }))
+      refreshUsage()
     } catch (error: any) {
       setAiRecommendations(prev => ({
         ...prev,
@@ -51,7 +83,7 @@ export default function Gaps({ tenantId }: Props) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Gaps</h2>
-        <label className="flex items-center gap-2 cursor-pointer">
+        <label className="flex items-center gap-2 cursor-pointer" data-tour="ai-toggle">
           <input
             type="checkbox"
             checked={aiEnabled}
@@ -61,9 +93,52 @@ export default function Gaps({ tenantId }: Props) {
           <span className="text-sm text-gray-700">Enable AI Recommendations</span>
         </label>
       </div>
-      <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 p-2 rounded">
+      <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 p-2 rounded" data-tour="gap-explanation">
         Tip: prioritize tuning existing tools (raise ConfigScore) before recommending net-new.
       </p>
+      {aiEnabled && (
+        <div className="rounded border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900" data-tour="ai-usage">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold">AI Usage</span>
+            {usageLoading && <span className="text-xs text-blue-700">Refreshing…</span>}
+          </div>
+          {usageError && (
+            <div className="mt-1 text-xs text-red-600">{usageError}</div>
+          )}
+          {!usageError && usageSummary && (
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div>
+                <div className="text-xs uppercase tracking-wide text-blue-700">Tokens Used</div>
+                <div className="text-lg font-semibold">{usageSummary.totalTokens ?? 0}</div>
+              </div>
+              <div>
+                <div className="text-xs uppercase tracking-wide text-blue-700">Runs</div>
+                <div className="text-lg font-semibold">{usageSummary.totalRuns ?? 0}</div>
+              </div>
+              <div>
+                <div className="text-xs uppercase tracking-wide text-blue-700">Last Run</div>
+                <div className="text-lg font-semibold">{usageSummary.lastRun ? new Date(usageSummary.lastRun).toLocaleString() : '—'}</div>
+              </div>
+            </div>
+          )}
+          {!usageError && !usageSummary && !usageLoading && (
+            <div className="mt-2 text-xs text-blue-700">No AI usage recorded yet.</div>
+          )}
+          {usageSummary?.tokensByModel && Object.keys(usageSummary.tokensByModel).length > 0 && (
+            <div className="mt-3 text-xs">
+              <div className="font-semibold text-blue-800">Tokens by Model</div>
+              <ul className="mt-1 space-y-1">
+                {Object.entries(usageSummary.tokensByModel).map(([model, tokens]) => (
+                  <li key={model} className="flex justify-between">
+                    <span>{model}</span>
+                    <span>{tokens as number}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
       {loading && <div className="text-gray-500">Loading…</div>}
       <div className="space-y-3">
         {items.map(it => {

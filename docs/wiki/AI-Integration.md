@@ -26,6 +26,22 @@ SecAI Radar integrates Azure OpenAI to provide AI-powered features for security 
 - Automated report content generation
 - Customizable report formats
 
+### 💬 Help Assistant
+- Floating in-app widget with Azure OpenAI responses
+- Context-aware prompts built from current route metadata
+- FAQ quick actions and guided tour shortcuts
+- Backend endpoint: `POST /api/tenant/{tenantId}/ai/help`
+
+### 🗣️ Voice Interaction
+- Browser speech-to-text for capturing questions hands-free
+- Spoken playback of AI answers via Speech Synthesis
+- Requires browsers that expose the Web Speech API
+
+### 📈 AI Usage Telemetry
+- Token consumption surfaced directly in the Gaps view when AI mode is enabled
+- Data captured in Azure Table Storage (`AiUsage` table)
+- REST endpoint: `GET /api/tenant/{tenantId}/ai/usage`
+
 ## Configuration
 
 ### Prerequisites
@@ -85,6 +101,29 @@ POST /api/tool-research
 
 Researches multiple tools and maps them to all 340 controls.
 
+### Contextual Help
+
+```bash
+POST /api/tenant/{tenantId}/ai/help
+{
+  "question": "How do I interpret hard gaps?",
+  "context": {
+    "page": "Gaps",
+    "pathname": "/tenant/NICO/gaps"
+  }
+}
+```
+
+Returns an Azure OpenAI answer tailored to the active screen.
+
+### AI Usage Summary
+
+```bash
+GET /api/tenant/{tenantId}/ai/usage
+```
+
+Returns token totals, run counts, and per-model breakdown for transparency and cost control.
+
 ## AI Service Configuration
 
 The AI service uses these environment variables:
@@ -128,6 +167,11 @@ API key is retrieved from Key Vault secret: `azure-openai-api-key`
 - Verify Azure OpenAI has web search enabled
 - Check API key has proper permissions
 - Review AI service logs for errors
+
+### Help assistant shows "AI service not available"
+- Confirm `azure-openai-api-key` exists in Key Vault
+- Ensure the Function App identity has `Key Vault Secrets User`
+- Verify `/api/tenant/{tenantId}/ai/help` returns a 200 when called from Postman or curl
 
 ## Related Documentation
 

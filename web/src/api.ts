@@ -35,6 +35,16 @@ export const getAIRecommendation = (tenant=TENANT, controlId: string) =>
 export const getAIGapExplanation = (tenant=TENANT, controlId: string, capabilityId: string, gapType: 'hard' | 'soft' = 'hard') => 
   fetch(`${API}/tenant/${tenant}/ai/recommendations?controlId=${controlId}&capabilityId=${capabilityId}&gapType=${gapType}`).then(r=>r.json());
 
+export const getAIUsageSummary = (tenant=TENANT) =>
+  fetch(`${API}/tenant/${tenant}/ai/usage`).then(r => r.json());
+
+export const getAIHelp = (tenant=TENANT, question: string, context: Record<string, any>) =>
+  fetch(`${API}/tenant/${tenant}/ai/help`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, context })
+  }).then(r => r.json());
+
 export const getControl = (tenant=TENANT, controlId: string) => 
   fetch(`${API}/tenant/${tenant}/controls?q=${controlId}`).then(r=>r.json()).then(d => d.items?.[0]);
 

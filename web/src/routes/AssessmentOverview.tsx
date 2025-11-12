@@ -90,7 +90,7 @@ export default function AssessmentOverview({ tenantId }: Props) {
         </div>
 
         {/* Overall Progress */}
-        <div className="mt-6">
+        <div className="mt-6" data-tour="progress-bar">
           <div className="flex items-center justify-between text-sm mb-2">
             <span className="text-blue-100">Overall Progress</span>
             <span className="font-bold text-lg">{Math.round(progressPercent)}%</span>
@@ -105,7 +105,7 @@ export default function AssessmentOverview({ tenantId }: Props) {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4" data-tour="quick-stats">
         <div className="bg-white rounded-lg border p-4">
           <div className="text-sm text-gray-500 mb-1">Controls</div>
           <div className="text-2xl font-bold text-gray-900">{completeControls} / {totalControls}</div>
@@ -134,7 +134,7 @@ export default function AssessmentOverview({ tenantId }: Props) {
 
       {/* Next Action */}
       {nextAction && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6" data-tour="next-action">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold text-blue-900 mb-1">Recommended Next Action</div>
@@ -151,7 +151,7 @@ export default function AssessmentOverview({ tenantId }: Props) {
       )}
 
       {/* Domain Progress */}
-      <div className="bg-white rounded-lg border p-6">
+      <div className="bg-white rounded-lg border p-6" data-tour="domain-grid">
         <h2 className="text-2xl font-semibold text-gray-900 mb-4">Security Domains</h2>
         <p className="text-sm text-gray-600 mb-6">
           Work through each security domain to complete your assessment. Click a domain to view controls, 

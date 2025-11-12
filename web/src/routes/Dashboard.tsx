@@ -32,7 +32,7 @@ export default function Dashboard({ tenantId }: Props) {
 
       {loading && <div className="text-gray-500">Loading…</div>}
 
-      <div>
+      <div data-tour="domain-breakdown">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Security Domains</h2>
         <p className="text-sm text-gray-600 mb-4">
           Click on any domain to view controls, enter observations, see gaps, and track progress for that security domain.
@@ -80,7 +80,7 @@ export default function Dashboard({ tenantId }: Props) {
       </div>
 
       {byDomain.length > 0 && (
-        <div className="bg-white rounded-lg border p-6">
+        <div className="bg-white rounded-lg border p-6" data-tour="radar-chart">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Progress Overview</h2>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">

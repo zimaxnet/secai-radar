@@ -44,6 +44,17 @@ SecAI Radar uses a **dual-branch strategy** that allows seamless development of 
 - Fixing documentation errors
 - Updating public-facing guides
 
+### Documentation Parity Checklist
+
+Before you merge feature work into `main`, confirm the following:
+
+- [ ] **Wiki coverage** – Each new UI feature or endpoint is reflected in `docs/wiki/` (e.g., Home, AI Integration, Interactive Guidance).
+- [ ] **Quick links** – Add or update navigation entries so users can discover the feature.
+- [ ] **Date stamp** – Refresh the “Last Updated” value on affected pages.
+- [ ] **Guided features** – When onboarding, help assistant, or AI behaviour changes, update `/wiki/Interactive-Guidance` and `/wiki/AI-Integration`.
+
+Cursor rules enforce this parity: if code touches `web/` or `api/` for user-facing functionality, expect the review to block until corresponding wiki updates land.
+
 ## Development Workflow
 
 ### Working on Application Development

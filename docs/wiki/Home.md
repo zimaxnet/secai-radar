@@ -24,6 +24,7 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 - **[Controls Guide](/wiki/Controls-Guide)** - Managing security controls
 - **[Tools Guide](/wiki/Tools-Guide)** - Configuring security tools
 - **[Gaps Guide](/wiki/Gaps-Guide)** - Understanding security gaps
+- **[Interactive Guidance](/wiki/Interactive-Guidance)** - Tours, help assistant, and voice support
 
 ### For Administrators
 - **[Installation](/wiki/Installation)** - Installation and deployment
@@ -69,6 +70,21 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 - Soft gap analysis (configuration issues)
 - Remediation recommendations
 
+### 🧭 Guided Onboarding
+- First-run tour powered by React Joyride
+- Scripted demo mode that walks the landing ➜ assessment ➜ dashboard ➜ gaps ➜ report journey
+- “Restart tour” and “Run guided demo” shortcuts in the help assistant
+
+### 💬 Conversational Assistant
+- Floating in-app help widget with Azure OpenAI answers
+- Context-aware guidance based on the screen you are viewing
+- FAQ shortcuts and AI usage telemetry
+
+### 🗣️ Voice Interaction
+- Browser speech-to-text for hands-free questioning
+- Text-to-speech playback of AI responses
+- Works in Chromium-based browsers and Safari with Web Speech API support
+
 ### 🤖 AI-Powered Analysis
 - AI-assisted security posture analysis
 - Evidence classification
@@ -104,5 +120,5 @@ SecAI Radar is open-source. See the repository LICENSE file for details.
 
 ---
 
-**Last Updated**: 2025-01-15
+**Last Updated**: 2025-11-12
 

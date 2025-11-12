@@ -23,6 +23,7 @@ export default function Landing() {
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
               to={`/tenant/${demoTenantId}/assessment`}
+              data-tour="explore-demo"
               className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
             >
               Explore Interactive Demo
@@ -38,7 +39,7 @@ export default function Landing() {
 
         {/* What is SecAI Framework */}
         <div className="max-w-6xl mx-auto mb-16">
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8" data-tour="how-it-works">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">What is the SecAI Framework?</h2>
             <p className="text-lg text-gray-700 mb-6">
               The SecAI Framework provides a <strong>vendor-neutral, capability-driven approach</strong> to security assessments. 
@@ -168,7 +169,7 @@ export default function Landing() {
           </div>
 
           {/* Demo Journey */}
-          <div className="bg-white rounded-lg shadow-lg p-8 mt-8">
+          <div className="bg-white rounded-lg shadow-lg p-8 mt-8" data-tour="demo-journey">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Walk the Demo Experience</h2>
             <p className="text-gray-700 mb-8">
               Jump into the preloaded demo tenant to explore every step of the assessment lifecycle. Each station below links directly into the app so you can move at your own pace.
