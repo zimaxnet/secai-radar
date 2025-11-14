@@ -1,6 +1,6 @@
 const API = import.meta.env.VITE_API_BASE || '/api';
 
-const TENANT = import.meta.env.VITE_DEFAULT_TENANT || "NICO";
+const TENANT = import.meta.env.VITE_DEFAULT_TENANT || "CONTOSO";
 
 
 

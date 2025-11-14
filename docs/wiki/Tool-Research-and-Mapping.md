@@ -80,7 +80,7 @@ Content-Type: application/json
     {"name": "Google SecOps", "vendor": "Google"},
     {"name": "Wiz", "vendor": "Wiz"}
   ],
-  "tenantId": "NICO"
+  "tenantId": "CONTOSO"
 }
 ```
 

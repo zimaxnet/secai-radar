@@ -122,7 +122,7 @@ POST /api/tenant/{tenantId}/ai/help
   "question": "How do I interpret hard gaps?",
   "context": {
     "page": "Gaps",
-    "pathname": "/tenant/NICO/gaps"
+    "pathname": "/tenant/CONTOSO/gaps"
   }
 }
 ```

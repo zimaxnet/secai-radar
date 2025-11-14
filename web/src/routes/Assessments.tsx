@@ -25,7 +25,7 @@ export default function Assessments() {
   useEffect(() => {
     setLoading(true)
     // Check if we have data for default tenant
-    const defaultTenant = (import.meta.env.VITE_DEFAULT_TENANT as string) || 'NICO'
+    const defaultTenant = (import.meta.env.VITE_DEFAULT_TENANT as string) || 'CONTOSO'
     
     getSummary(defaultTenant).then(d => {
       const totalControls = d.byDomain?.reduce((sum: number, domain: any) => sum + (domain.total || 0), 0) || 0

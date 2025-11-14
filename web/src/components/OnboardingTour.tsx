@@ -8,7 +8,7 @@ interface OnboardingTourProps {
 }
 
 const TOUR_STORAGE_KEY = 'secai-tour-completed'
-const DEMO_TENANT = 'NICO'
+const DEMO_TENANT = 'CONTOSO'
 
 // Tour steps organized by route
 const tourSteps: Record<string, Step[]> = {

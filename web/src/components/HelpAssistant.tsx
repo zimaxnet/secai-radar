@@ -62,7 +62,7 @@ export default function HelpAssistant() {
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null)
   const dataChannelRef = useRef<RTCDataChannel | null>(null)
   const realtimeDeployment = (import.meta.env.VITE_REALTIME_DEPLOYMENT as string | undefined) || undefined
-  const tenantId = params.id || (import.meta.env.VITE_DEFAULT_TENANT as string) || 'NICO'
+  const tenantId = params.id || (import.meta.env.VITE_DEFAULT_TENANT as string) || 'CONTOSO'
 
   const context = useMemo(() => derivePageContext(location.pathname), [location.pathname])
 

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-const demoTenantId = (import.meta.env.VITE_DEFAULT_TENANT as string) || 'NICO'
+const demoTenantId = (import.meta.env.VITE_DEFAULT_TENANT as string) || 'CONTOSO'
 
 export default function Landing() {
   return (
