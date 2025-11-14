@@ -18,7 +18,7 @@ const Report = lazy(() => import('./routes/Report'))
 
 function Shell() {
   const { id } = useParams()
-  const tenantId = id || (import.meta.env.VITE_DEFAULT_TENANT as string) || 'NICO'
+  const tenantId = id || (import.meta.env.VITE_DEFAULT_TENANT as string) || 'CONTOSO'
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto p-4">
@@ -57,6 +57,7 @@ function Shell() {
 }
 
 function App() {
+  const defaultTenant = (import.meta.env.VITE_DEFAULT_TENANT as string) || 'CONTOSO'
   return (
     <BrowserRouter>
       <OnboardingTour />
@@ -64,7 +65,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/assessments" element={<Assessments />} />
         <Route path="/tenant/:id/*" element={<Shell />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to={`/tenant/${defaultTenant}/dashboard`} replace />} />
       </Routes>
     </BrowserRouter>
   )
