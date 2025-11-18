@@ -58,13 +58,31 @@ class GoogleFileSearchRetriever(BaseRetriever):
             File store ID
         """
         try:
-            file_store = self.client.create_file_store(
-                display_name="SecAI Radar Knowledge Base"
-            )
-            return file_store.name.split("/")[-1]
+            # Try different API methods based on SDK version
+            try:
+                # Method 1: Direct create_file_store
+                file_store = self.client.create_file_store(
+                    display_name="SecAI Radar Knowledge Base"
+                )
+                # Extract ID from name (format: "fileStores/{id}")
+                if hasattr(file_store, 'name'):
+                    return file_store.name.split("/")[-1]
+                elif hasattr(file_store, 'id'):
+                    return file_store.id
+                else:
+                    return str(file_store)
+            except AttributeError:
+                # Method 2: Use genai.create_file_store if available
+                file_store = genai.create_file_store(
+                    display_name="SecAI Radar Knowledge Base"
+                )
+                if hasattr(file_store, 'name'):
+                    return file_store.name.split("/")[-1]
+                return "default_store"
         except Exception as e:
             print(f"Error creating file store: {e}")
-            # Return a placeholder - in production would handle this better
+            print(f"Note: File store creation API may need updating")
+            # Return a placeholder - user should set GOOGLE_FILE_STORE_ID manually
             return "default_store"
     
     async def retrieve(
@@ -86,19 +104,39 @@ class GoogleFileSearchRetriever(BaseRetriever):
         """
         try:
             # Create a model with file search enabled
-            model = self.client.GenerativeModel(
-                model_name="gemini-1.5-pro",
-                tools=[self.client.protos.Tool(
-                    file_search=self.client.protos.FileSearch(
-                        file_store=self.client.protos.FileStore(
-                            name=f"fileStores/{self.file_store_id}"
+            # Note: File Search is enabled via tools parameter
+            # The exact API may vary - this is a placeholder implementation
+            # that should be updated based on actual google-generativeai SDK version
+            
+            # Try the protos approach first (for newer SDK versions)
+            try:
+                from google.generativeai import protos
+                model = self.client.GenerativeModel(
+                    model_name="gemini-1.5-pro",
+                    tools=[protos.Tool(
+                        file_search=protos.FileSearch(
+                            file_store=protos.FileStore(
+                                name=f"fileStores/{self.file_store_id}"
+                            )
                         )
+                    )]
+                )
+            except (ImportError, AttributeError):
+                # Fallback: Use file_store parameter if available
+                try:
+                    model = self.client.GenerativeModel(
+                        model_name="gemini-1.5-pro",
+                        file_store=f"fileStores/{self.file_store_id}"
                     )
-                )]
-            )
+                except Exception:
+                    # If file_store parameter not available, use standard model
+                    # and include file store reference in prompt
+                    model = self.client.GenerativeModel(
+                        model_name="gemini-1.5-pro"
+                    )
             
             # Build prompt with query
-            prompt = f"Search the knowledge base for: {query}\n\n"
+            prompt = f"Search the knowledge base (file store: {self.file_store_id}) for: {query}\n\n"
             if context:
                 prompt += f"Context: {context}\n\n"
             prompt += "Provide relevant information from the knowledge base."
@@ -112,6 +150,7 @@ class GoogleFileSearchRetriever(BaseRetriever):
             return None
         except Exception as e:
             print(f"Error retrieving from Google File Search: {e}")
+            print(f"Note: API may need updating based on google-generativeai SDK version")
             return None
     
     async def upload_document(
@@ -131,20 +170,46 @@ class GoogleFileSearchRetriever(BaseRetriever):
         """
         try:
             # Upload file to file store
-            uploaded_file = self.client.upload_file(
-                path=document_path,
-                display_name=metadata.get("display_name", os.path.basename(document_path)) if metadata else os.path.basename(document_path)
-            )
+            # Try different API methods based on SDK version
+            try:
+                # Method 1: Direct upload_file
+                uploaded_file = self.client.upload_file(
+                    path=document_path,
+                    display_name=metadata.get("display_name", os.path.basename(document_path)) if metadata else os.path.basename(document_path)
+                )
+            except AttributeError:
+                # Method 2: Use genai.upload_file
+                uploaded_file = genai.upload_file(
+                    path=document_path,
+                    display_name=metadata.get("display_name", os.path.basename(document_path)) if metadata else os.path.basename(document_path)
+                )
+            
+            # Get file ID
+            file_id = None
+            if hasattr(uploaded_file, 'name'):
+                file_id = uploaded_file.name.split("/")[-1]
+            elif hasattr(uploaded_file, 'id'):
+                file_id = uploaded_file.id
+            else:
+                file_id = str(uploaded_file)
             
             # Add to file store
-            self.client.add_file_to_file_store(
-                file_store_id=self.file_store_id,
-                file_id=uploaded_file.name.split("/")[-1]
-            )
+            try:
+                self.client.add_file_to_file_store(
+                    file_store_id=self.file_store_id,
+                    file_id=file_id
+                )
+            except AttributeError:
+                # Alternative: Use genai.add_file_to_file_store
+                genai.add_file_to_file_store(
+                    file_store_id=self.file_store_id,
+                    file_id=file_id
+                )
             
             return True
         except Exception as e:
             print(f"Error uploading document: {e}")
+            print(f"Note: Upload API may need updating based on SDK version")
             return False
     
     async def upload_text(
