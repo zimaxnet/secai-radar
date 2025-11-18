@@ -16,19 +16,34 @@ The multi-agent orchestration system uses Azure Cosmos DB to persist assessment 
 
 ## Setup Steps
 
-### 1. Create Cosmos DB Account
+### 1. Create Cosmos DB Account with Free Tier
 
+**IMPORTANT**: Enable Free Tier at account creation (cannot be changed later)
+
+**Option A: Use the provided script (Recommended)**
+```bash
+./scripts/create-cosmos-db.sh
+```
+
+**Option B: Manual creation with Free Tier**
 ```bash
 # Create resource group (if needed)
 az group create --name secai-radar-rg --location eastus
 
-# Create Cosmos DB account
+# Create Cosmos DB account WITH FREE TIER ENABLED
 az cosmosdb create \
   --name secai-radar-cosmos \
   --resource-group secai-radar-rg \
   --default-consistency-level Session \
-  --locations regionName=eastus failoverPriority=0
+  --locations regionName=eastus failoverPriority=0 \
+  --enable-free-tier true
 ```
+
+**Free Tier Benefits:**
+- ✅ **1,000 RU/s** free (shared across all containers)
+- ✅ **25 GB storage** free
+- ✅ Valid for **12 months** from account creation
+- ✅ **$0/month** cost (as long as within limits)
 
 ### 2. Get Connection Information
 
@@ -158,10 +173,24 @@ await cosmos_persistence.delete_state("assessment-001")
 
 ## Monitoring
 
+### Check Costs and Usage
+
+**Use the provided script:**
+```bash
+./scripts/check-cosmos-costs.sh
+```
+
+This script shows:
+- Free Tier status and expiration date
+- Current throughput configuration
+- Storage usage
+- Cost estimation
+- Links to Azure Portal cost views
+
 ### Metrics to Monitor
-- Request units consumed
+- Request units consumed (stay under 1,000 RU/s for free tier)
 - Request rate (requests/second)
-- Data size
+- Data size (stay under 25 GB for free tier)
 - Latency (P50, P99)
 
 ### Query Performance
@@ -174,6 +203,27 @@ items = container.query_items(
     populate_query_metrics=True
 )
 ```
+
+### View Costs in Azure Portal
+
+1. **Cost Analysis (Recommended)**:
+   - Navigate to: Cost Management + Billing
+   - Select your subscription
+   - View "Cost by resource"
+   - Filter by "Cosmos DB" or resource name
+
+2. **Direct Resource Cost**:
+   - Go to Cosmos DB account in portal
+   - Click "Cost analysis" in left menu
+   - View current month costs
+
+3. **Azure CLI**:
+   ```bash
+   az consumption usage list \
+     --start-date $(date -u -d 'first day of this month' +%Y-%m-%d) \
+     --end-date $(date -u +%Y-%m-%d) \
+     --query "[?instanceName=='secai-radar-cosmos']"
+   ```
 
 ## Cost Optimization
 

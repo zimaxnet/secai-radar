@@ -67,10 +67,13 @@ class CosmosStatePersistence:
                 self.container = self.database.get_container_client(self.container_name)
                 self.container.read()
             except CosmosResourceNotFoundError:
+                # Use free tier: don't specify offer_throughput
+                # Free tier provides 1,000 RU/s and 25 GB storage
+                # If free tier is enabled on account, throughput is automatically free
                 self.container = self.database.create_container(
                     id=self.container_name,
-                    partition_key=PartitionKey(path="/assessment_id"),
-                    offer_throughput=400
+                    partition_key=PartitionKey(path="/assessment_id")
+                    # No offer_throughput specified = uses free tier allocation
                 )
         except Exception as e:
             print(f"Error initializing Cosmos DB client: {e}")
