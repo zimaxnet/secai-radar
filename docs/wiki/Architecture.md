@@ -161,28 +161,102 @@ See [Data Model](../data-model.md) for detailed schemas.
 
 ### Components
 
-- **Orchestrator**: Main workflow coordinator
-- **Workflow Engine**: Multi-step task execution
+- **Multi-Agent Orchestrator**: LangGraph-based agent coordination
+- **Supervisor**: Hierarchical routing and task delegation
+- **7 Agent Personas**: Specialized agents for different roles
+- **State Management**: Cosmos DB persistence
+- **Handoff Pattern**: Efficient context management
+- **Workflow Engine**: Three-phase workflow execution
 - **Planning**: Collector selection
 - **Analysis**: AI-powered analysis
 - **Review**: Self-review loop
 
-### Workflow
+### Multi-Agent System
 
-1. **Plan**: Decide which collectors to call
-2. **Collect**: Gather evidence (Bronze)
-3. **Normalize**: Transform to Silver
-4. **Embed**: Create Gold/RAG chunks
-5. **Analyze**: AI analysis per domain
-6. **Review**: Self-review loop
-7. **Generate**: Report assembly
+SecAI Radar implements a **7-agent multi-agent system** using **LangGraph** for orchestration:
+
+#### Agent Personas
+
+1. **Marcus Sterling** (Senior Manager)
+   - Executive decision-making
+   - Conflict resolution
+   - Budget approvals
+   - Phase transitions
+
+2. **Elena Bridges** (Relationship Manager)
+   - Business impact assessment
+   - Customer validation
+   - Downtime calculations
+   - Communication
+
+3. **Dr. Aris Thorne** (Principal Architect)
+   - CAF knowledge base queries
+   - Architecture design
+   - Threat modeling
+   - Security strategy
+
+4. **Leo Vance** (Security Architect - IAM)
+   - Identity migration planning
+   - MCA billing hierarchy design
+   - Conditional Access policies
+   - RBAC design
+
+5. **Priya Desai** (Program Manager - Offshore)
+   - Code/documentation review
+   - Task assignment
+   - Quality gates
+   - Delivery assurance
+
+6. **Ravi Patel** (Security Engineer)
+   - Infrastructure scanning
+   - IaC generation (Terraform/Bicep)
+   - Policy implementation
+   - Vulnerability scanning
+
+7. **Kenji Sato** (Program Manager)
+   - Schedule tracking
+   - Status reporting
+   - Dependency management
+   - Findings collation
+
+#### Workflow Phases
+
+**Phase 1: Assessment and Discovery**
+- Aris queries CAF knowledge base
+- Leo analyzes identity configuration
+- Ravi scans infrastructure
+- Kenji collates findings
+
+**Phase 2: Design and Conflict Resolution**
+- Aris designs Azure Landing Zone
+- Elena assesses business impact
+- Marcus resolves conflicts (if any)
+
+**Phase 3: Migration Planning**
+- Leo designs MCA billing hierarchy
+- Elena validates with customer
+- Final report generation
+
+### State Management
+
+- **Global State**: Assessment state with agent contexts
+- **Handoff Pattern**: Context summarization for token efficiency
+- **Persistence**: Azure Cosmos DB (Free Tier supported)
+- **Event Stream**: Real-time events for visualization
+
+### RAG Integration
+
+- **Google File Search**: Managed RAG for knowledge base
+- **Agentic Retrieval**: Agents decide when to search
+- **Knowledge Base**: CAF, WAF, MCA guides, security best practices
 
 ### Responsibilities
 
-- Coordinate multi-step workflows
-- Manage workflow state
+- Coordinate multi-agent workflows
+- Manage workflow state and handoffs
 - Handle errors and retries
 - Provide progress updates
+- Emit events for visualization
 
 ---
 

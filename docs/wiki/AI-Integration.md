@@ -2,7 +2,7 @@
 
 ## Overview
 
-SecAI Radar integrates Azure OpenAI to provide AI-powered features for security assessment, analysis, and recommendations.
+SecAI Radar integrates Azure OpenAI and Google Gemini to provide AI-powered features for security assessment, analysis, and recommendations. The system includes a **multi-agent orchestration layer** with **RAG (Retrieval-Augmented Generation)** for knowledge base queries.
 
 ## Features
 
@@ -25,6 +25,19 @@ SecAI Radar integrates Azure OpenAI to provide AI-powered features for security 
 - AI-generated executive summaries
 - Automated report content generation
 - Customizable report formats
+
+### 🤖 Multi-Agent Orchestration
+- 7 autonomous agents working together
+- LangGraph-based state machine orchestration
+- Three-phase workflow (Assessment → Design → Migration)
+- Conflict resolution and escalation
+- Real-time event stream for visualization
+
+### 📚 RAG Knowledge Base
+- Google File Search integration
+- Agentic retrieval (agents decide when to search)
+- CAF, WAF, MCA documentation access
+- Context-aware knowledge queries
 
 ### 💬 Help Assistant
 - Floating in-app widget with Azure OpenAI responses
@@ -60,8 +73,10 @@ SecAI Radar integrates Azure OpenAI to provide AI-powered features for security 
 ### Prerequisites
 
 1. **Azure OpenAI Resource**: Access to Azure OpenAI service
-2. **Key Vault**: Azure Key Vault for secure API key storage
-3. **Function App**: Managed Identity enabled for Key Vault access
+2. **Google API Key**: For RAG (Google File Search) - Optional but recommended
+3. **Key Vault**: Azure Key Vault for secure API key storage
+4. **Function App**: Managed Identity enabled for Key Vault access
+5. **Cosmos DB**: For state persistence (Free Tier available)
 
 ### Setup
 
@@ -197,10 +212,37 @@ API key is retrieved from Key Vault secret: `azure-openai-api-key`
 - Ensure the Function App identity has `Key Vault Secrets User`
 - Verify `/api/tenant/{tenantId}/ai/help` returns a 200 when called from Postman or curl
 
+## Multi-Agent System
+
+SecAI Radar includes a sophisticated multi-agent system for autonomous security assessments. See **[Multi-Agent System](Multi-Agent-System)** for complete documentation.
+
+### Quick Start
+
+```python
+from src.orchestrator.initialize import initialize_orchestrator
+
+# Auto-initializes Model Layer, RAG, and state management
+graph = initialize_orchestrator()
+
+# Run assessment workflow
+state = await graph.run(initial_state)
+```
+
+### RAG Setup
+
+1. Set `GOOGLE_API_KEY` environment variable
+2. Upload knowledge base documents to Google File Search
+3. Agents automatically query RAG when needed
+
+See [RAG Integration](../RAG-INTEGRATION.md) for detailed setup.
+
 ## Related Documentation
 
-- [Key Vault Setup](/wiki/Key-Vault-Setup)
-- [Tool Research and Mapping](/wiki/Tool-Research-and-Mapping)
-- [Gaps Guide](/wiki/Gaps-Guide)
-- [API Reference](/wiki/API-Reference)
+- [Multi-Agent System](Multi-Agent-System) - Complete multi-agent documentation
+- [Key Vault Setup](Key-Vault-Setup) - Secure API key storage
+- [Tool Research and Mapping](Tool-Research-and-Mapping) - Tool capability research
+- [Gaps Guide](Gaps-Guide) - Security gap analysis
+- [API Reference](API-Reference) - API documentation
+- [RAG Integration](../RAG-INTEGRATION.md) - RAG setup and usage
+- [Cosmos DB Setup](../COSMOS-DB-SETUP.md) - State persistence
 

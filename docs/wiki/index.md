@@ -40,6 +40,7 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 ### For Developers
 - **[Architecture](Architecture)** - System architecture overview
 - **[AI Integration](AI-Integration)** - AI-powered features
+- **[Multi-Agent System](Multi-Agent-System)** - Multi-agent orchestration with LangGraph
 - **[Contributing](Contributing)** - Contributing to SecAI Radar
 
 ### Help & Support
@@ -80,20 +81,33 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 - AI-assisted security posture analysis
 - Evidence classification
 - Automated report generation
+- **Multi-Agent Orchestration**: 7 autonomous agents working together
+- **RAG Knowledge Base**: Google File Search integration for CAF/MCA guidance
 
 ---
 
 ## Architecture Overview
 
-SecAI Radar follows a **5-layer architecture**:
+SecAI Radar follows a **5-layer architecture** with **multi-agent orchestration**:
 
 1. **Infrastructure Layer** - Containerized API + worker
 2. **Model Layer** - Role-based AI models (reasoning, classification, generation)
 3. **Data Layer** - Bronze (raw), Silver (normalized), Gold/RAG (embedded)
-4. **Orchestration Layer** - Multi-step AI workflows
-5. **Application Layer** - Web UI for browsing runs and reports
+4. **Orchestration Layer** - Multi-agent workflows with LangGraph
+5. **Application Layer** - Web UI with real-time radar visualization
 
-See **[Architecture](Architecture)** for detailed information.
+### Multi-Agent System
+
+SecAI Radar implements **Project Aethelgard** - a 7-agent system that simulates a complete security assessment team:
+- **Marcus Sterling** - Senior Manager (executive decisions, conflict resolution)
+- **Elena Bridges** - Relationship Manager (business impact, customer validation)
+- **Dr. Aris Thorne** - Principal Architect (CAF alignment, security strategy)
+- **Leo Vance** - Security Architect IAM (identity migration, MCA billing)
+- **Priya Desai** - Program Manager (quality control, delivery assurance)
+- **Ravi Patel** - Security Engineer (IaC development, vulnerability scanning)
+- **Kenji Sato** - Program Manager (schedule tracking, status reporting)
+
+See **[Architecture](Architecture)** and **[Multi-Agent System](Multi-Agent-System)** for detailed information.
 
 ---
 
