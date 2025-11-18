@@ -76,6 +76,8 @@ class BaseAgent(ABC):
         """
         Query the RAG knowledge base.
         
+        Supports both direct retrieval and agentic retrieval patterns.
+        
         Args:
             query: Search query
             context: Additional context for the query
@@ -87,8 +89,19 @@ class BaseAgent(ABC):
             return None
         
         try:
-            result = await self.rag_retriever.retrieve(query, context)
-            return result
+            # Check if it's an AgenticRetriever (has agentic_retrieve method)
+            if hasattr(self.rag_retriever, 'agentic_retrieve'):
+                # Use agentic retrieval (agents decide when to search)
+                task_description = context.get("task", query) if context else query
+                agent_context = context.get("agent_context", "") if context else ""
+                return await self.rag_retriever.agentic_retrieve(
+                    task_description=task_description,
+                    agent_context=agent_context
+                )
+            else:
+                # Use direct retrieval
+                result = await self.rag_retriever.retrieve(query, context)
+                return result
         except Exception as e:
             print(f"Error querying RAG: {e}")
             return None
