@@ -26,6 +26,10 @@ dist-ssr/
 .vscode/
 local.settings.json
 .python_packages/
+*.publishProfile.xml
+*-publish-profile.xml
+*.pubxml
+*.PublishSettings
 
 # IDE
 .idea/

@@ -1,267 +1,259 @@
 """
-Model Layer - Role-Based Model Access
+Model Layer Adapter
 
-This module provides the Model Layer abstraction according to the blueprint.
-Models are accessed by ROLE, not by brand/provider.
+Bridges the existing Azure OpenAI service with the multi-agent system interface.
 """
 
-from typing import Dict, List, Optional, Any
-from .config import ModelConfig, load_model_config, get_role_config
-from .providers import ModelProvider, create_provider
+import os
+import sys
+from typing import Dict, Any, Optional
+from pathlib import Path
+
+# Add api directory to path to import shared modules
+api_path = Path(__file__).resolve().parents[2] / "api"
+if str(api_path) not in sys.path:
+    sys.path.insert(0, str(api_path))
+
+try:
+    from shared.ai_service import get_ai_service, AzureOpenAIService
+    AI_SERVICE_AVAILABLE = True
+except (ImportError, ValueError):
+    AI_SERVICE_AVAILABLE = False
+    AzureOpenAIService = None
 
 
 class ModelLayer:
     """
-    Model Layer abstraction for role-based model access.
+    Model Layer adapter that provides a unified interface for agent LLM access.
     
-    Provides unified interface for accessing models by role:
-    - reasoning_model: Multi-step security analysis
-    - classification_model: Evidence classification
-    - generation_model: Report generation
+    Wraps the existing Azure OpenAI service to match the interface expected by agents.
     """
     
-    def __init__(self, config: Optional[ModelConfig] = None):
+    def __init__(self, ai_service: Optional[AzureOpenAIService] = None):
         """
         Initialize Model Layer.
         
         Args:
-            config: ModelConfig instance. If None, loads from default location.
+            ai_service: AzureOpenAIService instance (or None to auto-initialize)
         """
-        if config is None:
-            config = load_model_config()
-        self.config = config
-        self._providers: Dict[str, ModelProvider] = {}
-        self._initialize_providers()
-    
-    def _initialize_providers(self):
-        """Initialize provider instances for each role"""
-        for role_name, role_config in self.config.roles.items():
-            provider_type = role_config.provider
-            provider_config = self.config.providers.get(provider_type, {})
-            
-            provider = create_provider(provider_type, role_config, provider_config)
-            self._providers[role_name] = provider
-    
-    def get_model(self, role: str) -> ModelProvider:
-        """
-        Get model provider for a specific role.
-        
-        Args:
-            role: Role name (reasoning_model, classification_model, generation_model)
-            
-        Returns:
-            ModelProvider instance for the role
-            
-        Raises:
-            KeyError: If role is not configured
-        """
-        if role not in self._providers:
-            raise KeyError(f"Role '{role}' not configured. Available roles: {list(self._providers.keys())}")
-        
-        return self._providers[role]
+        if ai_service:
+            self.ai_service = ai_service
+        elif AI_SERVICE_AVAILABLE:
+            try:
+                self.ai_service = get_ai_service()
+            except (ValueError, Exception) as e:
+                print(f"Warning: Could not initialize AI service: {e}")
+                self.ai_service = None
+        else:
+            self.ai_service = None
     
     async def reasoning(
         self,
         prompt: str,
-        context: Optional[Dict[str, Any]] = None,
-        **kwargs
+        context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
-        Use reasoning model for multi-step security analysis.
+        Perform reasoning task using the model.
         
         Args:
-            prompt: User prompt/question
-            context: Additional context (evidence, findings, etc.)
-            **kwargs: Additional parameters
+            prompt: Reasoning prompt/question
+            context: Additional context dictionary
             
         Returns:
-            Response dict with 'content' and metadata
+            Dict with 'content' key containing the response
         """
-        model = self.get_model("reasoning_model")
+        if not self.ai_service:
+            return {
+                "content": "Model layer not available. AI service not configured.",
+                "error": True
+            }
         
-        messages = [
-            {"role": "user", "content": prompt}
-        ]
-        
-        # Add context to messages if provided
-        if context:
-            context_str = self._format_context(context)
-            messages.append({"role": "user", "content": f"Context: {context_str}"})
-        
-        role_config = get_role_config(self.config, "reasoning_model")
-        
-        return await model.chat_completion(
-            messages=messages,
-            system_prompt=role_config.system_prompt,
-            parameters=role_config.parameters,
-            **kwargs
-        )
+        try:
+            # Build messages from prompt and context
+            messages = [
+                {
+                    "role": "system",
+                    "content": "You are an expert security consultant. Provide clear, reasoned analysis based on the given context."
+                }
+            ]
+            
+            # Add context if provided
+            if context:
+                context_str = self._format_context(context)
+                user_content = f"Context:\n{context_str}\n\nTask:\n{prompt}"
+            else:
+                user_content = prompt
+            
+            messages.append({"role": "user", "content": user_content})
+            
+            # Call AI service
+            response = self.ai_service.chat_completion(
+                messages=messages,
+                stream=False,
+                temperature=0.7,
+                max_tokens=4096
+            )
+            
+            content = response.choices[0].message.content
+            
+            return {
+                "content": content,
+                "error": False
+            }
+        except Exception as e:
+            print(f"Error in reasoning: {e}")
+            return {
+                "content": f"Error during reasoning: {str(e)}",
+                "error": True
+            }
     
     async def classify(
         self,
-        evidence: Dict[str, Any],
-        **kwargs
+        context: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Use classification model to map evidence to controls/domains.
+        Perform classification task using the model.
         
         Args:
-            evidence: Evidence dict (from Bronze or Silver layer)
-            **kwargs: Additional parameters
+            context: Context dictionary to classify
             
         Returns:
-            Classification result with control_id, domain_code, confidence_score
+            Dict with 'content' key containing classification result
         """
-        model = self.get_model("classification_model")
-        
-        # Format evidence for classification
-        evidence_str = self._format_evidence(evidence)
-        
-        prompt = f"""
-        Classify the following security evidence to the appropriate control and domain.
-        Return JSON with: control_id, domain_code, confidence_score.
-        
-        Evidence:
-        {evidence_str}
-        """
-        
-        messages = [
-            {"role": "user", "content": prompt}
-        ]
-        
-        role_config = get_role_config(self.config, "classification_model")
-        
-        response = await model.chat_completion(
-            messages=messages,
-            system_prompt=role_config.system_prompt,
-            parameters=role_config.parameters,
-            **kwargs
-        )
-        
-        # Parse JSON response
-        import json
-        try:
-            content = response["content"]
-            # Extract JSON from response (might be wrapped in markdown code blocks)
-            if "```json" in content:
-                content = content.split("```json")[1].split("```")[0].strip()
-            elif "```" in content:
-                content = content.split("```")[1].split("```")[0].strip()
-            
-            classification = json.loads(content)
+        if not self.ai_service:
             return {
-                "classification": classification,
-                "raw_response": response,
+                "content": "Model layer not available. AI service not configured.",
+                "error": True
             }
-        except json.JSONDecodeError:
-            # If JSON parsing fails, return raw response
+        
+        try:
+            # Format context for classification
+            context_str = self._format_context(context)
+            
+            messages = [
+                {
+                    "role": "system",
+                    "content": "You are a classification expert. Analyze the provided context and classify it appropriately. Respond with JSON format when possible."
+                },
+                {
+                    "role": "user",
+                    "content": f"Classify the following context:\n\n{context_str}\n\nProvide a classification with reasoning."
+                }
+            ]
+            
+            response = self.ai_service.chat_completion(
+                messages=messages,
+                stream=False,
+                temperature=0.3,
+                max_tokens=2048
+            )
+            
+            content = response.choices[0].message.content
+            
             return {
-                "classification": None,
-                "raw_response": response,
-                "error": "Failed to parse JSON response",
+                "content": content,
+                "error": False
+            }
+        except Exception as e:
+            print(f"Error in classification: {e}")
+            return {
+                "content": f"Error during classification: {str(e)}",
+                "error": True
             }
     
     async def generate(
         self,
         section_type: str,
-        data: Dict[str, Any],
-        template: Optional[str] = None,
-        **kwargs
+        data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Use generation model to write report sections.
+        Generate content for a specific section type.
         
         Args:
-            section_type: Type of section (executive_summary, findings, recommendations, etc.)
-            data: Data to include in the section
-            template: Optional template/formatting instructions
-            **kwargs: Additional parameters
+            section_type: Type of section to generate (e.g., "findings", "recommendations")
+            data: Data dictionary to use for generation
             
         Returns:
-            Generated content dict with 'content' and metadata
+            Dict with 'content' key containing generated content
         """
-        model = self.get_model("generation_model")
+        if not self.ai_service:
+            return {
+                "content": "Model layer not available. AI service not configured.",
+                "error": True
+            }
         
-        # Format data for generation
-        data_str = self._format_data(data)
-        
-        prompt = f"""
-        Generate a {section_type} section for a security assessment report.
-        
-        Data:
-        {data_str}
-        
-        {f"Template/Format: {template}" if template else ""}
-        
-        Generate clear, professional, executive-level content suitable for a consulting report.
-        """
-        
-        messages = [
-            {"role": "user", "content": prompt}
-        ]
-        
-        role_config = get_role_config(self.config, "generation_model")
-        
-        return await model.chat_completion(
-            messages=messages,
-            system_prompt=role_config.system_prompt,
-            parameters=role_config.parameters,
-            **kwargs
-        )
+        try:
+            # Format data for generation
+            data_str = self._format_context(data)
+            
+            messages = [
+                {
+                    "role": "system",
+                    "content": f"You are a security assessment expert. Generate professional, accurate content for {section_type} sections."
+                },
+                {
+                    "role": "user",
+                    "content": f"Generate a {section_type} section based on the following data:\n\n{data_str}\n\nProvide comprehensive, actionable content."
+                }
+            ]
+            
+            response = self.ai_service.chat_completion(
+                messages=messages,
+                stream=False,
+                temperature=0.8,
+                max_tokens=4096
+            )
+            
+            content = response.choices[0].message.content
+            
+            return {
+                "content": content,
+                "error": False
+            }
+        except Exception as e:
+            print(f"Error in generation: {e}")
+            return {
+                "content": f"Error during generation: {str(e)}",
+                "error": True
+            }
     
     def _format_context(self, context: Dict[str, Any]) -> str:
-        """Format context dict as string"""
-        import json
-        return json.dumps(context, indent=2)
-    
-    def _format_evidence(self, evidence: Dict[str, Any]) -> str:
-        """Format evidence dict as string"""
-        import json
-        return json.dumps(evidence, indent=2)
-    
-    def _format_data(self, data: Dict[str, Any]) -> str:
-        """Format data dict as string"""
-        import json
-        return json.dumps(data, indent=2)
+        """
+        Format context dictionary into a readable string.
+        
+        Args:
+            context: Context dictionary
+            
+        Returns:
+            Formatted string
+        """
+        if not context:
+            return ""
+        
+        parts = []
+        for key, value in context.items():
+            if isinstance(value, (dict, list)):
+                import json
+                parts.append(f"{key}:\n{json.dumps(value, indent=2)}")
+            else:
+                parts.append(f"{key}: {value}")
+        
+        return "\n".join(parts)
 
 
-# Global Model Layer instance (singleton pattern)
-_model_layer: Optional[ModelLayer] = None
-
-
-def get_model(role: Optional[str] = None) -> ModelProvider:
-    """
-    Get model provider for a specific role.
-    
-    Args:
-        role: Role name (reasoning_model, classification_model, generation_model).
-              If None, returns the ModelLayer instance.
-              
-    Returns:
-        ModelProvider for the role, or ModelLayer instance if role is None
-    """
-    global _model_layer
-    
-    if _model_layer is None:
-        _model_layer = ModelLayer()
-    
-    if role is None:
-        return _model_layer
-    
-    return _model_layer.get_model(role)
+# Singleton instance
+_model_layer_instance: Optional[ModelLayer] = None
 
 
 def get_model_layer() -> ModelLayer:
     """
-    Get the global ModelLayer instance.
+    Get or create the Model Layer instance.
     
     Returns:
         ModelLayer instance
     """
-    global _model_layer
-    
-    if _model_layer is None:
-        _model_layer = ModelLayer()
-    
-    return _model_layer
+    global _model_layer_instance
+    if _model_layer_instance is None:
+        _model_layer_instance = ModelLayer()
+    return _model_layer_instance
 

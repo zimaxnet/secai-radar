@@ -1,26 +1,10 @@
 """
-SecAI Radar - Model Layer
+Model Layer for Multi-Agent System
 
-This module provides role-based access to AI models according to the blueprint architecture.
-Models are accessed by ROLE (reasoning, classification, generation), not by brand/provider.
-
-Usage:
-    from models import get_model
-    
-    reasoning = get_model("reasoning_model")
-    response = await reasoning.analyze(evidence, context)
+Provides a unified interface for LLM access across all agents.
 """
 
-from .config import ModelConfig, load_model_config
-from .providers import ModelProvider, AzureOpenAIProvider
-from .model_layer import ModelLayer, get_model
+from .model_layer import ModelLayer, get_model_layer
 
-__all__ = [
-    "ModelConfig",
-    "load_model_config",
-    "ModelProvider",
-    "AzureOpenAIProvider",
-    "ModelLayer",
-    "get_model",
-]
+__all__ = ["ModelLayer", "get_model_layer"]
 

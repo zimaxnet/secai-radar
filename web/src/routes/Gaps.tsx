@@ -1,136 +1,205 @@
-import { useEffect, useState } from 'react'
-import { getGaps } from '../api'
+import { useCallback, useEffect, useState } from 'react'
+import { getGaps, getAIRecommendation, getAIUsageSummary } from '../api'
 
 interface Props { tenantId: string }
 
 export default function Gaps({ tenantId }: Props) {
   const [items, setItems] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [aiEnabled, setAiEnabled] = useState(false)
+  const [aiRecommendations, setAiRecommendations] = useState<Record<string, { loading: boolean; text?: string; error?: string }>>({})
+  const [usageLoading, setUsageLoading] = useState(false)
+  const [usageSummary, setUsageSummary] = useState<any>(null)
+  const [usageError, setUsageError] = useState<string | null>(null)
+
+  const refreshUsage = useCallback(async () => {
+    if (!aiEnabled) {
+      setUsageSummary(null)
+      setUsageError(null)
+      return
+    }
+    setUsageLoading(true)
+    setUsageError(null)
+    try {
+      const summary = await getAIUsageSummary(tenantId)
+      if (summary?.error) {
+        setUsageError(summary.error)
+        setUsageSummary(null)
+      } else {
+        setUsageSummary(summary)
+      }
+    } catch (err: any) {
+      setUsageError(err?.message || 'Failed to load AI usage metrics')
+      setUsageSummary(null)
+    } finally {
+      setUsageLoading(false)
+    }
+  }, [aiEnabled, tenantId])
 
   useEffect(() => {
     let mounted = true
     setLoading(true)
-    getGaps(tenantId).then(d => {
+    getGaps(tenantId, aiEnabled).then(d => {
       if (!mounted) return
       setItems(d.items || [])
+      // If AI is enabled, items may already have AIRecommendation
+      if (d.aiEnabled && d.items) {
+        const recommendations: Record<string, { loading: boolean; text?: string }> = {}
+        d.items.forEach((it: any) => {
+          if (it.AIRecommendation) {
+            recommendations[it.ControlID] = { loading: false, text: it.AIRecommendation }
+          }
+        })
+        setAiRecommendations(recommendations)
+      }
     }).finally(() => setLoading(false))
     return () => { mounted = false }
-  }, [tenantId])
+  }, [tenantId, aiEnabled])
+
+  useEffect(() => {
+    refreshUsage()
+  }, [refreshUsage])
+
+  const loadAIRecommendation = async (controlId: string) => {
+    if (aiRecommendations[controlId]) return // Already loaded
+    
+    setAiRecommendations(prev => ({ ...prev, [controlId]: { loading: true } }))
+    try {
+      const result = await getAIRecommendation(tenantId, controlId)
+      setAiRecommendations(prev => ({
+        ...prev,
+        [controlId]: { loading: false, text: result.recommendation }
+      }))
+      refreshUsage()
+    } catch (error: any) {
+      setAiRecommendations(prev => ({
+        ...prev,
+        [controlId]: { loading: false, error: error.message || 'Failed to load AI recommendation' }
+      }))
+    }
+  }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Security Gaps</h1>
-        <p className="mt-1 text-sm text-slate-600">Capability coverage analysis and gap identification</p>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Gaps</h2>
+        <label className="flex items-center gap-2 cursor-pointer" data-tour="ai-toggle">
+          <input
+            type="checkbox"
+            checked={aiEnabled}
+            onChange={(e) => setAiEnabled(e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-sm text-gray-700">Enable AI Recommendations</span>
+        </label>
       </div>
-
-      <div className="alert alert-info">
-        <div className="flex items-start">
-          <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div>
-            <p className="font-medium">Prioritization Tip</p>
-            <p className="text-sm mt-1">Prioritize tuning existing tools (raise ConfigScore) before recommending new tools. This often provides better ROI.</p>
+      <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 p-2 rounded" data-tour="gap-explanation">
+        Tip: prioritize tuning existing tools (raise ConfigScore) before recommending net-new.
+      </p>
+      {aiEnabled && (
+        <div className="rounded border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900" data-tour="ai-usage">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold">AI Usage</span>
+            {usageLoading && <span className="text-xs text-blue-700">Refreshing…</span>}
           </div>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="spinner"></div>
-          <span className="ml-3 text-slate-600">Loading gaps analysis...</span>
-        </div>
-      ) : items.length === 0 ? (
-        <div className="card p-12 text-center">
-          <svg className="w-12 h-12 text-slate-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className="text-slate-600 font-medium">No gaps found</p>
-          <p className="text-sm text-slate-500 mt-1">All controls have adequate capability coverage</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {items.map((it) => {
-            const coveragePercent = (it.Coverage * 100).toFixed(1)
-            const hasHardGaps = it.HardGaps?.length > 0
-            const hasSoftGaps = it.SoftGaps?.length > 0
-            
-            return (
-              <div key={it.ControlID} className="card p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900">{it.ControlID}</h3>
-                    <p className="text-sm text-slate-600 mt-1">Domain: {it.DomainPartition?.split('|')[1] || 'N/A'}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-semibold text-slate-900">{coveragePercent}%</div>
-                    <div className="text-xs text-slate-500">Coverage</div>
-                    <div className={`mt-2 badge ${parseFloat(coveragePercent) >= 80 ? 'badge-success' : parseFloat(coveragePercent) >= 50 ? 'badge-warning' : 'badge-error'}`}>
-                      {parseFloat(coveragePercent) >= 80 ? 'Good' : parseFloat(coveragePercent) >= 50 ? 'Fair' : 'Poor'}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  {/* Hard Gaps */}
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-                    <div className="flex items-center mb-3">
-                      <svg className="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                      <h4 className="text-sm font-semibold text-red-900">Hard Gaps</h4>
-                      <span className="ml-auto badge badge-error">{it.HardGaps?.length || 0}</span>
-                    </div>
-                    {hasHardGaps ? (
-                      <ul className="space-y-2">
-                        {it.HardGaps.map((g: any, idx: number) => (
-                          <li key={idx} className="text-sm text-red-800">
-                            <span className="font-medium">{g.capabilityId}</span>
-                            <span className="text-red-600 ml-2">(weight: {g.weight})</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-red-700">No hard gaps found</p>
-                    )}
-                  </div>
-
-                  {/* Soft Gaps */}
-                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-                    <div className="flex items-center mb-3">
-                      <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                      <h4 className="text-sm font-semibold text-yellow-900">Soft Gaps</h4>
-                      <span className="ml-auto badge badge-warning">{it.SoftGaps?.length || 0}</span>
-                    </div>
-                    {hasSoftGaps ? (
-                      <ul className="space-y-2">
-                        {it.SoftGaps.map((g: any, idx: number) => (
-                          <li key={idx} className="text-sm text-yellow-800">
-                            <div className="flex items-start justify-between">
-                              <span className="font-medium">{g.capabilityId}</span>
-                              <span className="text-xs text-yellow-600 ml-2">
-                                {g.best?.toFixed(2)} / {g.min?.toFixed(2)}
-                              </span>
-                            </div>
-                            {g.tool && (
-                              <p className="text-xs text-yellow-700 mt-1">Tool: {g.tool}</p>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-yellow-700">No soft gaps found</p>
-                    )}
-                  </div>
-                </div>
+          {usageError && (
+            <div className="mt-1 text-xs text-red-600">{usageError}</div>
+          )}
+          {!usageError && usageSummary && (
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div>
+                <div className="text-xs uppercase tracking-wide text-blue-700">Tokens Used</div>
+                <div className="text-lg font-semibold">{usageSummary.totalTokens ?? 0}</div>
               </div>
-            )
-          })}
+              <div>
+                <div className="text-xs uppercase tracking-wide text-blue-700">Runs</div>
+                <div className="text-lg font-semibold">{usageSummary.totalRuns ?? 0}</div>
+              </div>
+              <div>
+                <div className="text-xs uppercase tracking-wide text-blue-700">Last Run</div>
+                <div className="text-lg font-semibold">{usageSummary.lastRun ? new Date(usageSummary.lastRun).toLocaleString() : '—'}</div>
+              </div>
+            </div>
+          )}
+          {!usageError && !usageSummary && !usageLoading && (
+            <div className="mt-2 text-xs text-blue-700">No AI usage recorded yet.</div>
+          )}
+          {usageSummary?.tokensByModel && Object.keys(usageSummary.tokensByModel).length > 0 && (
+            <div className="mt-3 text-xs">
+              <div className="font-semibold text-blue-800">Tokens by Model</div>
+              <ul className="mt-1 space-y-1">
+                {Object.entries(usageSummary.tokensByModel).map(([model, tokens]) => (
+                  <li key={model} className="flex justify-between">
+                    <span>{model}</span>
+                    <span>{tokens as number}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
+      {loading && <div className="text-gray-500">Loading…</div>}
+      <div className="space-y-3">
+        {items.map(it => {
+          const hasGaps = (it.HardGaps?.length || 0) + (it.SoftGaps?.length || 0) > 0
+          const rec = aiRecommendations[it.ControlID]
+          const showAIButton = aiEnabled && hasGaps && !rec?.text && !rec?.loading
+          
+          return (
+            <div key={it.ControlID} className="rounded border bg-white p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="font-medium">{it.ControlID}</div>
+                <div className="text-sm text-gray-600">Coverage: {(it.Coverage*100).toFixed(1)}%</div>
+              </div>
+              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-gray-700">Hard Gaps</div>
+                  <ul className="list-disc list-inside text-sm text-gray-800">
+                    {it.HardGaps?.length ? it.HardGaps.map((g:any, idx:number)=>(
+                      <li key={idx}>{g.capabilityId} (w={g.weight})</li>
+                    )) : <li className="text-gray-500">None</li>}
+                  </ul>
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-gray-700">Soft Gaps</div>
+                  <ul className="list-disc list-inside text-sm text-gray-800">
+                    {it.SoftGaps?.length ? it.SoftGaps.map((g:any, idx:number)=>(
+                      <li key={idx}>{g.capabilityId} best={g.best?.toFixed(2)} min={g.min?.toFixed(2)} tool={g.tool || 'n/a'}</li>
+                    )) : <li className="text-gray-500">None</li>}
+                  </ul>
+                </div>
+              </div>
+              
+              {/* AI Recommendations Section */}
+              {aiEnabled && hasGaps && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  {showAIButton && (
+                    <button
+                      onClick={() => loadAIRecommendation(it.ControlID)}
+                      className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Get AI Recommendation →
+                    </button>
+                  )}
+                  {rec?.loading && (
+                    <div className="text-sm text-gray-500">Generating AI recommendation...</div>
+                  )}
+                  {rec?.text && (
+                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded">
+                      <div className="text-xs font-semibold text-blue-900 mb-1">AI Recommendation</div>
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap">{rec.text}</div>
+                    </div>
+                  )}
+                  {rec?.error && (
+                    <div className="mt-2 text-sm text-red-600">Error: {rec.error}</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
