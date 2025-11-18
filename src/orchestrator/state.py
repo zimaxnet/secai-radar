@@ -106,14 +106,16 @@ class StateManager:
     Handles state updates and handoff packet creation.
     """
     
-    def __init__(self, cosmos_client=None):
+    def __init__(self, cosmos_client=None, cosmos_persistence=None):
         """
         Initialize StateManager.
         
         Args:
-            cosmos_client: Azure Cosmos DB client (optional, for persistence)
+            cosmos_client: Azure Cosmos DB client (legacy, optional)
+            cosmos_persistence: CosmosStatePersistence instance (preferred)
         """
         self.cosmos_client = cosmos_client
+        self.cosmos_persistence = cosmos_persistence
     
     def create_initial_state(
         self,
@@ -285,6 +287,17 @@ class StateManager:
         Returns:
             True if successful
         """
+        # Use new CosmosStatePersistence if available
+        if self.cosmos_persistence:
+            import asyncio
+            # Cosmos DB SDK is synchronous, run in thread pool
+            return await asyncio.to_thread(
+                self.cosmos_persistence.persist_state,
+                state,
+                self
+            )
+        
+        # Fallback to legacy cosmos_client if provided
         if not self.cosmos_client:
             # No persistence configured, skip
             return True
@@ -314,6 +327,17 @@ class StateManager:
         Returns:
             AssessmentState if found, None otherwise
         """
+        # Use new CosmosStatePersistence if available
+        if self.cosmos_persistence:
+            import asyncio
+            # Cosmos DB SDK is synchronous, run in thread pool
+            return await asyncio.to_thread(
+                self.cosmos_persistence.load_state,
+                assessment_id,
+                self
+            )
+        
+        # Fallback to legacy cosmos_client if provided
         if not self.cosmos_client:
             return None
         

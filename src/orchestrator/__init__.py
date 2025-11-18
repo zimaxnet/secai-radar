@@ -14,6 +14,7 @@ from .state import (
 )
 from .supervisor import Supervisor
 from .langgraph_config import LangGraphConfig
+from .cosmos_persistence import CosmosStatePersistence
 
 __all__ = [
     "AssessmentState",
@@ -23,6 +24,7 @@ __all__ = [
     "HandoffPacket",
     "StateManager",
     "Supervisor",
-    "LangGraphConfig"
+    "LangGraphConfig",
+    "CosmosStatePersistence"
 ]
 
