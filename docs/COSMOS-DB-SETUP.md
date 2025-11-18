@@ -179,8 +179,12 @@ items = container.query_items(
 
 1. **Use provisioned throughput** for predictable workloads
 2. **Enable autoscale** for variable workloads
-3. **Archive old assessments** to reduce storage costs
+3. **Archive old assessments** to reduce storage costs (see cost analysis)
 4. **Use change feed** for real-time updates (if needed)
+5. **Consider Reserved Capacity** for 30-65% discount on production workloads
+6. **Use Free Tier** for development (1,000 RU/s + 25 GB free for 12 months)
+
+**For detailed cost analysis, see [COSMOS-DB-COST-ANALYSIS.md](./COSMOS-DB-COST-ANALYSIS.md)**
 
 ## Troubleshooting
 
