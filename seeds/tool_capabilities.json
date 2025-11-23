@@ -1,0 +1,254 @@
+[
+  {
+    "vendorToolId": "cloudflare",
+    "capabilityId": "waf",
+    "strength": 0.85,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "cloudflare",
+    "capabilityId": "ddos",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "cloudflare",
+    "capabilityId": "casb",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "cloudflare",
+    "capabilityId": "ztna",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "cloudflare",
+    "capabilityId": "swg",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "cribl",
+    "capabilityId": "observability-pipeline",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "cribl",
+    "capabilityId": "log-collect",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "crowdstrike-falcon",
+    "capabilityId": "edr",
+    "strength": 0.85,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "crowdstrike-falcon",
+    "capabilityId": "fim",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "crowdstrike-falcon",
+    "capabilityId": "identity-protection",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "crowdstrike-falcon",
+    "capabilityId": "ti",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "google-secops",
+    "capabilityId": "siem",
+    "strength": 0.85,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "google-secops",
+    "capabilityId": "ueba",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "google-secops",
+    "capabilityId": "ti",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "google-secops-siemplify",
+    "capabilityId": "soar",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "virustotal",
+    "capabilityId": "ti",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "virustotal",
+    "capabilityId": "sandboxing",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "mandiant-breach-analytics",
+    "capabilityId": "ti",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "mandiant-breach-analytics",
+    "capabilityId": "ir",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "mandiant-managed-soc",
+    "capabilityId": "ir",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "mandiant-managed-soc",
+    "capabilityId": "ti",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "paloalto-fw",
+    "capabilityId": "ns-firewall",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "paloalto-fw",
+    "capabilityId": "ids-ips",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "paloalto-fw",
+    "capabilityId": "url-filtering",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "paloalto-wildfire",
+    "capabilityId": "sandboxing",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "paloalto-wildfire",
+    "capabilityId": "ti",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "prisma-access",
+    "capabilityId": "ztna",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "prisma-access",
+    "capabilityId": "swg",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "prisma-access",
+    "capabilityId": "casb",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "proofpoint-efd",
+    "capabilityId": "email-sec",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "proofpoint-efd",
+    "capabilityId": "dlp",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "proofpoint-tr",
+    "capabilityId": "soar",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "proofpoint-psat",
+    "capabilityId": "phish-sim",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "proofpoint-phalarm",
+    "capabilityId": "user-reporting",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "upguard",
+    "capabilityId": "third-party-risk",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "upguard",
+    "capabilityId": "externalscan",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "qualys-vm",
+    "capabilityId": "vuln-mgmt",
+    "strength": 0.85,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "veracode",
+    "capabilityId": "sast",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "veracode",
+    "capabilityId": "dast",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "veracode",
+    "capabilityId": "sca",
+    "strength": 0.7,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "wiz-cspm",
+    "capabilityId": "cspm",
+    "strength": 0.85,
+    "maturity": 0.8
+  },
+  {
+    "vendorToolId": "wiz-cspm",
+    "capabilityId": "cnapp",
+    "strength": 0.7,
+    "maturity": 0.8
+  }
+]

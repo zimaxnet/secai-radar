@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ToolCapabilities",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["vendorToolId", "capabilityId", "strength"],
+    "properties": {
+      "vendorToolId": { "type": "string", "minLength": 1 },
+      "capabilityId": { "type": "string", "minLength": 1 },
+      "strength": { "type": "number", "minimum": 0, "maximum": 1 },
+      "maturity": { "type": "number", "minimum": 0, "maximum": 1 },
+      "notes": { "type": "string" }
+    },
+    "additionalProperties": false
+  }
+}

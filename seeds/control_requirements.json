@@ -1,0 +1,32 @@
+[
+  {
+    "controlId": "SEC-NET-0001",
+    "capabilityId": "ns-firewall",
+    "weight": 0.6,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-NET-0001",
+    "capabilityId": "url-filtering",
+    "weight": 0.4,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-LOG-0001",
+    "capabilityId": "siem",
+    "weight": 1.0,
+    "minStrength": 0.7
+  },
+  {
+    "controlId": "SEC-ID-0002",
+    "capabilityId": "identity-protection",
+    "weight": 1.0,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-POST-0003",
+    "capabilityId": "vuln-mgmt",
+    "weight": 1.0,
+    "minStrength": 0.7
+  }
+]
