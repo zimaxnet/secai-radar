@@ -1,0 +1,132 @@
+ControlID,Domain,DomainCode,ControlTitle,ControlDescription,Question,RequiredEvidence,EvidenceItems,Status,Owner,Frequency,ScoreNumeric,Weight,Notes,SourceRef,Tags,UpdatedAt,DocControlId,ComplianceStatus,Criticality,Observations,Gaps,References,EvidenceCount,AvailableEvidenceCount,EvidenceArtifacts,EvidenceLastCollected,ExcelControlId,MCSBMapping,CISMapping,NISTMapping,PCIDSSMapping,CSACCMMapping,IANSMapping,RiskSeverity,ImplementationGap
+SEC-DATA-0001,Data protection,DATA,"Discover, classify, and label sensitive data","Establish and maintain an inventory of the sensitive data, based on the defined sensitive data scope. Use tools to discover, classify and label the in- scope sensitive data.
+
+Use tools such as Microsoft Purview, which combines the former Azure Purview and Microsoft 365 compliance solutions, and Azure SQL Data Discovery and Classification to centrally scan, classify, and label the sensitive data that reside in the Azure, on-premises, Microsoft 365, and other locations.","1. How is sensitive data discovered across structured (SQL, Cosmos DB) and unstructured (Storage, SharePoint, Exchange) repositories?
+2. What tools (Microsoft Purview, AIP) are in use for automated scanning and classification?
+3. Are classification labels enforced and synchronized across hybrid/M365 workloads?
+4. How is coverage validated for new data sources (e.g., onboarding of new Azure SQL
+servers)?","1. Microsoft Purview scan/job logs with discovered data assets.
+2. Export of SQL sys. sensitivity_classifications.
+3. Sensitivity labels configuration in AIP/Purview.
+4. Sample classified records/screenshots of label enforcement in Office/SharePoint.",Microsoft Purview scan/job logs with discovered data assets | Export of SQL sys. sensitivity_classifications | Sensitivity labels configuration in AIP/Purview | Sample classified records/screenshots of label enforcement in Office/SharePoint,NotStarted,,,0,0.85,"Gaps: There is no formal enterprise data management process, and data is not consistently tagged with classification levels. Organizational data retention policies are under development.
+
+Azure Purview is planned for meeting this control","Excel=CSF-AZ-DP-01 | MCSB=DP-1 | DocID=DP-1 | CIS=3.2, 3.7, 3.13 | NIST=RA-2, SC-28","CIS:3.2, 3.7, 3.13; NIST:RA-2, SC-28; PCI:A3.2; CSA:DSP-01, DSP-02, DSP-03; DocStatus:Non-Compliant",2025-11-11T17:51:32.035526+00:00,DP-1,Non-Compliant,High,,"There is no formal enterprise data management process, and data is not consistently tagged with classification levels. Organizational data retention policies are under development.
+
+Azure Purview is planned for meeting this control",1. Meeting notes.,4,,,,CSF-AZ-DP-01,DP-1,"3.2, 3.7, 3.13","RA-2, SC-28",A3.2,"DSP-01, DSP-02, DSP-03",,,
+SEC-DATA-0002,Data protection,DATA,Monitor anomalies and threats targeting sensitive data,"Monitor for anomalies around sensitive data, such as unauthorized transfer of data to locations outside of enterprise visibility and control. This typically involves monitoring for anomalous activities (large or unusual transfers) that could indicate unauthorized data exfiltration.
+
+Use Azure Information protection (AIP) to monitor the data that has been classified and labeled.
+
+Use Microsoft Defender for Storage, Microsoft Defender for SQL, Microsoft Defender for open-source relational databases, and Microsoft Defender for Cosmos DB to alert on anomalous transfer of information that might indicate unauthorized transfers of sensitive data information.
+
+Note: If required for compliance of data loss prevention (DLP), you can use a host-based DLP solution from Azure Marketplace or a Microsoft 365 DLP solution to enforce detective and/or preventative controls to prevent data exfiltration.","1. Which monitoring services (Defender for Storage, Defender for SQL, Sentinel analytics) are enabled?
+2. How is anomalous exfiltration (large/unusual transfers, cross-region copy) detected?
+3. Are DLP policies deployed for both cloud (M365 DLP, Azure DLP connectors) and endpoint paths?
+4. How are false positives tuned in alert rules?","1.	Alerts from Microsoft Defender for SQL, Storage, CosmosDB.
+2.	Sentinel queries/rules for anomalous transfer activity.
+3.	DLP incident reports from Microsoft Purview Information Protection.
+4.	Log Analytics export of activity anomalies (copy, delete, large volume).","Alerts from Microsoft Defender for SQL, Storage, CosmosDB | Sentinel queries/rules for anomalous transfer activity | DLP incident reports from Microsoft Purview Information Protection | Log Analytics export of activity anomalies (copy, delete, large volume)",NotStarted,,,0,0.85,Gaps: Defender for Storage is not enabled,"Excel=CSF-AZ-DP-02 | MCSB=DP-2 | DocID=DP-2 | CIS=3.13 | NIST=AC-4, SI-4","CIS:3.13; NIST:AC-4, SI-4; PCI:A3.2; CSA:DSP-04, DSP-05, EKM-01; DocStatus:Non-Compliant",2025-11-11T17:51:32.035526+00:00,DP-2,Non-Compliant,High,,Defender for Storage is not enabled,1. Microsoft defender for cloud.,4,,,,CSF-AZ-DP-02,DP-2,3.13,"AC-4, SI-4",A3.2,"DSP-04, DSP-05, EKM-01",,,
+SEC-DATA-0003,Data protection,DATA,Encrypt sensitive data in transit,"Protect the data in transit against 'out of band' attacks (such as traffic capture) using encryption to ensure that attackers cannot easily read or modify the data.
+
+Set the network boundary and service scope where data in transit encryption is mandatory inside and outside of the network. While this is optional for traffic on private networks, this is critical for traffic on external and public networks.
+
+Enforce secure transfer in services such as Azure Storage, where a native data in transit encryption feature is built in.
+
+Enforce HTTPS for web application workloads and services by ensuring that any clients connecting to your Azure resources use transport layer security (TLS) v1.2 or later. For remote management of VMs, use SSH (for Linux) or RDP/TLS (for Windows) instead of an unencrypted protocol.
+
+For remote management of Azure virtual machines, use SSH (for Linux) or RDP/TLS (for Windows) instead of an unencrypted protocol. For secure file transfer, use the SFTP/FTPS service in Azure Storage Blob, App Service apps, and Function apps, instead of using the regular FTP service.
+
+Note: Data in transit encryption is enabled for all Azure traffic traveling between Azure datacenters. TLS v1.2 or later is enabled on most Azure services by default. And some services such as Azure Storage and Application Gateway can enforce TLS v1.2 or later on the server side.","1.	Are TLS 1.2+ enforced for all public endpoints (App Gateway, Storage, Key Vault)?
+2.	Is ""Secure transfer required"" enabled on all Storage accounts?
+3.	Are SSH/RDP over TLS configured for VM management?
+4.	Are legacy or weak cipher suites blocked?","1. App Gateway / Front Door TLS configuration output.
+2. VM access logs confirming RDP over TLS / SSH key-based authentication.
+3. Wireshark/tcpdump validation of TLS handshakes.
+4. Azure Policy compliance for ""Secure transfer required.""","App Gateway / Front Door TLS configuration output | VM access logs confirming RDP over TLS / SSH key-based authentication | Wireshark/tcpdump validation of TLS handshakes | Azure Policy compliance for ""Secure transfer required.""",Complete,,,100,0.85,Observations: TLS 1.2 enforced for data in transit,Excel=CSF-AZ-DP-03 | MCSB=DP-3 | DocID=DP-3 | CIS=3.1 | NIST=SC-8,"CIS:3.1; NIST:SC-8; PCI:3.5, 3.6, 4.1; CSA:EKM-02, IPY-03, IVS-07; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,DP-3,Compliant,High,TLS 1.2 enforced for data in transit,,1. Meeting notes.,4,,,,CSF-AZ-DP-03,DP-3,3.1,SC-8,"3.5, 3.6, 4.1","EKM-02, IPY-03, IVS-07",,,
+SEC-DATA-0004,Data protection,DATA,Enable data at rest encryption by default,"To complement access controls, data at rest should be protected against 'out of band' attacks (such as accessing underlying storage) using encryption. This helps ensure that attackers cannot easily read or modify the data.
+
+Many Azure services have data at rest encryption enabled by default at the infrastructure layer using a service-managed key. These service-managed keys are generated on the customer’s behalf and automatically rotated every two years.
+
+Where technically feasible and not enabled by default, you can enable data at rest encryption in the Azure services, or in your VMs at the storage level, file level, or database level.","1.	Is encryption enabled by default on Storage, SQL DB, Cosmos DB, and managed disks?
+2.	Are custom images/disks checked for BitLocker/DM-crypt?
+3.	How is double encryption applied in critical workloads?
+4.	How often are service-managed keys rotated?","1.	Azure Storage account properties JSON ( encryption. services. * ).
+2.	SQL Transparent Data Encryption status ( sys.dm_database_encryption_keys ).
+3.	Disk encryption settings via az vm encryption show.
+4.	Azure Policy compliance report for ""encryption at rest.""","Azure Storage account properties JSON ( encryption. services. * ) | SQL Transparent Data Encryption status ( sys.dm_database_encryption_keys ) | Disk encryption settings via az vm encryption show | Azure Policy compliance report for ""encryption at rest.""",Complete,,,100,0.85,,Excel=CSF-AZ-DP-04 | MCSB=DP-4 | DocID=DP-4 | CIS=3.11 | NIST=SC-28,"CIS:3.11; NIST:SC-28; PCI:3.4, 3.5; CSA:EKM-03, IPY-03, IVS-07; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,DP-4,Compliant,High,,,1. Defender for cloud and meeting notes.,4,,,,CSF-AZ-DP-04,DP-4,3.11,SC-28,"3.4, 3.5","EKM-03, IPY-03, IVS-07",,,
+SEC-DATA-0005,Data protection,DATA,Use customer-managed key option in data at rest encryption when required,"If required for regulatory compliance, define the use case and service scope where customer-managed key option is needed. Enable and implement data at rest encryption using customer-managed keys in services.
+
+Azure also provides an encryption option using keys managed by yourself (customer-managed keys) for most services.
+
+Azure Key Vault Standard, Premium, and Managed HSM are natively integrated with many Azure Services for customer-managed key use cases. You may use Azure Key Vault to generate your key or bring your own keys.
+
+However, using the customer-managed key option requires additional operational effort to manage the key lifecycle. This may include encryption key generation, rotation, revoke, and access control, etc.","1.	Which services are using CMKs instead of Microsoft-managed keys?
+2.	How are keys created, rotated, and retired in Key Vault/HSM?
+3.	Is BYOK/HYOK used for regulatory workloads (finance, healthcare)?
+4.	Are CMK policies (rotation, expiration) enforced by automation?","1.	Azure Key Vault key properties with rotation policy JSON.
+2.	Audit logs for CMK usage (wrap/unwrap, encrypt/decrypt).
+3.	Service configs (Storage/SQL) referencing CMK URIs.
+4.	Proof of HSM-protected key use (Managed HSM configuration).","Azure Key Vault key properties with rotation policy JSON | Audit logs for CMK usage (wrap/unwrap, encrypt/decrypt) | Service configs (Storage/SQL) referencing CMK URIs | Proof of HSM-protected key use (Managed HSM configuration)",NotStarted,,,0,0.6,Gaps: CMEK is not configured.,"Excel=CSF-AZ-DP-05 | MCSB=DP-5 | DocID=DP-5 | CIS=3.11 | NIST=SC-12, SC-28","CIS:3.11; NIST:SC-12, SC-28; PCI:3.4, 3.5, 3.6; CSA:EKM-04, EKM-06, EKM-07; DocStatus:Non- Compliant",2025-11-11T17:51:32.035526+00:00,DP-5,Non- Compliant,Medium,,CMEK is not configured.,1. Meeting notes.,4,,,,CSF-AZ-DP-05,DP-5,3.11,"SC-12, SC-28","3.4, 3.5, 3.6","EKM-04, EKM-06, EKM-07",,,
+SEC-DATA-0006,Data protection,DATA,Use a secure key management process,"Document and implement an enterprise cryptographic key management standard, processes, and procedures to control your key lifecycle. When there is a need to use customer-managed key in the services, use a secured key vault service for key generation, distribution, and storage. Rotate and revoke your keys based on the defined schedule and when there is a key retirement or compromise.
+
+Use Azure Key Vault to create and control your encryption keys life cycle, including key generation, distribution, and storage. Rotate and revoke your keys in Azure Key Vault and your service based on the defined schedule and when there is a key retirement or compromise. Require a certain cryptographic type and minimum key size when generating keys.
+
+When there is a need to use customer-managed key (CMK) in the workload services or applications, ensure you follow the best practices:
+
+Use a key hierarchy to generate a separate data encryption key (DEK) with your key encryption key (KEK) in your key vault.
+Ensure keys are registered with Azure Key Vault and implemented via key IDs in each service or application.
+To maximize the key material lifetime and portability, bring your own key (BYOK) to the services (i.e., importing HSM-protected keys from your on-premises HSMs into Azure Key Vault). Follow the recommended guideline to perform the key generation and key transfer.
+
+Note: Refer to the below for the FIPS 140-2 level for Azure Key Vault types and FIPS compliance/validation level.
+
+Software-protected keys in vaults (Premium & Standard SKUs): FIPS 140-2 Level 1
+HSM-protected keys in vaults (Premium SKU): FIPS 140-2 Level 2
+HSM-protected keys in Managed HSM: FIPS 140-2 Level 3
+Azure Key Vault Premium uses a shared HSM infrastructure in the backend. Azure Key Vault Managed HSM uses dedicated, confidential service endpoints with a dedicated HSM for when you need a higher level of key security.","1.	How are cryptographic keys generated (manual, API, HSM)?
+2.	Are expired/unused keys deleted?
+3.	Are access permissions for key operations reviewed regularly?","1.	Azure Key Vault audit logs ( OperationName = Createkey and Deletekey ) from Log Analytics.
+2.	Managed HSM FIPS compliance export ( az keyvault show -- hsm-name <hsm> ).
+3.	Proof of key versioning: az keyvault key list-versions -- vault-name <vault> -- name <keyName>.
+4.	Azure AD PIM assignments or RBAC export showing who can perform wrapkey / unwrapKey.
+5.	Policy assignment screenshot enforcing ""Key Vault keys should have an expiration date.""","Azure Key Vault audit logs ( OperationName = Createkey and Deletekey ) from Log Analytics | Managed HSM FIPS compliance export ( az keyvault show -- hsm-name <hsm> ) | Proof of key versioning: az keyvault key list-versions -- vault-name <vault> -- name <keyName> | Azure AD PIM assignments or RBAC export showing who can perform wrapkey / unwrapKey | Policy assignment screenshot enforcing ""Key Vault keys should have an expiration date.""",NotStarted,,,0,0.85,,"Excel=CSF-AZ-DP-06 | MCSB=DP-6 | DocID=DP-6 | CIS=N/A | NIST=IA-5, SC-12, SC-28","CIS:N/A; NIST:IA-5, SC-12, SC-28; PCI:3.6; CSA:EKM-08, EKM-09, EKM-10; DocStatus:Non-Compliant",2025-11-11T17:51:32.035526+00:00,DP-6,Non-Compliant,High,,,1. Meeting notes,5,,,,CSF-AZ-DP-06,DP-6,N/A,"IA-5, SC-12, SC-28",3.6,"EKM-08, EKM-09, EKM-10",,,
+SEC-DATA-0007,Data protection,DATA,Use a secure certificate management process,"Document and implement an enterprise certificate management standard, processes and procedures which includes the certificate lifecycle control, and certificate policies (if a public key infrastructure is needed).
+
+Ensure certificates used by the critical services in your organization are inventoried, tracked, monitored, and renewed timely using automated mechanism to avoid service disruption.
+
+Use Azure Key Vault to create and control the certificate lifecycle, including the creation/import, rotation, revocation, storage, and purge of the certificate. Ensure the certificate generation follows the defined standard without using any insecure properties, such as insufficient key size, overly long validity period, insecure cryptography and so on. Setup automatic rotation of the certificate in Azure Key Vault and supported Azure services based on the defined schedule and when a certificate expires. If automatic rotation is not supported in the frontend application, use a manual rotation in Azure Key Vault.
+
+Avoid using a self-signed certificate and wildcard certificate in your critical services due to the limited security assurance. Instead, you can create public signed certificates in Azure Key Vault. The following Certificate Authorities (CAs) are the partnered providers that are currently integrated with Azure Key Vault.
+
+DigiCert: Azure Key Vault offers OV TLS/SSL certificates with DigiCert.
+GlobalSign: Azure Key Vault offers OV TLS/SSL certificates with GlobalSign.
+Note: Use only approved CA and ensure that known bad root/intermediate certificates issued by these CAs are disabled.","1.	What process ensures only approved Certificate Authorities (CAs) are used?
+2.	How are cert renewals automated?
+3.	How is certificate expiry monitored and alerted?","1.	Key Vault certificate inventory ( az keyvault certificate list ).
+2.	Azure Monitor alert rule JSON for Microsoft.KeyVault/certificates/nearExpiry.
+3.	Sentinel query results showing certificate expiration alerts triggered in last 90 days.
+4.	Documentation or config file showing integration with enterprise CA or DigiCert API.",Key Vault certificate inventory ( az keyvault certificate list ) | Azure Monitor alert rule JSON for Microsoft.KeyVault/certificates/nearExpiry | Sentinel query results showing certificate expiration alerts triggered in last 90 days | Documentation or config file showing integration with enterprise CA or DigiCert API,NotStarted,,,0,0.6,,"Excel=CSF-AZ-DP-07 | MCSB=DP-7 | DocID=DP-7 | CIS=N/A | NIST=IA-5, SC-12, SC-17","CIS:N/A; NIST:IA-5, SC-12, SC-17; PCI:3.6; CSA:EKM-11, EKM-12; DocStatus:Non-Compliant",2025-11-11T17:51:32.035526+00:00,DP-7,Non-Compliant,Medium,,,1.,4,,,,CSF-AZ-DP-07,DP-7,N/A,"IA-5, SC-12, SC-17",3.6,"EKM-11, EKM-12",,,
+SEC-DATA-0008,Data protection,DATA,Ensure security of key and certificate repository,"Ensure the security of the key vault service used for the cryptographic key and certificate lifecycle management. Harden your key vault service through access control, network security, logging and monitoring and backup to ensure keys and certificates are always protected using the maximum security.
+
+Secure your cryptographic keys and certificates by hardening your Azure Key Vault service through the following controls:
+
+Implement access control using RBAC policies in Azure Key Vault Managed HSM at the key level to ensure the least privilege and separation of duties principles are followed. For example, ensure separation of duties are in place for users who manage encryption keys so they do not have the ability to access encrypted data, and vice versa. For Azure Key Vault Standard and Premium, create unique vaults for different applications to ensure the least privilege and separation of duties principles are followed.
+Turn on Azure Key Vault logging to ensure critical management plane and data plane activities are logged.
+Secure the Azure Key Vault using Private Link and Azure Firewall to ensure minimal exposure of the service
+Use managed identity to access keys stored in Azure Key Vault in your workload applications.
+When purging data, ensure your keys are not deleted before the actual data, backups and archives are purged.
+Backup your keys and certificates using Azure Key Vault. Enable soft delete and purge protection to avoid accidental deletion of keys.When keys need to be deleted, consider disabling keys instead of deleting them to avoid accidental deletion of keys and cryptographic erasure of data.
+For bring your own key (BYOK) use cases, generate keys in an on-premises HSM and import them to maximize the lifetime and portability of the keys.
+Never store keys in plaintext format outside of the Azure Key Vault. Keys in all key vault services are not exportable by default.
+Use HSM-backed key types (RSA-HSM) in Azure Key Vault Premium and Azure Managed HSM for the hardware protection and the strongest FIPS levels.
+Enable Microsoft Defender for Key Vault for Azure-native, advanced threat protection for Azure Key Vault, providing an additional layer of security intelligence.","1.	Who has administrative access to Key Vault and Managed HSM?
+2.	Are vaults protected by network ACLs and private endpoints?
+3.	Are purge protection and soft delete enabled?
+4.	Are all access events logged and forwarded to SIEM?
+5.	Are alerting rules in place for abnormal access attempts?","1.	RBAC role assignment dump for Key Vault: az role assignment list -- scope <vaultResourceID>.
+2.	Vault network restriction config ( az keyvault show -- name <vault> -- query properties.networkAcls ).
+3.	Vault properties confirming soft delete/purge protection ( enablePurgeProtection: true ).
+4.	Sentinel workbook screenshot showing ingestion of Key Vault diagnostic logs.
+5.	Export of Azure Policy compliance: ""Key Vault should have purge protection enabled.""","RBAC role assignment dump for Key Vault: az role assignment list -- scope <vaultResourceID> | Vault network restriction config ( az keyvault show -- name <vault> -- query properties.networkAcls ) | Vault properties confirming soft delete/purge protection ( enablePurgeProtection: true ) | Sentinel workbook screenshot showing ingestion of Key Vault diagnostic logs | Export of Azure Policy compliance: ""Key Vault should have purge protection enabled.""",InProgress,,,60,0.85,Observations: Some of the Key vaults do not use private links and deletion protection is not enabled,"Excel=CSF-AZ-DP-08 | MCSB=DP-8 | DocID=DP-8 | CIS=N/A | NIST=IA-5, SC-12, SC-17","CIS:N/A; NIST:IA-5, SC-12, SC-17; PCI:3.6; CSA:EKM-13, IVS-02, LOG-02; DocStatus:Partial Compliant",2025-11-11T17:51:32.035526+00:00,DP-8,Partial Compliant,High,Some of the Key vaults do not use private links and deletion protection is not enabled,,1. Defender for Cloud.,5,,,,CSF-AZ-DP-08,DP-8,N/A,"IA-5, SC-12, SC-17",3.6,"EKM-13, IVS-02, LOG-02",,,
+SEC-DATA-0009,Data protection,DATA,Secrets management in use for applications,"Application secrets are stored in a secrets manager or vaulting solution.
+
+Azure Key Vault is in use",Is the organization currently following the Azure Guidance ?,Confirmation of the Assessment question,Confirmation of the Assessment question,NotStarted,,,0,0.5,,Excel=CSF-AZ-DP-09,,2025-11-11T17:51:32.035526+00:00,,,,,,,1,,,,CSF-AZ-DP-09,,,,,,,,

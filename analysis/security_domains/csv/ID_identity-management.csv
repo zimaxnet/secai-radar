@@ -1,0 +1,170 @@
+ControlID,Domain,DomainCode,ControlTitle,ControlDescription,Question,RequiredEvidence,EvidenceItems,Status,Owner,Frequency,ScoreNumeric,Weight,Notes,SourceRef,Tags,UpdatedAt,DocControlId,ComplianceStatus,Criticality,Observations,Gaps,References,EvidenceCount,AvailableEvidenceCount,EvidenceArtifacts,EvidenceLastCollected,ExcelControlId,MCSBMapping,CISMapping,NISTMapping,PCIDSSMapping,CSACCMMapping,IANSMapping,RiskSeverity,ImplementationGap
+SEC-ID-0001,Identity management,ID,Use centralized identity and authentication system,"Use a centralized identity and authentication system to govern your organization's identities and authentications for cloud and non-cloud resources.
+
+Azure Active Directory (Azure AD) is Azure's identity and authentication management service. You should standardize on Azure AD to govern your organization's identity and authentication in:
+
+Microsoft cloud resources, such as Azure Storage, Azure Virtual Machines (Linux and Windows), Azure Key Vault, PaaS, and SaaS applications.
+Your organization's resources, such as applications on Azure, third-party applications running on your corporate network resources, and third-party SaaS applications.
+Your enterprise identities in Active Directory by synchronization to Azure AD to ensure a consistent and centrally managed identity strategy.
+For the Azure services that apply, avoid use of local authentication methods and instead use Azure Active Directory to centralize your service authentications.","1. Are all Azure resources (VMs, SQL, Storage, Key Vault, PaaS) integrated with Azure AD instead of local accounts?
+2. Is on-premises Active Directory synchronized with Azure AD using AD Connect or SCIM?
+3. Are third-party SaaS applications federated with Azure AD SSO (SAML/OIDC)?","1. Azure AD tenant configuration screenshot (Azure Portal → Azure Active Directory → Overview).
+2. Export of Azure AD Connect sync rules (AD Connect → Synchronization Rules Editor).
+3. List of Enterprise Applications integrated with SSO (AzureAD PowerShell: Get-AzureADServicePrincipal)",Azure AD tenant configuration screenshot (Azure Portal → Azure Active Directory → Overview) | Export of Azure AD Connect sync rules (AD Connect → Synchronization Rules Editor) | List of Enterprise Applications integrated with SSO (AzureAD PowerShell: Get-AzureADServicePrincipal),NotStarted,,,0,0.85,"Observations: CONTOSO uses AD on-prem with AD Connect to synchronize user accounts to Entra ID.
+Observed that some storage accounts are enabled with shared key access","Excel=CSF-AZ-IM-01 | MCSB=IM-1 | DocID=IM-1 | CIS=6.7, 12.5 | NIST=AC-2, AC-3, IA-2, IA-8","CIS:6.7, 12.5; NIST:AC-2, AC-3, IA-2, IA-8; PCI:7.2, 8.3; CSA:IAM-01, IAM-02, IAM-03; DocStatus:Partial - Compliant",2025-11-11T17:51:32.035526+00:00,IM-1,Partial - Compliant,High,"CONTOSO uses AD on-prem with AD Connect to synchronize user accounts to Entra ID.
+Observed that some storage accounts are enabled with shared key access",,1. Meeting notes and defender for cloud.,3,,,,CSF-AZ-IM-01,IM-1,"6.7, 12.5","AC-2, AC-3, IA-2, IA-8","7.2, 8.3","IAM-01, IAM-02, IAM-03",,,
+SEC-ID-0002,Identity management,ID,Protect identity and authentication systems,"Secure your identity and authentication system as a high priority in your organization's cloud security practice. Common security controls include:
+
+1. Restrict privileged roles and accounts
+2. Require strong authentication for all privileged access
+3. Monitor and audit high risk activities
+
+Use the Azure AD security baseline and the Azure AD Identity Secure Score to evaluate your Azure AD identity security posture, and remediate security and configuration gaps. The Azure AD Identity Secure Score evaluates Azure AD for the following configurations:
+
+Use limited administrative roles
+Turn on user risk policy
+Designate more than one global admin
+Enable policy to block legacy authentication
+Ensure all users can complete multi-factor authentication for secure access
+Require MFA for administrative roles
+Enable self-service password reset
+Do not expire passwords
+Turn on sign-in risk policy
+Do not allow users to grant consent to unmanaged applications
+Use Azure AD Identity Protection to detect, investigate, and remediate identity-based risks. To similarly protect your on-premises Active Directory domain, use Defender for Identity.","1. Is Azure AD Identity Secure Score reviewed and tracked for remediation?
+2. Are Identity Protection policies (user risk, sign-in risk) enabled?
+3. Is Microsoft Defender for Identity deployed to monitor on-premises AD for lateral movement, credential theft, and Kerberos abuse?
+4. Is logging enabled for privileged role assignments and admin consent to applications?","1. Azure AD Identity Secure Score export (Azure Portal → Security → Identity Secure Score → Export).
+2. Conditional Access and Identity Protection policy export (AzureAD PowerShell: Get-AzureADMSConditionalAccessPolicy).
+3. Defender for Identity sensor deployment status (Defender for Identity Portal → Configuration → Sensors).
+4. Azure AD Audit logs for role assignments (AzureAD PowerShell: Get-AzureADAuditDirectoryLogs).",Azure AD Identity Secure Score export (Azure Portal → Security → Identity Secure Score → Export) | Conditional Access and Identity Protection policy export (AzureAD PowerShell: Get-AzureADMSConditionalAccessPolicy) | Defender for Identity sensor deployment status (Defender for Identity Portal → Configuration → Sensors) | Azure AD Audit logs for role assignments (AzureAD PowerShell: Get-AzureADAuditDirectoryLogs),Complete,,,100,0.85,"Observations: MFA is mandated for all administrator level access
+CyberArk is configured as PAM
+EntraID PIM is also in use","Excel=CSF-AZ-IM-02 | MCSB=IM-2 | DocID=IM-2 | CIS=5.4, 6.5 | NIST=AC-2, AC-3, IA-2, IA-8, SI-4","CIS:5.4, 6.5; NIST:AC-2, AC-3, IA-2, IA-8, SI-4; PCI:8.2, 8.3; CSA:IAM-05, IAM-06, IVS-05; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,IM-2,Compliant,High,"MFA is mandated for all administrator level access
+CyberArk is configured as PAM
+EntraID PIM is also in use",,1. Meeting notes.,4,,,,CSF-AZ-IM-02,IM-2,"5.4, 6.5","AC-2, AC-3, IA-2, IA-8, SI-4","8.2, 8.3","IAM-05, IAM-06, IVS-05",,,
+SEC-ID-0003,Identity management,ID,Manage application identities securely and automatically,"Use managed application identities instead of creating human accounts for applications to access resources and execute code. Managed application identities provide benefits such as reducing the exposure of credentials. Automate the rotation of credentials to ensure the security of the identities.
+
+Use Azure managed identities, which can authenticate to Azure services and resources that support Azure AD authentication. Managed identity credentials are fully managed, rotated, and protected by the platform, avoiding hard-coded credentials in source code or configuration files.
+
+For services that don't support managed identities, use Azure AD to create a service principal with restricted permissions at the resource level. It is recommended to configure service principals with certificate credentials and fall back to client secrets for authentication.","1. Are Managed Identities used for applications instead of hard-coded credentials?
+2. For applications that require service principals, are certificate-based credentials enforced over client secrets?
+3. Is credential rotation automated via Key Vault?
+4. Are service principal permissions restricted to least privilege?","1. List of resources with Managed Identities enabled (Azure CLI: az resource list --query ""[?identity!=null]"").
+2. Service principal credential types (Azure CLI: az ad sp credential list --id <AppID>).
+3. Key Vault secret rotation policy JSON export (az keyvault secret show --vault-name <vault> --name <secret>).
+4. Role assignments of service principals (Azure CLI: az role assignment list --assignee <AppID>)","List of resources with Managed Identities enabled (Azure CLI: az resource list --query ""[?identity!=null]"") | Service principal credential types (Azure CLI: az ad sp credential list --id <AppID>) | Key Vault secret rotation policy JSON export (az keyvault secret show --vault-name <vault> --name <secret>) | Role assignments of service principals (Azure CLI: az role assignment list --assignee <AppID>)",NotStarted,,,0,0.5,,"Excel=CSF-AZ-IM-03 | MCSB=IM-3: | CIS=N/A | NIST=AC-2, AC-3, IA-4, IA-5, IA-9","CIS:N/A; NIST:AC-2, AC-3, IA-4, IA-5, IA-9; PCI:N/A; CSA:IAM-07, IAM-08, IAM-09",2025-11-11T17:51:32.035526+00:00,,,,,,,4,,,,CSF-AZ-IM-03,IM-3:,N/A,"AC-2, AC-3, IA-4, IA-5, IA-9",N/A,"IAM-07, IAM-08, IAM-09",,,
+SEC-ID-0004,Identity management,ID,Authenticate server and services,"Authenticate remote servers and services from your client side to ensure you are connecting to trusted server and services. The most common server authentication protocol is Transport Layer Security (TLS), where the client-side (often a browser or client device) verifies the server by verifying the server’s certificate was issued by a trusted certificate authority.
+
+Many Azure services support TLS authentication by default. For services that don't support TLS authentication by default, or support disabling TLS, ensure it is always enabled to support the server/client authentication. Your client application should also be designed to verify server/client identity (by verifying the server’s certificate issued by a trusted certificate authority) in the handshake stage.","1. Is HTTPS/TLS enforced on all Azure services (Storage, App Services, Key Vault)?
+2. Are certificates issued from trusted CAs and stored in Azure Key Vault/App Service Certificates?
+3. Is mutual TLS (mTLS) configured where service-to-service trust is required?
+4. Are legacy/unencrypted protocols disabled (FTP, LDAP without TLS, HTTP)?","1. Azure Policy compliance report for “HTTPS Only” (Azure Policy → Assignments →Effect: Deny).
+2. Key Vault certificate inventory export (az keyvault certificate list --vault-name <vault>).
+3. App Gateway / API Management TLS configuration JSON.
+4. List of enabled protocols per Storage account (az storage account show --name <storage> --query ""enableHttpsTrafficOnly"").","Azure Policy compliance report for “HTTPS Only” (Azure Policy → Assignments →Effect: Deny) | Key Vault certificate inventory export (az keyvault certificate list --vault-name <vault>) | App Gateway / API Management TLS configuration JSON | List of enabled protocols per Storage account (az storage account show --name <storage> --query ""enableHttpsTrafficOnly"")",Complete,,,100,0.85,"Observations: Currently no VM/Servers are being utilised 
+Resources (Storage and DB) are configured with TLS 1.2",Excel=CSF-AZ-IM-04 | MCSB=IM-4 | DocID=IM-4 | CIS=N/A | NIST=IA-9,"CIS:N/A; NIST:IA-9; PCI:N/A; CSA:IAM-10, IAM-11, IAM-12; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,IM-4,Compliant,High,"Currently no VM/Servers are being utilised 
+Resources (Storage and DB) are configured with TLS 1.2",,Meeting notes and Defender for Cloud,4,,,,CSF-AZ-IM-04,IM-4,N/A,IA-9,N/A,"IAM-10, IAM-11, IAM-12",,,
+SEC-ID-0005,Identity management,ID,Use single sign-on (SSO) for application access,"Use single sign-on (SSO) to simplify the user experience for authenticating to resources including applications and data across cloud services and on-premises environments.
+
+Use Azure AD for workload application access (customer facing) access through Azure AD single sign-on (SSO), reducing the need for duplicate accounts. Azure AD provides identity and access management to Azure resources (in the management plane, including CLI, PowerShell, the portal), cloud applications, and on-premises applications.","1. Are enterprise SaaS applications federated with Azure AD using SAML or OIDC?
+2. Are guest users accessing apps via Azure AD B2B configured with Conditional Access policies?
+3. Are any applications still using standalone logins outside Azure AD federation?","1. Enterprise Application list (AzureAD PowerShell: Get-AzureADServicePrincipal | Select DisplayName, AppId).
+2. Federation settings for B2B/B2C (Azure AD → External Identities → Cross-tenant access).
+3. Conditional Access policy assignments for SaaS apps.
+4. Sign-in logs showing federated vs non-federated authentication (Azure Portal → Azure AD → Sign-ins)","Enterprise Application list (AzureAD PowerShell: Get-AzureADServicePrincipal | Select DisplayName, AppId) | Federation settings for B2B/B2C (Azure AD → External Identities → Cross-tenant access) | Conditional Access policy assignments for SaaS apps | Sign-in logs showing federated vs non-federated authentication (Azure Portal → Azure AD → Sign-ins)",Complete,,,100,0.6,Observations: Okta and Entra ID configured.,"Excel=CSF-AZ-IM-05 | MCSB=IM-5 | DocID=IM-5 | CIS=12.5 | NIST=IA-4, IA-2, IA-8","CIS:12.5; NIST:IA-4, IA-2, IA-8; PCI:N/A; CSA:IAM-13, IAM-14; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,IM-5,Compliant,Medium,Okta and Entra ID configured.,,1. Meeting notes.,4,,,,CSF-AZ-IM-05,IM-5,12.5,"IA-4, IA-2, IA-8",N/A,"IAM-13, IAM-14",,,
+SEC-ID-0006,Identity management,ID,Use strong authentication controls,"Enforce strong authentication controls (strong passwordless authentication or multi-factor authentication) with your centralized identity and authentication management system for all access to resources. Authentication based on password credentials alone is considered legacy, as it is insecure and does not stand up to popular attack methods.
+When deploying strong authentication, configure administrators and privileged users first, to ensure the highest level of the strong authentication method, quickly followed by rolling out the appropriate strong authentication policy to all users.
+
+Azure AD supports strong authentication controls through passwordless methods and multi-factor authentication (MFA).
+
+Passwordless authentication: Use passwordless authentication as your default authentication method. There are three options available in passwordless authentication: Windows Hello for Business, Microsoft Authenticator app phone sign-in, and FIDO2 security keys. In addition, customers can use on-premises authentication methods such as smart cards.
+Multi-factor authentication: Azure MFA can be enforced on all users, select users, or at the per-user level based on sign-in conditions and risk factors. Enable Azure MFA and follow Microsoft Defender for Cloud identity and access management recommendations for your MFA setup.
+If legacy password-based authentication is still used for Azure AD authentication, be aware that cloud-only accounts (user accounts created directly in Azure) have a default baseline password policy. And hybrid accounts (user accounts that come from on-premises Active Directory) follow the on-premises password policies.
+
+For third-party applications and services that may have default IDs and passwords, you should disable or change them during initial service setup.","1. Is MFA enforced for all privileged accounts and end users via Conditional Access?
+2. Are passwordless authentication methods (FIDO2, Authenticator app, Windows Hello) enabled?
+3. Is Azure AD Password Protection in place with custom banned password lists?
+4. Are break-glass accounts exempt from MFA but monitored with alerts?","1. Conditional Access policies export (Get-AzureADMSConditionalAccessPolicy).
+2. MFA registration report (Azure AD → Security → MFA → Registration Details).
+3. Azure AD Password Protection policy configuration (Azure AD → Security →
+Authentication Methods → Password Protection).
+4. Azure Monitor alerts for break-glass account usage.",Conditional Access policies export (Get-AzureADMSConditionalAccessPolicy) | MFA registration report (Azure AD → Security → MFA → Registration Details) | Azure AD Password Protection policy configuration (Azure AD → Security → | Authentication Methods → Password Protection) | Azure Monitor alerts for break-glass account usage,Complete,,,100,0.85,"Observations: MFA is Enforced for administrative access
+CyberArk is used PAM","Excel=CSF-AZ-IM-06 | MCSB=IM-6 | DocID=IM-6 | CIS=6.3, 6.4 | NIST=AC-2, AC-3, IA-2, IA-5, IA-8","CIS:6.3, 6.4; NIST:AC-2, AC-3, IA-2, IA-5, IA-8; PCI:7.2, 8.2, 8.3, 8.4; CSA:IAM-15, IAM-16; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,IM-6,Compliant,High,"MFA is Enforced for administrative access
+CyberArk is used PAM",,1. Meeting notes.,4,,,,CSF-AZ-IM-06,IM-6,"6.3, 6.4","AC-2, AC-3, IA-2, IA-5, IA-8","7.2, 8.2, 8.3, 8.4","IAM-15, IAM-16",,,
+SEC-ID-0007,Identity management,ID,Restrict resource access based on conditions,"Explicitly validate trusted signals to allow or deny user access to resources, as part of a zero-trust access model. Signals to validate should include strong authentication of user account, behavioral analytics of user account, device trustworthiness, user or group membership, locations and so on.
+
+Use Azure AD conditional access for more granular access controls based on user-defined conditions, such as requiring user logins from certain IP ranges (or devices) to use MFA. Azure AD Conditional Access allows you to enforce access controls on your organization’s apps based on certain conditions.
+
+Define the applicable conditions and criteria for Azure AD conditional access in the workload. Consider the following common use cases:
+
+Requiring multi-factor authentication for users with administrative roles
+Requiring multi-factor authentication for Azure management tasks
+Blocking sign-ins for users attempting to use legacy authentication protocols
+Requiring trusted locations for Azure AD Multi-Factor Authentication registration
+Blocking or granting access from specific locations
+Blocking risky sign-in behaviors
+Requiring organization-managed devices for specific applications
+Note: Granular authentication session management controls can also be implemented through Azure AD conditional access policy, such as sign-in frequency and persistent browser session.","1. Are Conditional Access policies applied based on device compliance (Intune), location, or risk level?
+2. Are session controls (sign-in frequency, persistent browser sessions) enforced?
+3. Are Conditional Access policies tested against high-risk users and applications?","1. Full Conditional Access policy JSON export.
+2. Intune compliance policy configuration export.
+3. Azure AD sign-in logs showing risk-based MFA enforcement.
+4. Conditional Access “What-If” test results (Azure Portal → Conditional Access → What If).",Full Conditional Access policy JSON export | Intune compliance policy configuration export | Azure AD sign-in logs showing risk-based MFA enforcement | Conditional Access “What-If” test results (Azure Portal → Conditional Access → What If),Complete,,,100,0.85,Observations: Zero Trust Principles: Geolocation-based access policies are enabled and applied almost universally as a key feature of the zero-trust strategy.,"Excel=CSF-AZ-IM-07 | MCSB=IM-7 | DocID=IM-7 | CIS=3.3, 6.4, 13.5 | NIST=AC-2, AC-3, AC-6","CIS:3.3, 6.4, 13.5; NIST:AC-2, AC-3, AC-6; PCI:7.2; CSA:IAM-04, IAM-17; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,IM-7,Compliant,High,Zero Trust Principles: Geolocation-based access policies are enabled and applied almost universally as a key feature of the zero-trust strategy.,,1. Meeting notes.,4,,,,CSF-AZ-IM-07,IM-7,"3.3, 6.4, 13.5","AC-2, AC-3, AC-6",7.2,"IAM-04, IAM-17",,,
+SEC-ID-0008,Identity management,ID,Restrict the exposure of credentials and secrets,"Ensure that application developers securely handle credentials and secrets:
+
+Avoid embedding the credentials and secrets into the code and configuration files
+Use key vault or a secure key store service to store the credentials and secrets
+Scan for credentials in source code.
+
+When using a managed identity is not an option, ensure that secrets and credentials are stored in secure locations such as Azure Key Vault, instead of embedding them into the code and configuration files.
+
+If you use Azure DevOps and GitHub for your code management platform:
+
+Implement Azure DevOps Credential Scanner to identify credentials within the code.
+For GitHub, use the native secret scanning feature to identify credentials or other form of secrets within the code.
+Clients such as Azure Functions, Azure Apps services, and VMs can use managed identities to access Azure Key Vault securely. See Data Protection controls related to the use of Azure Key Vault for secrets management.
+
+Note: Azure Key Vault provides automatic rotation for supported services. For secrets that cannot be automatically rotated, ensure they are manually rotated periodically and purged when no longer in use.","1. Are all application secrets, keys, and certificates stored in Azure Key Vault?
+2. Is RBAC enforced for Key Vault access instead of using access policies only?
+3. Are DevOps pipelines scanned for secrets (e.g., GitHub secret scanning, Microsoft Security DevOps)?
+4. Are rotation schedules in place for secrets/certificates?
+5. Are audit logs enabled for Key Vault access events?","1. Key Vault access policy and RBAC role assignment export (az keyvault show --name <vault> and az role assignment list).
+2. Key Vault diagnostic settings showing logs sent to Log Analytics/Event Hub.
+3. Secret scanning reports from GitHub/Azure DevOps.
+4. Secret and certificate expiry/rotation configuration (az keyvault certificate list --vault-name <vault>).",Key Vault access policy and RBAC role assignment export (az keyvault show --name <vault> and az role assignment list) | Key Vault diagnostic settings showing logs sent to Log Analytics/Event Hub | Secret scanning reports from GitHub/Azure DevOps | Secret and certificate expiry/rotation configuration (az keyvault certificate list --vault-name <vault>),Complete,,,100,0.85,"Observations: Veracode is used for scanning credentials and secrets in the DevOps pipeline
+ Azure Key Vault is utilized for Secret management in MCA","Excel=CSF-AZ-IM-08 | MCSB=IM-8 | DocID=IM-8 | CIS=16.9, 16.12 | NIST=IA-5","CIS:16.9, 16.12; NIST:IA-5; PCI:3.5, 6.3, 8.2; CSA:IAM-18, IVS-02; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,IM-8,Compliant,High,"Veracode is used for scanning credentials and secrets in the DevOps pipeline
+ Azure Key Vault is utilized for Secret management in MCA",,1. Meeting Notes,4,,,,CSF-AZ-IM-08,IM-8,"16.9, 16.12",IA-5,"3.5, 6.3, 8.2","IAM-18, IVS-02",,,
+SEC-ID-0009,Identity management,ID,Secure user access to existing applications,"In a hybrid environment, where you have on-premises applications or non-native cloud applications using legacy authentication, consider solutions such as cloud access security broker (CASB), application proxy, single sign-on (SSO) to govern the access to these applications for the following benefits:
+
+Enforce a centralized strong authentication
+Monitor and control risky end-user activities
+Monitor and remediate risky legacy applications activities
+Detect and prevent sensitive data transmission
+
+Protect your on-premises and non-native cloud applications using legacy authentication by connecting them to:
+
+Azure AD Application Proxy and configure header-based authentication to allow single sign-on (SSO) access to the applications for remote users, while explicitly validating the trustworthiness of both remote users and devices with Azure AD Conditional Access. If required, use a a third-party Software-Defined Perimeter (SDP) solution which can offer similar functionality.
+Microsoft Defender for Cloud Apps, which serves a cloud access security broker (CASB) service to monitor and block user access to unapproved third-party SaaS applications.
+Your existing third-party application delivery controllers and networks.","1. Are Azure AD sign-in and audit logs integrated into Sentinel or another SIEM?
+2. Are risky sign-ins, leaked credentials, and impossible travel events monitored?
+3. Are automated remediation actions applied (MFA challenge, block, conditional access)?
+4. Are deprecated accounts or stale service principals detected and alerted on?","1. Azure AD sign-in logs export (az ad signin list or Portal → Azure AD → Sign-ins).
+2. Sentinel analytics rules for identity anomalies (Azure Sentinel → Analytics → Rule templates).
+3. Identity Protection risky users/sign-ins export.
+4. Reports of inactive accounts (Get-AzureADUser -All $true | ?{$_.AccountEnabled -eq $false})",Azure AD sign-in logs export (az ad signin list or Portal → Azure AD → Sign-ins) | Sentinel analytics rules for identity anomalies (Azure Sentinel → Analytics → Rule templates) | Identity Protection risky users/sign-ins export | Reports of inactive accounts (Get-AzureADUser -All $true | ?{$_.AccountEnabled -eq $false}),NotStarted,,,0,0.5,,"Excel=CSF-AZ-IM-09 | MCSB=IM-9 | CIS=6.7, 12.5 | NIST=AC-2, AC-3, SC-11","CIS:6.7, 12.5; NIST:AC-2, AC-3, SC-11; PCI:N/A; CSA:EKM-01, EKM-02, IAM-19",2025-11-11T17:51:32.035526+00:00,,,,,,,4,,,,CSF-AZ-IM-09,IM-9,"6.7, 12.5","AC-2, AC-3, SC-11",N/A,"EKM-01, EKM-02, IAM-19",,,
+SEC-ID-0010,Identity management,ID,SSO utilized for most console/portal access,"Access to the CSP's console/portal is done through consolidated single sign-on. This can be via an external SSO provider or one built into the cloud platform.
+
+This is the default for Azure, which requires the use of Entra ID (formerly Azure AD)",Is the organization currently following the Azure Guidance ?,Confirmation of the Assessment question,Confirmation of the Assessment question,NotStarted,,,0,0.5,,Excel=CSF-AZ-IM-10,IANS:IAM-02.1,2025-11-11T17:51:32.035526+00:00,,,,,,,1,,,,CSF-AZ-IM-10,,,,,,IAM-02.1,,
+SEC-ID-0011,Identity management,ID,Users do not access the cloud console/portal outside of SSO,"Access to the cloud console or portal is only through the SSO portal, with the exception of a break-glass account (in case the SSO integration breaks).
+
+This is the default for Azure, which requires the use of Entra ID",Is the organization currently following the Azure Guidance ?,Confirmation of the Assessment question,Confirmation of the Assessment question,NotStarted,,,0,0.5,,Excel=CSF-AZ-IM-11,IANS:IAM-03.1,2025-11-11T17:51:32.035526+00:00,,,,,,,1,,,,CSF-AZ-IM-11,,,,,,IAM-03.1,,
+SEC-ID-0012,Identity management,ID,An IAM data perimeter is enforced,"An IAM data perimeter as an advanced concept that restricts where API calls are able to originate. While it may be implemented in all environments, it is especially important for production accounts.
+
+This is typically based on IP address but may also rely on device restrictions. Each cloud provider enforces these differently (and not all cloud providers support the capability at all), but the goal is to prevent an attacker from stealing static or session credentials (including tokens) and using them from a location under that attackers control.
+
+The subscription uses conditional access policies consistently",Is the organization currently following the Azure Guidance ?,Confirmation of the Assessment question,Confirmation of the Assessment question,NotStarted,,,0,0.5,,Excel=CSF-AZ-IM-12,IANS:IAM-05.1,2025-11-11T17:51:32.035526+00:00,,,,,,,1,,,,CSF-AZ-IM-12,,,,,,IAM-05.1,,
+SEC-ID-0013,Identity management,ID,JIT access used for access to production deployments,"Rather than allowing persistent human access to cloud deployments, a just-in-time (JIT) system provisions time-limited, session-based access on demand.
+
+JIT requests must meet policy guidelines and the system must support out-of-band approvals for highly privileged access.
+
+Azure PIM is enabled and used on all production subscriptions",Is the organization currently following the Azure Guidance ?,Confirmation of the Assessment question,Confirmation of the Assessment question,NotStarted,,,0,0.5,,Excel=CSF-AZ-IM-13,IANS:IAM-05.2,2025-11-11T17:51:32.035526+00:00,,,,,,,1,,,,CSF-AZ-IM-13,,,,,,IAM-05.2,,

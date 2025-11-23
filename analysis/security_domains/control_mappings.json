@@ -1,0 +1,912 @@
+{
+  "SEC-ASSET-0001": {
+    "domain": "Asset management",
+    "domainCode": "ASSET",
+    "excelControlId": "CSF-AZ-AM-01",
+    "docControlId": "AM-1",
+    "mcsb": "AM-1",
+    "title": "Track asset inventory and their risks",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-ASSET-0002": {
+    "domain": "Asset management",
+    "domainCode": "ASSET",
+    "excelControlId": "CSF-AZ-AM-02",
+    "docControlId": "AM-2",
+    "mcsb": "AM-2",
+    "title": "Use only approved services",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-ASSET-0003": {
+    "domain": "Asset management",
+    "domainCode": "ASSET",
+    "excelControlId": "CSF-AZ-AM-03",
+    "docControlId": "AM-3",
+    "mcsb": "AM-3",
+    "title": "Ensure security of asset lifecycle management",
+    "status": "NotStarted",
+    "complianceStatus": "Non-Compliant"
+  },
+  "SEC-ASSET-0004": {
+    "domain": "Asset management",
+    "domainCode": "ASSET",
+    "excelControlId": "CSF-AZ-AM-04",
+    "docControlId": "",
+    "mcsb": "AM-4",
+    "title": "Limit access to asset management",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-ASSET-0005": {
+    "domain": "Asset management",
+    "domainCode": "ASSET",
+    "excelControlId": "CSF-AZ-AM-05",
+    "docControlId": "AM-5",
+    "mcsb": "AM-5",
+    "title": "Use only approved applications in virtual machine",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-BAK-0001": {
+    "domain": "Backup and recovery",
+    "domainCode": "BAK",
+    "excelControlId": "CSF-AZ-B&R-01",
+    "docControlId": "BR-1",
+    "mcsb": "BR-1",
+    "title": "Ensure regular automated backups",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-BAK-0002": {
+    "domain": "Backup and recovery",
+    "domainCode": "BAK",
+    "excelControlId": "CSF-AZ-B&R-02",
+    "docControlId": "BR-2",
+    "mcsb": "BR-2",
+    "title": "Protect backup and recovery data",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-BAK-0003": {
+    "domain": "Backup and recovery",
+    "domainCode": "BAK",
+    "excelControlId": "CSF-AZ-B&R-03",
+    "docControlId": "BR-3",
+    "mcsb": "BR-3",
+    "title": "Monitor backups",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-BAK-0004": {
+    "domain": "Backup and recovery",
+    "domainCode": "BAK",
+    "excelControlId": "CSF-AZ-B&R-04",
+    "docControlId": "BR-4",
+    "mcsb": "BR-4",
+    "title": "Regularly test backup",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-DATA-0001": {
+    "domain": "Data protection",
+    "domainCode": "DATA",
+    "excelControlId": "CSF-AZ-DP-01",
+    "docControlId": "DP-1",
+    "mcsb": "DP-1",
+    "title": "Discover, classify, and label sensitive data",
+    "status": "NotStarted",
+    "complianceStatus": "Non-Compliant"
+  },
+  "SEC-DATA-0002": {
+    "domain": "Data protection",
+    "domainCode": "DATA",
+    "excelControlId": "CSF-AZ-DP-02",
+    "docControlId": "DP-2",
+    "mcsb": "DP-2",
+    "title": "Monitor anomalies and threats targeting sensitive data",
+    "status": "NotStarted",
+    "complianceStatus": "Non-Compliant"
+  },
+  "SEC-DATA-0003": {
+    "domain": "Data protection",
+    "domainCode": "DATA",
+    "excelControlId": "CSF-AZ-DP-03",
+    "docControlId": "DP-3",
+    "mcsb": "DP-3",
+    "title": "Encrypt sensitive data in transit",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-DATA-0004": {
+    "domain": "Data protection",
+    "domainCode": "DATA",
+    "excelControlId": "CSF-AZ-DP-04",
+    "docControlId": "DP-4",
+    "mcsb": "DP-4",
+    "title": "Enable data at rest encryption by default",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-DATA-0005": {
+    "domain": "Data protection",
+    "domainCode": "DATA",
+    "excelControlId": "CSF-AZ-DP-05",
+    "docControlId": "DP-5",
+    "mcsb": "DP-5",
+    "title": "Use customer-managed key option in data at rest encryption when required",
+    "status": "NotStarted",
+    "complianceStatus": "Non- Compliant"
+  },
+  "SEC-DATA-0006": {
+    "domain": "Data protection",
+    "domainCode": "DATA",
+    "excelControlId": "CSF-AZ-DP-06",
+    "docControlId": "DP-6",
+    "mcsb": "DP-6",
+    "title": "Use a secure key management process",
+    "status": "NotStarted",
+    "complianceStatus": "Non-Compliant"
+  },
+  "SEC-DATA-0007": {
+    "domain": "Data protection",
+    "domainCode": "DATA",
+    "excelControlId": "CSF-AZ-DP-07",
+    "docControlId": "DP-7",
+    "mcsb": "DP-7",
+    "title": "Use a secure certificate management process",
+    "status": "NotStarted",
+    "complianceStatus": "Non-Compliant"
+  },
+  "SEC-DATA-0008": {
+    "domain": "Data protection",
+    "domainCode": "DATA",
+    "excelControlId": "CSF-AZ-DP-08",
+    "docControlId": "DP-8",
+    "mcsb": "DP-8",
+    "title": "Ensure security of key and certificate repository",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-DATA-0009": {
+    "domain": "Data protection",
+    "domainCode": "DATA",
+    "excelControlId": "CSF-AZ-DP-09",
+    "docControlId": "",
+    "mcsb": "",
+    "title": "Secrets management in use for applications",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-DEV-0001": {
+    "domain": "DevOps security",
+    "domainCode": "DEV",
+    "excelControlId": "CSF-AZ-DOS-01",
+    "docControlId": "DS-1",
+    "mcsb": "DS-1",
+    "title": "Conduct threat modeling",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-DEV-0002": {
+    "domain": "DevOps security",
+    "domainCode": "DEV",
+    "excelControlId": "CSF-AZ-DOS-02",
+    "docControlId": "DS-2",
+    "mcsb": "DS-2",
+    "title": "Ensure software supply chain security",
+    "status": "NotStarted",
+    "complianceStatus": "Partial\nCompliant"
+  },
+  "SEC-DEV-0003": {
+    "domain": "DevOps security",
+    "domainCode": "DEV",
+    "excelControlId": "CSF-AZ-DOS-03",
+    "docControlId": "DS-3",
+    "mcsb": "DS-3",
+    "title": "Secure DevOps infrastructure",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-DEV-0004": {
+    "domain": "DevOps security",
+    "domainCode": "DEV",
+    "excelControlId": "CSF-AZ-DOS-04",
+    "docControlId": "DS-4",
+    "mcsb": "DS-4",
+    "title": "Integrate static application security testing into DevOps pipeline",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-DEV-0005": {
+    "domain": "DevOps security",
+    "domainCode": "DEV",
+    "excelControlId": "CSF-AZ-DOS-05",
+    "docControlId": "DS-5",
+    "mcsb": "DS-5",
+    "title": "Integrate dynamic application security testing into DevOps pipeline",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-DEV-0006": {
+    "domain": "DevOps security",
+    "domainCode": "DEV",
+    "excelControlId": "CSF-AZ-DOS-06",
+    "docControlId": "DS-6",
+    "mcsb": "DS-6",
+    "title": "Enforce security of workload throughout DevOps lifecycle",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-DEV-0007": {
+    "domain": "DevOps security",
+    "domainCode": "DEV",
+    "excelControlId": "CSF-AZ-DOS-07",
+    "docControlId": "DS-7",
+    "mcsb": "DS-7",
+    "title": "Enable logging and monitoring in DevOps",
+    "status": "NotStarted",
+    "complianceStatus": "Non-Compliant"
+  },
+  "SEC-END-0001": {
+    "domain": "Endpoint security",
+    "domainCode": "END",
+    "excelControlId": "CSF-AZ-EPS-01",
+    "docControlId": "ES-1",
+    "mcsb": "ES-1",
+    "title": "Use Endpoint Detection and Response (EDR)",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-END-0002": {
+    "domain": "Endpoint security",
+    "domainCode": "END",
+    "excelControlId": "CSF-AZ-EPS-02",
+    "docControlId": "ES-2",
+    "mcsb": "ES-2",
+    "title": "Use modern anti-malware software",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-END-0003": {
+    "domain": "Endpoint security",
+    "domainCode": "END",
+    "excelControlId": "CSF-AZ-EPS-03",
+    "docControlId": "ES-3",
+    "mcsb": "ES-3",
+    "title": "Ensure anti-malware software and signatures are updated",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-GOV-0001": {
+    "domain": "Governance and strategy",
+    "domainCode": "GOV",
+    "excelControlId": "CSF-AZ-GS-01",
+    "docControlId": "GS-1",
+    "mcsb": "GS-1",
+    "title": "Align organization roles, responsibilities and accountabilities",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-GOV-0002": {
+    "domain": "Governance and strategy",
+    "domainCode": "GOV",
+    "excelControlId": "CSF-AZ-GS-02",
+    "docControlId": "GS-2",
+    "mcsb": "GS-2",
+    "title": "Define and implement enterprise segmentation/separation of duties strategy",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-GOV-0003": {
+    "domain": "Governance and strategy",
+    "domainCode": "GOV",
+    "excelControlId": "CSF-AZ-GS-03",
+    "docControlId": "GS-3",
+    "mcsb": "GS-3",
+    "title": "Define and implement data protection strategy",
+    "status": "NotStarted",
+    "complianceStatus": "Partial-Compliant"
+  },
+  "SEC-GOV-0004": {
+    "domain": "Governance and strategy",
+    "domainCode": "GOV",
+    "excelControlId": "CSF-AZ-GS-04",
+    "docControlId": "GS-4",
+    "mcsb": "GS-4",
+    "title": "Define and implement network security strategy",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-GOV-0005": {
+    "domain": "Governance and strategy",
+    "domainCode": "GOV",
+    "excelControlId": "CSF-AZ-GS-05",
+    "docControlId": "GS-5",
+    "mcsb": "GS-5",
+    "title": "Define and implement security posture management strategy",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-GOV-0006": {
+    "domain": "Governance and strategy",
+    "domainCode": "GOV",
+    "excelControlId": "CSF-AZ-GS-06",
+    "docControlId": "GS-6",
+    "mcsb": "GS-6",
+    "title": "Define and implement identity and privileged access strategy",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-GOV-0007": {
+    "domain": "Governance and strategy",
+    "domainCode": "GOV",
+    "excelControlId": "CSF-AZ-GS-07",
+    "docControlId": "GS-7",
+    "mcsb": "GS-7",
+    "title": "Define and implement logging, threat detection and incident response strategy",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-GOV-0008": {
+    "domain": "Governance and strategy",
+    "domainCode": "GOV",
+    "excelControlId": "CSF-AZ-GS-08",
+    "docControlId": "GS-8",
+    "mcsb": "GS-8",
+    "title": "Define and implement backup and recovery strategy",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-GOV-0009": {
+    "domain": "Governance and strategy",
+    "domainCode": "GOV",
+    "excelControlId": "CSF-AZ-GS-09",
+    "docControlId": "GS-9",
+    "mcsb": "GS-9",
+    "title": "Define and implement endpoint security strategy",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-GOV-0010": {
+    "domain": "Governance and strategy",
+    "domainCode": "GOV",
+    "excelControlId": "CSF-AZ-GS-10",
+    "docControlId": "GS-10",
+    "mcsb": "GS-10",
+    "title": "Define and implement DevOps security strategy",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-GOV-0011": {
+    "domain": "Governance and strategy",
+    "domainCode": "GOV",
+    "excelControlId": "CSF-AZ-GS-11",
+    "docControlId": "",
+    "mcsb": "GS-11",
+    "title": "Align organization roles, responsibilities and accountabilities",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-ID-0001": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-01",
+    "docControlId": "IM-1",
+    "mcsb": "IM-1",
+    "title": "Use centralized identity and authentication system",
+    "status": "NotStarted",
+    "complianceStatus": "Partial - Compliant"
+  },
+  "SEC-ID-0002": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-02",
+    "docControlId": "IM-2",
+    "mcsb": "IM-2",
+    "title": "Protect identity and authentication systems",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-ID-0003": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-03",
+    "docControlId": "",
+    "mcsb": "IM-3:",
+    "title": "Manage application identities securely and automatically",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-ID-0004": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-04",
+    "docControlId": "IM-4",
+    "mcsb": "IM-4",
+    "title": "Authenticate server and services",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-ID-0005": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-05",
+    "docControlId": "IM-5",
+    "mcsb": "IM-5",
+    "title": "Use single sign-on (SSO) for application access",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-ID-0006": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-06",
+    "docControlId": "IM-6",
+    "mcsb": "IM-6",
+    "title": "Use strong authentication controls",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-ID-0007": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-07",
+    "docControlId": "IM-7",
+    "mcsb": "IM-7",
+    "title": "Restrict resource access based on conditions",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-ID-0008": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-08",
+    "docControlId": "IM-8",
+    "mcsb": "IM-8",
+    "title": "Restrict the exposure of credentials and secrets",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-ID-0009": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-09",
+    "docControlId": "",
+    "mcsb": "IM-9",
+    "title": "Secure user access to existing applications",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-ID-0010": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-10",
+    "docControlId": "",
+    "mcsb": "",
+    "title": "SSO utilized for most console/portal access",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-ID-0011": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-11",
+    "docControlId": "",
+    "mcsb": "",
+    "title": "Users do not access the cloud console/portal outside of SSO",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-ID-0012": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-12",
+    "docControlId": "",
+    "mcsb": "",
+    "title": "An IAM data perimeter is enforced",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-ID-0013": {
+    "domain": "Identity management",
+    "domainCode": "ID",
+    "excelControlId": "CSF-AZ-IM-13",
+    "docControlId": "",
+    "mcsb": "",
+    "title": "JIT access used for access to production deployments",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-IR-0001": {
+    "domain": "Incident response",
+    "domainCode": "IR",
+    "excelControlId": "CSF-AZ-IR-01",
+    "docControlId": "IR-1",
+    "mcsb": "IR-1",
+    "title": "Preparation - update incident response plan and handling process",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-IR-0002": {
+    "domain": "Incident response",
+    "domainCode": "IR",
+    "excelControlId": "CSF-AZ-IR-02",
+    "docControlId": "IR-2",
+    "mcsb": "IR-2",
+    "title": "Preparation - setup incident notification",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-IR-0003": {
+    "domain": "Incident response",
+    "domainCode": "IR",
+    "excelControlId": "CSF-AZ-IR-03",
+    "docControlId": "IR-3",
+    "mcsb": "IR-3",
+    "title": "Detection and analysis - create incidents based on high-quality alerts",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-IR-0004": {
+    "domain": "Incident response",
+    "domainCode": "IR",
+    "excelControlId": "CSF-AZ-IR-04",
+    "docControlId": "IR-4",
+    "mcsb": "IR-4",
+    "title": "Detection and analysis - investigate an incident",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-IR-0005": {
+    "domain": "Incident response",
+    "domainCode": "IR",
+    "excelControlId": "CSF-AZ-IR-05",
+    "docControlId": "IR-5",
+    "mcsb": "IR-5",
+    "title": "Detection and analysis - prioritize incidents",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-IR-0006": {
+    "domain": "Incident response",
+    "domainCode": "IR",
+    "excelControlId": "CSF-AZ-IR-06",
+    "docControlId": "IR-6",
+    "mcsb": "IR-6",
+    "title": "Containment, eradication and recovery - automate the incident handling",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-IR-0007": {
+    "domain": "Incident response",
+    "domainCode": "IR",
+    "excelControlId": "CSF-AZ-IR-07",
+    "docControlId": "IR-7",
+    "mcsb": "IR-7",
+    "title": "Post-incident activity - conduct lessons learned and retain evidence",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-LOG-0001": {
+    "domain": "Logging and threat detection",
+    "domainCode": "LOG",
+    "excelControlId": "CSF-AZ-LTD-01",
+    "docControlId": "LT-1",
+    "mcsb": "LT-1",
+    "title": "Enable threat detection capabilities",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-LOG-0002": {
+    "domain": "Logging and threat detection",
+    "domainCode": "LOG",
+    "excelControlId": "CSF-AZ-LTD-02",
+    "docControlId": "LT-2",
+    "mcsb": "LT-2",
+    "title": "Enable threat detection for identity and access management",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-LOG-0003": {
+    "domain": "Logging and threat detection",
+    "domainCode": "LOG",
+    "excelControlId": "CSF-AZ-LTD-03",
+    "docControlId": "LT-3",
+    "mcsb": "LT-3",
+    "title": "Enable logging for security investigation",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-LOG-0004": {
+    "domain": "Logging and threat detection",
+    "domainCode": "LOG",
+    "excelControlId": "CSF-AZ-LTD-04",
+    "docControlId": "LT-4",
+    "mcsb": "LT-4",
+    "title": "Enable network logging for security investigation",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-LOG-0005": {
+    "domain": "Logging and threat detection",
+    "domainCode": "LOG",
+    "excelControlId": "CSF-AZ-LTD-05",
+    "docControlId": "LT-5",
+    "mcsb": "LT-5",
+    "title": "Centralize security log management and analysis",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-LOG-0006": {
+    "domain": "Logging and threat detection",
+    "domainCode": "LOG",
+    "excelControlId": "CSF-AZ-LTD-06",
+    "docControlId": "LT-6",
+    "mcsb": "LT-6",
+    "title": "Configure log storage retention",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-LOG-0007": {
+    "domain": "Logging and threat detection",
+    "domainCode": "LOG",
+    "excelControlId": "CSF-AZ-LTD-07",
+    "docControlId": "",
+    "mcsb": "LT-7",
+    "title": "Use approved time synchronization sources",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-LOG-0008": {
+    "domain": "Logging and threat detection",
+    "domainCode": "LOG",
+    "excelControlId": "CSF-AZ-LTD-08",
+    "docControlId": "",
+    "mcsb": "",
+    "title": "Core log collection established, but not necessarily consistent",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-LOG-0009": {
+    "domain": "Logging and threat detection",
+    "domainCode": "LOG",
+    "excelControlId": "CSF-AZ-LTD-09",
+    "docControlId": "",
+    "mcsb": "",
+    "title": "Management plane API activity logs are consistently collected and centralized",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-LOG-0010": {
+    "domain": "Logging and threat detection",
+    "domainCode": "LOG",
+    "excelControlId": "CSF-AZ-LTD-10",
+    "docControlId": "",
+    "mcsb": "",
+    "title": "CSP threat/detection feeds are enabled and collected for at least production environments",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-LOG-0011": {
+    "domain": "Logging and threat detection",
+    "domainCode": "LOG",
+    "excelControlId": "CSF-AZ-LTD-11",
+    "docControlId": "",
+    "mcsb": "",
+    "title": "Robust cloud platform security telemetry centrally collected",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-LOG-0012": {
+    "domain": "Logging and threat detection",
+    "domainCode": "LOG",
+    "excelControlId": "CSF-AZ-LTD-12",
+    "docControlId": "",
+    "mcsb": "",
+    "title": "Cloud-native threat detectors are enabled",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-NET-0001": {
+    "domain": "Network security",
+    "domainCode": "NET",
+    "excelControlId": "CSF-AZ-NS-01",
+    "docControlId": "NS-1",
+    "mcsb": "NS-1",
+    "title": "Establish network segmentation boundaries",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-NET-0002": {
+    "domain": "Network security",
+    "domainCode": "NET",
+    "excelControlId": "CSF-AZ-NS-02",
+    "docControlId": "NS-2",
+    "mcsb": "NS-2",
+    "title": "Secure cloud native services with network controls",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-NET-0003": {
+    "domain": "Network security",
+    "domainCode": "NET",
+    "excelControlId": "CSF-AZ-NS-03",
+    "docControlId": "NS-3",
+    "mcsb": "NS-3",
+    "title": "Deploy firewall at the edge of enterprise network",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-NET-0004": {
+    "domain": "Network security",
+    "domainCode": "NET",
+    "excelControlId": "CSF-AZ-NS-04",
+    "docControlId": "NS-4",
+    "mcsb": "NS-4",
+    "title": "Deploy intrusion detection/intrusion prevention systems (IDS/IPS)",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-NET-0005": {
+    "domain": "Network security",
+    "domainCode": "NET",
+    "excelControlId": "CSF-AZ-NS-05",
+    "docControlId": "NS-5",
+    "mcsb": "NS-5",
+    "title": "Deploy DDOS protection",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-NET-0006": {
+    "domain": "Network security",
+    "domainCode": "NET",
+    "excelControlId": "CSF-AZ-NS-06",
+    "docControlId": "NS-6",
+    "mcsb": "NS-6",
+    "title": "Deploy web application firewall",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-NET-0007": {
+    "domain": "Network security",
+    "domainCode": "NET",
+    "excelControlId": "CSF-AZ-NS-07",
+    "docControlId": "NS-7",
+    "mcsb": "NS-7",
+    "title": "Simplify network security configuration",
+    "status": "NotStarted",
+    "complianceStatus": "Partial-Compliant"
+  },
+  "SEC-NET-0008": {
+    "domain": "Network security",
+    "domainCode": "NET",
+    "excelControlId": "CSF-AZ-NS-08",
+    "docControlId": "NS-8",
+    "mcsb": "NS-8",
+    "title": "Detect and disable insecure services and protocols",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-NET-0009": {
+    "domain": "Network security",
+    "domainCode": "NET",
+    "excelControlId": "CSF-AZ-NS-09",
+    "docControlId": "NS-9",
+    "mcsb": "NS-9",
+    "title": "Connect on-premises or cloud network privately",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-NET-0010": {
+    "domain": "Network security",
+    "domainCode": "NET",
+    "excelControlId": "CSF-AZ-NS-10",
+    "docControlId": "NS-10",
+    "mcsb": "NS-10",
+    "title": "Ensure Domain Name System (DNS) security",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-NET-0011": {
+    "domain": "Network security",
+    "domainCode": "NET",
+    "excelControlId": "CSF-AZ-NS-11",
+    "docControlId": "",
+    "mcsb": "N/A",
+    "title": "Sensitive ports are not exposed to the internet",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-NET-0012": {
+    "domain": "Network security",
+    "domainCode": "NET",
+    "excelControlId": "CSF-AZ-NS-12",
+    "docControlId": "",
+    "mcsb": "N/A",
+    "title": "Security groups should not allow excessive port ranges",
+    "status": "NotStarted",
+    "complianceStatus": ""
+  },
+  "SEC-PA-0001": {
+    "domain": "Privileged access",
+    "domainCode": "PA",
+    "excelControlId": "CSF-AZ-PA-01",
+    "docControlId": "PA-1",
+    "mcsb": "PA-1",
+    "title": "Separate and limit highly privileged/administrative users",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-PA-0002": {
+    "domain": "Privileged access",
+    "domainCode": "PA",
+    "excelControlId": "CSF-AZ-PA-02",
+    "docControlId": "PA-2",
+    "mcsb": "PA-2",
+    "title": "Avoid standing access for user accounts and permissions",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-PA-0003": {
+    "domain": "Privileged access",
+    "domainCode": "PA",
+    "excelControlId": "CSF-AZ-PA-03",
+    "docControlId": "PA-3",
+    "mcsb": "PA-3",
+    "title": "Manage lifecycle of identities and entitlements",
+    "status": "InProgress",
+    "complianceStatus": "Partially Compliant"
+  },
+  "SEC-PA-0004": {
+    "domain": "Privileged access",
+    "domainCode": "PA",
+    "excelControlId": "CSF-AZ-PA-04",
+    "docControlId": "PA-4",
+    "mcsb": "PA-4",
+    "title": "Review and reconcile user access regularly",
+    "status": "InProgress",
+    "complianceStatus": "Partially Compliant"
+  },
+  "SEC-PA-0005": {
+    "domain": "Privileged access",
+    "domainCode": "PA",
+    "excelControlId": "CSF-AZ-PA-05",
+    "docControlId": "PA-5",
+    "mcsb": "PA-5",
+    "title": "Set up emergency access",
+    "status": "NotStarted",
+    "complianceStatus": "Non-Compliant"
+  },
+  "SEC-PA-0006": {
+    "domain": "Privileged access",
+    "domainCode": "PA",
+    "excelControlId": "CSF-AZ-PA-06",
+    "docControlId": "PA-6",
+    "mcsb": "PA-6",
+    "title": "Use privileged access workstations",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  },
+  "SEC-PA-0007": {
+    "domain": "Privileged access",
+    "domainCode": "PA",
+    "excelControlId": "CSF-AZ-PA-07",
+    "docControlId": "PA-7",
+    "mcsb": "PA-7",
+    "title": "Follow just enough administration (least privilege) principle",
+    "status": "Complete",
+    "complianceStatus": "Compliant"
+  },
+  "SEC-PA-0008": {
+    "domain": "Privileged access",
+    "domainCode": "PA",
+    "excelControlId": "CSF-AZ-PA-08",
+    "docControlId": "PA-8",
+    "mcsb": "PA-8",
+    "title": "Determine access process for cloud provider support",
+    "status": "InProgress",
+    "complianceStatus": "Partial Compliant"
+  }
+}

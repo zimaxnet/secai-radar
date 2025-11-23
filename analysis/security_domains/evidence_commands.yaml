@@ -1,0 +1,30 @@
+# Sample Azure evidence commands. Replace subscription IDs, resource groups,
+# and workspace names with the customer tenant information before running.
+
+tenant: NICO
+
+context:
+  subscription: env:AZ_SUBSCRIPTION_ID          # pulls from environment variable
+  resource_group: Contoso-SecOps-RG
+  workspace: Contoso-LA
+
+controls:
+  SEC-NET-0001:
+    description: "Network segmentation evidence baseline"
+    evidence:
+      - name: vnet_inventory
+        command: az network vnet list --subscription {subscription} --output json
+        output: json
+      - name: nsg_rules
+        command: az network nsg list --subscription {subscription} --output json
+        output: json
+
+  SEC-LOG-0001:
+    description: "Central logging verification"
+    evidence:
+      - name: log_workspaces
+        command: az monitor log-analytics workspace list --subscription {subscription} --output json
+        output: json
+      - name: sentinel_data_connectors
+        command: az security sentinel data-connector list --resource-group {resource_group} --workspace-name {workspace} --output json
+        output: json

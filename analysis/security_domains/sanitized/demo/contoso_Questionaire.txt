@@ -1,0 +1,55 @@
+Domain
+Queries
+Documentation Queries
+CONTOSO Comments
+Network Security
+Please provide a reference for network security architecture diagram for the Azure environment covering the Palo Alto NGFW
+Network Security
+Please provide network architecture diagram covering on-prem to azure connections
+Network Security
+For the Palo Alto are the advanced IDS/IPS enabled for NGFW for Azure Envionment
+IAM
+How is the SSO being planned for application access. Is it Okta for MCA 
+Hosted apps
+IAM
+Is MFA configured for all Azure access & all users.
+IAM
+Currently Azure PIM is the PAM Solution. Is there a plan to use CyberArk for Azure in future
+IAM
+Is there an approach implemented using conditional policies for data perimeter by adding data/IP restrictions? What are the current conditional policies configured
+PAM
+Is there any detailed documentation on emergency/break-glass access for Azure env.
+PAM
+Is there a  Use of privileged access workstations/bastion hosts for privileged tasks by admins etc.?
+PAM
+Is there a process defined for Microsoft Support Access for troubleshooting or support help
+Data Protection
+Is ExpressRoute configured with encryption?
+Data Protection
+Is there a standard and procedure defined for Azure Key Management LifeCycle
+Data Protection
+Is there a standard and procedure defined for Certificate Management in Azure
+Azure Services
+Is there any control to restrict only usage of approved azure services
+Asset Management
+Is there a policy for asset management of VMs and other assets for 1) secure configurations 2) approved applications on VMs and 3) asset lifecycle mangement
+Threat Detection
+Are the IAM accounts monitored for threats like risk-logins, failed logins integrated to the SIEM for incident detection
+Log Collection
+Is there a document on 
+log collection,
+centralization 
+and retention 
+type of logs to be collected
+for Azure Logs
+Incident Response
+Is there a Azure Incident Response plan detailing the process and owners of each step including containment, co-ordination with Microsoft support, eradication, lesson-learnt
+Posture and Vulnerability Management
+Are security baselines defined for each Aure Services e.g.: guardrail/policy documents for each service
+Backup Management
+What security controls are in place for protecting backups, monitoring backups, testing the backups
+Are there any Backup and Recovery SOPs for Azure env
+Securing DevOps Infrastructure
+Are there any security controls to monitor and protect DevOps pipelines. Is logging and monitoring enabled for DevOps and integrated with SIEM
+Cloud Security Strategy
+Do we have a cloud security strategy document  covering  IAM , network data protection strategy

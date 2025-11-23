@@ -1,0 +1,157 @@
+ControlID,Domain,DomainCode,ControlTitle,ControlDescription,Question,RequiredEvidence,EvidenceItems,Status,Owner,Frequency,ScoreNumeric,Weight,Notes,SourceRef,Tags,UpdatedAt,DocControlId,ComplianceStatus,Criticality,Observations,Gaps,References,EvidenceCount,AvailableEvidenceCount,EvidenceArtifacts,EvidenceLastCollected,ExcelControlId,MCSBMapping,CISMapping,NISTMapping,PCIDSSMapping,CSACCMMapping,IANSMapping,RiskSeverity,ImplementationGap
+SEC-NET-0001,Network security,NET,Establish network segmentation boundaries,"Ensure that your virtual network deployment aligns to your enterprise segmentation strategy defined in the GS-2 security control. Any workload that could incur higher risk for the organization should be in isolated virtual networks.
+
+Create a virtual network (VNet) as a fundamental segmentation approach in your Azure network, so resources such as VMs can be deployed into the VNet within a network boundary. To further segment the network, you can create subnets inside VNet for smaller sub-networks.
+
+Use network security groups (NSG) as a network layer control to restrict or monitor traffic by port, protocol, source IP address, or destination IP address. Refer to NS-7: Simplify network security configuration to use Adaptive Network Hardening to recommend NSG hardening rules based on threat intelligence and traffic analysis result.
+
+You can also use application security groups (ASGs) to simplify complex configuration. Instead of defining policy based on explicit IP addresses in network security groups, ASGs enable you to configure network security as a natural extension of an application's structure, allowing you to group virtual machines and define network security policies based on those groups.","1. Are VNets and subnets defined for workload isolation?
+2. Are NSGs applied to restrict/monitor traffic?
+3. Are ASGs used for simplifying security rules?
+4. Are segmentation rules aligned with enterprise segmentation strategy?","1. Azure VNet/subnet configuration export
+2. NSG rule reports
+3. ASG definitions
+4. Network Hardening recommendations (Defender for Cloud or equivalent tool)
+5. Architecture diagram showing segmentation boundaries",Azure VNet/subnet configuration export | NSG rule reports | ASG definitions | Network Hardening recommendations (Defender for Cloud or equivalent tool) | Architecture diagram showing segmentation boundaries,Complete,,,100,0.85,Observations: VNET Isolation and usage of NSG rules have been implemented. When applications migrate from CSP appropriate ASG rules will be deployed.,"Excel=CSF-AZ-NS-01 | MCSB=NS-1 | DocID=NS-1 | CIS=3.12, 13.4, 4.4 | NIST=AC-4, SC-2, SC-7","CIS:3.12, 13.4, 4.4; NIST:AC-4, SC-2, SC-7; PCI:1.1, 1.2, 1.3; CSA:IVS-03; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,NS-1,Compliant,High,VNET Isolation and usage of NSG rules have been implemented. When applications migrate from CSP appropriate ASG rules will be deployed.,,"Azure Review, Meeting Notes",5,0,,,CSF-AZ-NS-01,NS-1,"3.12, 13.4, 4.4","AC-4, SC-2, SC-7","1.1, 1.2, 1.3",IVS-03,,,
+SEC-NET-0002,Network security,NET,Secure cloud native services with network controls,"Secure cloud services by establishing a private access point for resources. You should also disable or restrict access from public networks when possible.
+
+Deploy private endpoints for all Azure resources that support the Private Link feature to establish a private access point for the resources. Using Private Link will keep the private connection from routing through the public network.
+
+Note: Certain Azure services may also allow private communication through the service endpoint feature, though it is recommended to use Azure Private Link for secure and private access to services hosted on Azure platform.
+
+For certain services, you can choose to deploy VNet integration for the service where you can restrict the VNET to establish a private access point for the service.
+
+You also have the option to configure the service native network ACL rules or simply disable public network access to block access from public networks.
+
+For Azure VMs, unless there is a strong use case, you should avoid assigning public IPs/subnet directly to the VM interface and instead use gateway or load balancer services as the front-end for access by the public network.","1. Are Azure PaaS services (e.g., Storage, SQL, Key Vault) integrated privately with VNets via Private Link or Service Endpoints?
+2. Is public access disabled where feasible?
+3. Are NSGs or firewall rules applied to restrict access to services?","1. Azure Private Link/Service Endpoint configuration
+2. Firewall and NSG rule sets
+3. Azure Policy assignments for restricting public access",Azure Private Link/Service Endpoint configuration | Firewall and NSG rule sets | Azure Policy assignments for restricting public access,InProgress,,,60,0.85,"Observations: Private Endpoints planned for MCA Subscriptions as discussed in the initial meeting
+Observed that Some storage accounts, key vaults are not using private links as reported by Defender for Cloud","Excel=CSF-AZ-NS-02 | MCSB=NS-2 | DocID=NS-2 | CIS=3.12, 4.4 | NIST=AC-4, SC-2, SC-7","CIS:3.12, 4.4; NIST:AC-4, SC-2, SC-7; PCI:1.1, 1.2, 1.3; CSA:IVS-06; DocStatus:Partial Compliant",2025-11-11T17:51:32.035526+00:00,NS-2,Partial Compliant,High,"Private Endpoints planned for MCA Subscriptions as discussed in the initial meeting
+Observed that Some storage accounts, key vaults are not using private links as reported by Defender for Cloud",,"Meeting Notes/Discussion
+Defender for Cloud",3,0,,,CSF-AZ-NS-02,NS-2,"3.12, 4.4","AC-4, SC-2, SC-7","1.1, 1.2, 1.3",IVS-06,,,
+SEC-NET-0003,Network security,NET,Deploy firewall at the edge of enterprise network,"Deploy a firewall to perform advanced filtering on network traffic to and from external networks. You can also use firewalls between internal segments to support a segmentation strategy. If required, use custom routes for your subnet to override the system route when you need to force the network traffic to go through a network appliance for security control purposes.
+
+Use Azure Firewall to provide fully stateful application layer traffic restriction (such as URL filtering) and/or central management over a large number of enterprise segments or spokes (in a hub/spoke topology).
+
+If you have a complex network topology, such as a hub/spoke setup, you may need to create user-defined routes (UDR) to ensure the traffic goes through the desired route. For example, you have the option to use an UDR to redirect egress internet traffic through a specific Azure Firewall or a network virtual appliance.","1. Is Azure Firewall deployed for centralized traffic control?
+2. Are firewall policies defined with application and network rules?
+3. Is Firewall Manager used for policy consistency?
+4. Are threat intelligence-based filtering rules enabled?","1. Azure Firewall configuration and rules export
+2. Firewall Manager policy assignments
+3. Defender for Cloud recommendations",Azure Firewall configuration and rules export | Firewall Manager policy assignments | Defender for Cloud recommendations,Complete,,,100,0.85,"Observations: As discussed in the meeting, Palo Alto is deployed for protection at Edge and Cloudflare and Azure WAF at the edge","Excel=CSF-AZ-NS-03 | MCSB=NS-3 | DocID=NS-3 | CIS=4.4, 4.8, 13.10 | NIST=AC-4, SC-7, CM-7","CIS:4.4, 4.8, 13.10; NIST:AC-4, SC-7, CM-7; PCI:1.1, 1.2, 1.3; CSA:IVS-08; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,NS-3,Compliant,High,"As discussed in the meeting, Palo Alto is deployed for protection at Edge and Cloudflare and Azure WAF at the edge",,1.,3,0,,,CSF-AZ-NS-03,NS-3,"4.4, 4.8, 13.10","AC-4, SC-7, CM-7","1.1, 1.2, 1.3",IVS-08,,,
+SEC-NET-0004,Network security,NET,Deploy intrusion detection/intrusion prevention systems (IDS/IPS),"Use network intrusion detection and intrusion prevention systems (IDS/IPS) to inspect the network and payload traffic to or from your workload. Ensure that IDS/IPS is always tuned to provide high-quality alerts to your SIEM solution.
+
+Use Azure Firewall’s IDPS capabilities to protect your virtual network to alert on and/or block traffic to and from known malicious IP addresses and domains.
+
+For more in-depth host level detection and prevention capability, deploy host-based IDS/IPS or a host-based endpoint detection and response (EDR) solution, such as Microsoft Defender for Endpoint, at the VM level in conjunction with the network IDS/IPS.","1. Is IDS/IPS functionality enabled on Azure Firewall Premium or NVA appliances?
+2. Is traffic being mirrored to an IDS solution (e.g., via Network Watcher TAP)?
+3. Are alerts integrated with SIEM (Microsoft Sentinel)?","1. IDS/IPS configuration on Azure Firewall or NVAs
+2. Logs showing intrusion detection alerts
+3. Sentinel integration settings",IDS/IPS configuration on Azure Firewall or NVAs | Logs showing intrusion detection alerts | Sentinel integration settings,InProgress,,,60,0.85,Observations: Palo Alto NGFW found configured. It includes IPS/IDS.,"Excel=CSF-AZ-NS-04 | MCSB=NS-4 | DocID=NS-4 | CIS=13.2, 13.3, 13.7, 13.8 | NIST=SC-7, SI-4","CIS:13.2, 13.3, 13.7, 13.8; NIST:SC-7, SI-4; PCI:11.4; CSA:IVS-09; DocStatus:Partial Compliant",2025-11-11T17:51:32.035526+00:00,NS-4,Partial Compliant,High,Palo Alto NGFW found configured. It includes IPS/IDS.,,1. https://www.paloaltonetworks.com/resources/whitepapers/palo-alto-networks-approach-to-intrusion-prevention,3,0,,,CSF-AZ-NS-04,NS-4,"13.2, 13.3, 13.7, 13.8","SC-7, SI-4",11.4,IVS-09,,,
+SEC-NET-0005,Network security,NET,Deploy DDOS protection,"Deploy distributed denial of service (DDoS) protection to protect your network and applications from attacks.
+
+DDoS Protection Basic is automatically enabled to protect the Azure underlying platform infrastructure (e.g. Azure DNS) and requires no configuration from the users.
+
+For higher levels of protection of your application layer (Layer 7) attacks such as HTTP floods and DNS floods, enable the DDoS standard protection plan on your VNet to protect resources that are exposed to the public networks.","1. Is Azure DDoS Protection (Basic or Standard) enabled?
+2. Are high-risk internet-facing VNets enrolled in DDoS Standard?
+3. Are mitigation alerts integrated with monitoring?","1. DDoS Standard plan assignment in subscription
+2. VNet DDoS protection configuration
+3. Monitoring/alert logs from Defender for Cloud",DDoS Standard plan assignment in subscription | VNet DDoS protection configuration | Monitoring/alert logs from Defender for Cloud,Complete,,,100,0.85,"Observations: Cloudflare is being used to as DDoS protection
+DDoS protection enabled at VNET level","Excel=CSF-AZ-NS-05 | MCSB=NS-5 | DocID=NS-5 | CIS=13.1 | NIST=SC-5, SC-7","CIS:13.1; NIST:SC-5, SC-7; PCI:1.1, 1.2, 1.3, 6.6; CSA:IPY-09; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,NS-5,Compliant,High,"Cloudflare is being used to as DDoS protection
+DDoS protection enabled at VNET level",,1. Meeting Notes,3,0,,,CSF-AZ-NS-05,NS-5,13.1,"SC-5, SC-7","1.1, 1.2, 1.3, 6.6",IPY-09,,,
+SEC-NET-0006,Network security,NET,Deploy web application firewall,"Deploy a web application firewall (WAF) and configure the appropriate rules to protect your web applications and APIs from application-specific attacks.
+
+Use web application firewall (WAF) capabilities in Azure Application Gateway, Azure Front Door, and Azure Content Delivery Network (CDN) to protect your applications, services and APIs against application layer attacks at the edge of your network.
+
+Set your WAF in ""detection"" or ""prevention mode"", depending on your needs and threat landscape.
+
+Choose a built-in ruleset, such as OWASP Top 10 vulnerabilities, and tune it to your application needs.","1. Are Azure Application Gateway WAF or Azure Front Door WAF policies deployed?
+2. Are managed rule sets enabled and customized as needed?
+3. Are logs from WAF integrated into Sentinel?","1. WAF policy configuration export
+2. Rule set assignment (OWASP CRS, custom rules)
+3. Log Analytics/Sentinel WAF logs","WAF policy configuration export | Rule set assignment (OWASP CRS, custom rules) | Log Analytics/Sentinel WAF logs",Complete,,,100,0.85,Observations: Cloudflare at Edge and Azure WAF is in use at the app gateway,Excel=CSF-AZ-NS-06 | MCSB=NS-6 | DocID=NS-6 | CIS=13.1 | NIST=SC-7,"CIS:13.1; NIST:SC-7; PCI:1.1, 1.2, 1.3; CSA:IVS-07; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,NS-6,Compliant,High,Cloudflare at Edge and Azure WAF is in use at the app gateway,,1.,3,0,,,CSF-AZ-NS-06,NS-6,13.1,SC-7,"1.1, 1.2, 1.3",IVS-07,,,
+SEC-NET-0007,Network security,NET,Simplify network security configuration,"When managing a complex network environment, use tools to simplify, centralize and enhance network security management.
+
+Use the following features to simplify the implementation and management of the virtual network, NSG rules, and Azure Firewall rules:
+
+1. Use Azure Virtual Network Manager to group, configure, deploy, and manage virtual networks and NSG rules across regions and subscriptions.
+2. Use Microsoft Defender for Cloud Adaptive Network Hardening to recommend NSG hardening rules that further limit ports, protocols and source IPs based on threat intelligence and traffic analysis result.
+3. Use Azure Firewall Manager to centralize the firewall policy and route management of the virtual network. To simplify the firewall rules and network security groups implementation, you can also use the Azure Firewall Manager Azure Resource Manager(ARM) template.","1. Is Adaptive Network Hardening enabled in Defender for Cloud?
+2. Are NSGs being hardened using recommendations?
+3. Is policy-as-code (Azure Policy/Blueprints) applied to enforce security rules?","1. Adaptive Network Hardening recommendations
+2. Azure Policy assignment reports
+3. Screenshots of NSG recommendation remediation",Adaptive Network Hardening recommendations | Azure Policy assignment reports | Screenshots of NSG recommendation remediation,NotStarted,,,0,0.6,,"Excel=CSF-AZ-NS-07 | MCSB=NS-7 | DocID=NS-7 | CIS=4.4, 4.8 | NIST=AC-4, SC-2, SC-7","CIS:4.4, 4.8; NIST:AC-4, SC-2, SC-7; PCI:1.1, 1.2, 1.3; CSA:IVS-04; DocStatus:Partial-Compliant",2025-11-11T17:51:32.035526+00:00,NS-7,Partial-Compliant,Medium,,,1.,3,0,,,CSF-AZ-NS-07,NS-7,"4.4, 4.8","AC-4, SC-2, SC-7","1.1, 1.2, 1.3",IVS-04,,,
+SEC-NET-0008,Network security,NET,Detect and disable insecure services and protocols,"Detect and disable insecure services and protocols at the OS, application, or software package layer. Deploy compensating controls if disabling insecure services and protocols are not possible.
+
+Use Microsoft Sentinel’s built-in Insecure Protocol Workbook to discover the use of insecure services and protocols such as SSL/TLSv1, SSHv1, SMBv1, LM/NTLMv1, wDigest, weak ciphers in Kerberos, and Unsigned LDAP Binds. Disable insecure services and protocols that do not meet the appropriate security standard.
+
+Note: If disabling insecure services or protocols is not possible, use compensating controls such as blocking access to the resources through network security group, Azure Firewall, or Azure Web Application Firewall to reduce the attack surface.","1. Are insecure protocols (e.g., SMBv1, Telnet, RDP over internet) blocked via NSGs or Firewall?
+2. Are TLS 1.2+ enforced on services?
+3. Are monitoring alerts enabled for deprecated/insecure services?","1. NSG/Firewall rules blocking insecure ports
+2. Service configurations (TLS settings in App Gateway, SQL, Storage)
+3. Defender for Cloud insecure protocol findings","NSG/Firewall rules blocking insecure ports | Service configurations (TLS settings in App Gateway, SQL, Storage) | Defender for Cloud insecure protocol findings",Complete,,,100,0.85,Observations: CONTOSO disables all ports and protocols by default.,"Excel=CSF-AZ-NS-08 | MCSB=NS-8 | DocID=NS-8 | CIS=4.4, 4.8 | NIST=CM-2, CM-6, CM-7","CIS:4.4, 4.8; NIST:CM-2, CM-6, CM-7; PCI:4.1, A2.1, A2.2, A2.3; CSA:LOG-03; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,NS-8,Compliant,High,CONTOSO disables all ports and protocols by default.,,1. Meeting Notes,3,0,,,CSF-AZ-NS-08,NS-8,"4.4, 4.8","CM-2, CM-6, CM-7","4.1, A2.1, A2.2, A2.3",LOG-03,,,
+SEC-NET-0009,Network security,NET,Connect on-premises or cloud network privately,"Use private connections for secure communication between different networks, such as cloud service provider datacenters and on-premises infrastructure in a colocation environment.
+
+For lightweight site-to-site or point-to-site connectivity, use Azure virtual private network (VPN) to create a secure connection between your on-premises site or end-user device and the Azure virtual network.
+
+For enterprise-level high performance connections, use Azure ExpressRoute (or Virtual WAN) to connect Azure datacenters and on-premises infrastructure in a co-location environment.
+
+When connecting two or more Azure virtual networks together, use virtual network peering. Network traffic between peered virtual networks is private and is kept on the Azure backbone network.","1. Is ExpressRoute or VPN Gateway used for hybrid connectivity?
+2. Are Private Endpoints used for inter-service communication?
+3. Is traffic encrypted over private connections?
+4. Is forced tunneling configured if required?","1. ExpressRoute/VPN Gateway configuration
+2. Private Link endpoint setup
+3. Network architecture diagrams
+4. Defender for Cloud hybrid network findings",ExpressRoute/VPN Gateway configuration | Private Link endpoint setup | Network architecture diagrams | Defender for Cloud hybrid network findings,Complete,,,100,0.85,Observations: MCA will use ExpressRoute,"Excel=CSF-AZ-NS-09 | MCSB=NS-9 | DocID=NS-9 | CIS=12.7 | NIST=CA-3, AC-17, AC-4","CIS:12.7; NIST:CA-3, AC-17, AC-4; PCI:N/A; CSA:LOG-2; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,NS-9,Compliant,High,MCA will use ExpressRoute,,1. Meeting Notes,4,0,,,CSF-AZ-NS-09,NS-9,12.7,"CA-3, AC-17, AC-4",N/A,LOG-2,,,
+SEC-NET-0010,Network security,NET,Ensure Domain Name System (DNS) security,"Ensure that Domain Name System (DNS) security configuration protects against known risks:
+
+1. Use trusted authoritative and recursive DNS services across your cloud environment to ensure the client (such as operating systems and applications) receives the correct resolution result.
+2. Separate the public and private DNS resolution so the DNS resolution process for the private network can be isolated from the public network.
+3. Ensure your DNS security strategy also includes mitigations against common attacks, such as dangling DNS, DNS amplifications attacks, DNS poisoning and spoofing, and so on.
+
+Use Azure recursive DNS (usually assigned to your VM through DHCP or preconfigured in the service) or a trusted external DNS server in your workload recursive DNS setup, such as in the VM's operating system or in the application.
+
+Use Azure Private DNS for a private DNS zone setup where the DNS resolution process does not leave the virtual network. Use a custom DNS to restrict the DNS resolution to only allow trusted resolution to your client.
+
+Use Microsoft Defender for DNS for advanced protection against the following security threats to your workload or your DNS service:
+
+Data exfiltration from your Azure resources using DNS tunneling
+Malware communicating with a command-and-control server
+Communication with malicious domains, such as phishing and crypto mining
+DNS attacks in communication with malicious DNS resolvers
+You can also use Microsoft Defender for App Service to detect dangling DNS records if you decommission an App Service website without removing its custom domain from your DNS registrar.","1. Is Azure DNS with DNSSEC (where applicable) enabled?
+2. Are private DNS zones used for internal name resolution?
+3. Are outbound DNS queries filtered (Azure Firewall DNS proxy, custom resolver)?
+4. Is SPF/DMARC/DKIM configured for domains?","1. Azure DNS zone configuration with DNSSEC status
+2. Private DNS zone setup documentation
+3. Firewall DNS proxy configuration
+4. Domain security settings (SPF/DMARC/DKIM)",Azure DNS zone configuration with DNSSEC status | Private DNS zone setup documentation | Firewall DNS proxy configuration | Domain security settings (SPF/DMARC/DKIM),Complete,,,100,0.85,Observations: CONTOSO has a Secure DNS provider.,"Excel=CSF-AZ-NS-10 | MCSB=NS-10 | DocID=NS-10 | CIS=4.9, 9.2 | NIST=SC-20, SC-21","CIS:4.9, 9.2; NIST:SC-20, SC-21; PCI:N/A; CSA:SEF-03; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,NS-10,Compliant,High,CONTOSO has a Secure DNS provider.,,1. Meeting Notes,4,0,,,CSF-AZ-NS-10,NS-10,"4.9, 9.2","SC-20, SC-21",N/A,SEF-03,,,
+SEC-NET-0011,Network security,NET,Sensitive ports are not exposed to the internet,"Sensitive network ports are not exposed to the internet, including administrative ports (SSH/RDP), database ports and other common management ports.
+
+This is typically a good indicator that basic network security hygiene is in place, even if implemented manually.
+
+VMs or load balancers are not in network security groups that expose the following ports:
+
+    - MongoDB ports 27017 and 27018
+    - FTP ports 20 or 21
+    - port 22
+    - port 3389
+    - Cassandra ports 7199 or 9160 or 8888
+    - Elasticsearch/Kibana ports 9200 or 9300 or 5601
+    - Kafka port 9092
+    - Memcached port 11211
+    - MySQL port 3306
+    - Oracle ports 1521 or 2483
+    - Postgres port 5432
+    - Redis port 6379
+    - Windows SQL Server ports 1433 or 1434
+    - Telnet port 23""",Is the organization currently following the Azure Guidance ?,Confirmation of the Assessment question,Confirmation of the Assessment question,NotStarted,,,0,0.5,,Excel=CSF-AZ-NS-11 | MCSB=N/A | CIS=N/A | NIST=N/A,CIS:N/A; NIST:N/A; PCI:N/A; CSA:N/A; IANS:NET-02.1,2025-11-11T17:51:32.035526+00:00,,,,,,,1,,,,CSF-AZ-NS-11,N/A,N/A,N/A,N/A,N/A,NET-02.1,,
+SEC-NET-0012,Network security,NET,Security groups should not allow excessive port ranges,"Cloud networks should minimize potential attack paths by using tightly scoped security group rules, even on non-internet facing resources.
+
+One indicator of this is tightly scoped security groups applied to every compute resource that only allow a limited number of inbound ports (e.g., no more than five ports).
+
+Network Security Groups allow no more than five inbound ports
+
+Security groups are applied to all VMs/containers, not just subnets",Is the organization currently following the Azure Guidance ?,Confirmation of the Assessment question,Confirmation of the Assessment question,NotStarted,,,0,0.5,,Excel=CSF-AZ-NS-12 | MCSB=N/A | CIS=N/A | NIST=N/A,CIS:N/A; NIST:N/A; PCI:N/A; CSA:N/A; IANS:NET-03.2,2025-11-11T17:51:32.035526+00:00,,,,,,,1,,,,CSF-AZ-NS-12,N/A,N/A,N/A,N/A,N/A,NET-03.2,,

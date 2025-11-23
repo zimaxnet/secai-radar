@@ -1,0 +1,123 @@
+ControlID,Domain,DomainCode,ControlTitle,ControlDescription,Question,RequiredEvidence,EvidenceItems,Status,Owner,Frequency,ScoreNumeric,Weight,Notes,SourceRef,Tags,UpdatedAt,DocControlId,ComplianceStatus,Criticality,Observations,Gaps,References,EvidenceCount,AvailableEvidenceCount,EvidenceArtifacts,EvidenceLastCollected,ExcelControlId,MCSBMapping,CISMapping,NISTMapping,PCIDSSMapping,CSACCMMapping,IANSMapping,RiskSeverity,ImplementationGap
+SEC-DEV-0001,DevOps security,DEV,Conduct threat modeling,"Perform threat modeling to identify the potential threats and enumerate the mitigating controls. Ensure your threat modeling serves the following purposes:
+
+Secure your applications and services in the production run-time stage.
+Secure the artifacts, underlying CI/CD pipeline and other tooling environment used for build, test, and deployment. The threat modeling at least should include the following aspects:
+Define the security requirements of the application. Ensure these requirements are adequately addressed in the threat modeling.
+Analyze application components, data connections and their relationship. Ensure this analysis also includes the upstream and downstream connections outside of your application scope.
+List the potential threats and attack vectors that your application components, data connections and upstream and downstream services may be exposed to.
+Identify the applicable security controls that can be used to mitigate the threats enumerated and identify any controls gaps (e.g., security vulnerabilities) that may require additional treatment plans.
+Enumerate and design the controls that can mitigate the vulnerabilities identified.
+
+Use threat modeling tools such as the Microsoft threat modeling tool with the Azure threat model template embedded to drive your threat modeling process. Use the STRIDE model to enumerate the threats from both internal and external and identify the controls applicable. Ensure the threat modeling process includes the threat scenarios in the DevOps process, such as malicious code injection through an insecure artifacts repository with misconfigured access control policy.
+
+If using a threat modeling tool is not applicable, you should, at minimum, use a questionnaire-based threat modeling process to identify the threats.
+
+Ensure the threat modeling or analysis results are recorded and updated when there is a major security-impact change in your application or in the threat landscape.","1. Has a threat model been developed for applications, CI/CD pipelines, and supporting
+infrastructure?
+2. Are STRIDE or equivalent frameworks used to identify threats and mitigations?
+3. Are threat models updated when major architectural or dependency changes occur?","1. Threat modeling tool outputs (Microsoft Threat Modeling Tool files or diagrams).
+2. Change management records showing updated threat models after releases.
+3. Stored threat model documents in repo/wiki (with last updated timestamps).",Threat modeling tool outputs (Microsoft Threat Modeling Tool files or diagrams) | Change management records showing updated threat models after releases | Stored threat model documents in repo/wiki (with last updated timestamps),Complete,,,100,0.85,"Observations: As per the SME discussion Threat modelling is in place. Mostly STRIDE threat modeling process is in use.
+
+Gaps: N/A","Excel=CSF-AZ-DOS-01 | MCSB=DS-1 | DocID=DS-1 | CIS=16.10, 16.14 | NIST=SA-15","CIS:16.10, 16.14; NIST:SA-15; PCI:6.5, 12.2; CSA:AIS-02; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,DS-1,Compliant,High,As per the SME discussion Threat modelling is in place. Mostly STRIDE threat modeling process is in use.,N/A,,3,,,,CSF-AZ-DOS-01,DS-1,"16.10, 16.14",SA-15,"6.5, 12.2",AIS-02,,,
+SEC-DEV-0002,DevOps security,DEV,Ensure software supply chain security,"Ensure your enterprise’s SDLC (Software Development Lifecycle) or process include a set of security controls to govern the in-house and third-party software components (including both proprietary and open-source software) where your applications have dependencies. Define gating criteria to prevent vulnerable or malicious components being integrated and deployed into the environment.
+
+The software supply chain security controls should at least include the following aspects:
+
+Properly manage a Software Bill of Materials (SBOM) by identifying the upstream dependencies required for the service/resource development, build, integration and deployment phase.
+Inventory and track the in-house and third-party software components for known vulnerability when there is a fix available in the upstream.
+Assess the vulnerabilities and malware in the software components using static and dynamic application testing for unknown vulnerabilities.
+Ensure the vulnerabilities and malware are mitigated using the appropriate approach. This may include source code local or upstream fix, feature exclusion and/or applying compensating controls if the direct mitigation is not available.
+If closed source third-party components are used in your production environment, you may have limited visibility to its security posture. You should consider additional controls such as access control, network isolation and endpoint security to minimize the impact if there is a malicious activity or vulnerability associated with the component.
+
+For the GitHub platform, ensure the software supply chain security through the following capability or tools from GitHub Advanced Security or GitHub’s native feature:- Use Dependency Graph to scan, inventory and identify all your project’s dependencies and related vulnerabilities through Advisory Database.
+
+Use Dependabot to ensure that the vulnerable dependency is tracked and remediated, and ensure your repository automatically keeps up with the latest releases of the packages and applications it depends on.
+Use GitHub's native code scanning capability to scan the source code when sourcing the code externally.
+Use Microsoft Defender for Cloud to integrate vulnerability assessment for your container image in the CI/CD workflow. For Azure DevOps, you can use third-party extensions to implement similar controls to inventory, analyze and remediate the third-party software components and their vulnerabilities.","1. Are dependencies scanned for vulnerabilities during builds (e.g., with GitHub Dependabot
+or Defender for Cloud)?
+2. Are container images scanned before publishing to Azure Container Registry?
+3. Are Software Bill of Materials (SBOM) maintained and updated for builds?
+4. Are only trusted artifact registries used for dependencies?","1. GitHub Dependency Graph and Dependabot reports.
+2. ACR vulnerability assessment results from Microsoft Defender for Containers ( az acr repository show-manifests -- detail ).
+3. SBOM exports (CycloneDX, SPDX) stored in repo.
+4. Azure Policy or Defender for Cloud compliance results on image scanning.","GitHub Dependency Graph and Dependabot reports | ACR vulnerability assessment results from Microsoft Defender for Containers ( az acr repository show-manifests -- detail ) | SBOM exports (CycloneDX, SPDX) stored in repo | Azure Policy or Defender for Cloud compliance results on image scanning",NotStarted,,,0,0.85,"Observations: As per the documentation Veracode is the SCA Tool being used, But more details on the SBOM generation are not available.","Excel=CSF-AZ-DOS-02 | MCSB=DS-2 | DocID=DS-2 | CIS=16.4, 16.6, 16.11 | NIST=SA-12, SA-15","CIS:16.4, 16.6, 16.11; NIST:SA-12, SA-15; PCI:6.3, 6.5; CSA:AIS-05; DocStatus:Partial
+Compliant",2025-11-11T17:51:32.035526+00:00,DS-2,"Partial
+Compliant",High,"As per the documentation Veracode is the SCA Tool being used, But more details on the SBOM generation are not available.",,https://Internal Knowledge Base/wiki/Tech:IT_Security,4,,,,CSF-AZ-DOS-02,DS-2,"16.4, 16.6, 16.11","SA-12, SA-15","6.3, 6.5",AIS-05,,,
+SEC-DEV-0003,DevOps security,DEV,Secure DevOps infrastructure,"Ensure the DevOps infrastructure and pipeline follow security best practices across environments including your build, test, and production stages. This typically includes the security controls for following scope:
+
+Artifact repositories that store source code, built packages and images, project artifacts and business data.
+Servers, services, and tooling that host CI/CD pipelines.
+CI/CD pipeline configuration.
+
+As part of applying the Microsoft Cloud Security Benchmark to your DevOps infrastructure security controls, prioritize the following controls:
+
+Protect artifacts and the underlying environment to ensure the CI/CD pipelines don’t become avenues to insert malicious code. For example, review your CI/CD pipeline to identify any misconfiguration in core areas of Azure DevOps such as Organization, Projects, Users, Pipelines (Build & Release), Connections, and Build Agent to identify any misconfigurations such as open access, weak authentication, insecure connection setup and so on. For GitHub, use similar controls to secure the Organization permission levels.
+Ensure your DevOps infrastructure is deployed consistently across development projects. Track compliance of your DevOps infrastructure at scale by using Microsoft Defender for Cloud (such as Compliance Dashboard, Azure Policy, Cloud Posture Management) or your own compliance monitoring tools.
+Configure identity/role permissions and entitlement policies in Azure AD, native services, and CI/CD tools in your pipeline to ensure changes to the pipelines are authorized.
+Avoid providing permanent “standing” privileged access to the human accounts such as developers or testers by using features such as Azure managed identifies and just-in-time access.
+Remove keys, credentials, and secrets from code and scripts used in CI/CD workflow jobs and keep them in a key store or Azure Key Vault.
+If you run self-hosted build/deployment agents, follow Microsoft Cloud Security Benchmark controls including network security, posture and vulnerability management, and endpoint security to secure your environment.","1. Are Azure DevOps/GitHub organizations configured with RBAC and MFA enforced?
+2. Are secrets and credentials removed from code and stored in Azure Key Vault?
+3. Are self-hosted build agents hardened and monitored?
+4. Is CI/CD pipeline configuration audited for misconfigurations (open access, weak auth)?","1. Azure DevOps/GitHub audit logs ( az devops audit-log list , GitHub org audit log export).
+2. Key Vault secret inventory ( az keyvault secret list ).
+3. Defender for Cloud compliance dashboard for CI/CD resources.
+4. Azure Monitor/Sentinel logs for pipeline changes.","Azure DevOps/GitHub audit logs ( az devops audit-log list , GitHub org audit log export) | Key Vault secret inventory ( az keyvault secret list ) | Defender for Cloud compliance dashboard for CI/CD resources | Azure Monitor/Sentinel logs for pipeline changes",InProgress,,,60,0.85,Gaps: Microsoft Defender for cloud DevOps Security is not connected to Azure DevOps.,"Excel=CSF-AZ-DOS-03 | MCSB=DS-3 | DocID=DS-3 | CIS=16.7 | NIST=CM-2, CM-6, AC-2, AC-3, AC-6","CIS:16.7; NIST:CM-2, CM-6, AC-2, AC-3, AC-6; PCI:2.2, 6.3, 7.1; CSA:IVS-09; DocStatus:Partial Compliant",2025-11-11T17:51:32.035526+00:00,DS-3,Partial Compliant,High,,Microsoft Defender for cloud DevOps Security is not connected to Azure DevOps.,,4,,,,CSF-AZ-DOS-03,DS-3,16.7,"CM-2, CM-6, AC-2, AC-3, AC-6","2.2, 6.3, 7.1",IVS-09,,,
+SEC-DEV-0004,DevOps security,DEV,Integrate static application security testing into DevOps pipeline,"Ensure static application security testing (SAST) fuzzy testing, interactive testing, mobile application testing, are part of the gating controls in the CI/CD workflow. The gating can be set based on the testing results to prevent vulnerable packages from committing into the repository, building into the packages, or deploying into the production.
+
+Integrate SAST into your pipeline (e.g., in your infrastructure as code template) so the source code can be scanned automatically in your CI/CD workflow. Azure DevOps Pipeline or GitHub can integrate the below tools and third-party SAST tools into the workflow.
+
+GitHub CodeQL for source code analysis.
+Microsoft BinSkim Binary Analyzer for Windows and *nix binary analysis.
+Azure DevOps Credential Scanner (Microsoft Security DevOps extension) and GitHub native secret scanning for credential scan in the source code.","1. Is SAST integrated in CI/CD pipelines (GitHub CodeQL, BinSkim, CredScan)?
+2. Are builds blocked when critical SAST issues are detected?
+3. Are SAST results stored and reviewed periodically?","1. GitHub Actions workflow YAML showing CodeQL integration.
+2. Azure DevOps build pipeline logs with SAST job output.
+3. Security DevOps extension/CodeQL scan reports in repos.",GitHub Actions workflow YAML showing CodeQL integration | Azure DevOps build pipeline logs with SAST job output | Security DevOps extension/CodeQL scan reports in repos,Complete,,,100,0.85,Observations: Veracode is used as the SAST tool. As per discussion this need to be formalized.,Excel=CSF-AZ-DOS-04 | MCSB=DS-4 | DocID=DS-4 | CIS=16.12 | NIST=SA-11,"CIS:16.12; NIST:SA-11; PCI:6.3, 6.5; CSA:AIS-03; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,DS-4,Compliant,High,Veracode is used as the SAST tool. As per discussion this need to be formalized.,,https://Internal Knowledge Base/wiki/Tech:Veracode,3,,,,CSF-AZ-DOS-04,DS-4,16.12,SA-11,"6.3, 6.5",AIS-03,,,
+SEC-DEV-0005,DevOps security,DEV,Integrate dynamic application security testing into DevOps pipeline,"Ensure dynamic application security testing (DAST) are part of the gating controls in the CI/CD workflow. The gating can be set based on the testing results to prevent vulnerability from building into the packages or deploying into the production.
+
+Integrate DAST into your pipeline so the runtime application can be tested automatically in your CI/CD workflow set in Azure DevOps or GitHub. The automated penetration testing (with manual assisted validation) should also be part of the DAST.
+
+Azure DevOps Pipeline or GitHub supports the integration of third-party DAST tools into the CI/CD workflow.","1. Are DAST scans executed as part of release pipelines (e.g., OWASP ZAP, Web Security
+Scanner)?
+2. Are runtime application endpoints tested pre-production?
+3. Are DAST results used as gating criteria for deployment approvals?","1. Azure DevOps release pipeline logs showing DAST scan job execution.
+2. GitHub Actions workflows with DAST tool integrations.
+3. Stored DAST reports in artifact storage or dashboards.",Azure DevOps release pipeline logs showing DAST scan job execution | GitHub Actions workflows with DAST tool integrations | Stored DAST reports in artifact storage or dashboards,Complete,,,100,0.85,Observations: Veracode is used as DAST tool.,Excel=CSF-AZ-DOS-05 | MCSB=DS-5 | DocID=DS-5 | CIS=16.12 | NIST=SA-11,"CIS:16.12; NIST:SA-11; PCI:6.3, 6.5; CSA:AIS-03; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,DS-5,Compliant,High,Veracode is used as DAST tool.,,Meeting Notes,3,,,,CSF-AZ-DOS-05,DS-5,16.12,SA-11,"6.3, 6.5",AIS-03,,,
+SEC-DEV-0006,DevOps security,DEV,Enforce security of workload throughout DevOps lifecycle,"Ensure the workload is secured throughout the entire lifecycle in development, testing, and deployment stage. Use Microsoft Cloud Security Benchmark to evaluate the controls (such as network security, identity management, privileged access and so on) that can be set as guardrails by default or shift left prior to the deployment stage. In particular, ensure the following controls are in place in your DevOps process:- Automate the deployment by using Azure or third-party tooling in the CI/CD workflow, infrastructure management (infrastructure as code), and testing to reduce human error and attack surface.
+
+Ensure VMs, container images and other artifacts are secure from malicious manipulation.
+Scan the workload artifacts (in other words, container images, dependencies, SAST and DAST scans) prior to the deployment in the CI/CD workflow
+Deploy vulnerability assessment and threat detection capability into the production environment and continuously use these capabilities in the run-time.
+
+Guidance for Azure VMs:
+
+Use Azure Shared Image Gallery to share and control access to your images by different users, service principals, or AD groups within your organization. Use Azure role-based access control (Azure RBAC) to ensure that only authorized users can access your custom images.
+Define the secure configuration baselines for the VMs to eliminate unnecessary credentials, permissions, and packages. Deploy and enforce configuration baselines through custom images, Azure Resource Manager templates, and/or Azure Policy guest configuration.
+Guidance for Azure container services:
+
+Use Azure Container Registry (ACR) to create your private container registry where granular access can be restricted through Azure RBAC, so only authorized services and accounts can access the containers in the private registry.
+Use Defender for Containers for vulnerability assessment of the images in your private Azure Container Registry. In addition, you can use Microsoft Defender for Cloud to integrate the container image scans as part of your CI/CD workflows.
+For Azure serverless services, adopt similar controls to ensure security controls ""shift-left"" to the stage prior to deployment.","1. Are VM/container images hardened with baseline configs (Shared Image Gallery, Azure Policy)?
+2. Are container/VM images continuously scanned in runtime with Defender for
+Containers/Defender for Cloud?
+3. Is laC (Terraform/ARM/Bicep) security scanning enabled pre-deployment?
+4. Are runtime threat detection alerts monitored in Sentinel/Defender?","1. Shared Image Gallery/ACR access logs.
+2. Defender for Cloud ""Container image vulnerabilities"" reports.
+3. laC security scan logs (Checkov, Bicep linter, Azure DevOps Security DevOps extension).
+4. Sentinel incident logs from Defender for Cloud signals.","Shared Image Gallery/ACR access logs | Defender for Cloud ""Container image vulnerabilities"" reports | laC security scan logs (Checkov, Bicep linter, Azure DevOps Security DevOps extension) | Sentinel incident logs from Defender for Cloud signals",Complete,,,100,0.85,"Observations: Wiz is used for the IaC scanning. Veracode is used for SAST, SCA, DAST","Excel=CSF-AZ-DOS-06 | MCSB=DS-6 | DocID=DS-6 | CIS=7.5, 7.6, 7.7, 16.1, 16.7 | NIST=CM-2, CM-6, AC-2, AC-3, AC-6","CIS:7.5, 7.6, 7.7, 16.1, 16.7; NIST:CM-2, CM-6, AC-2, AC-3, AC-6; PCI:6.1, 6.2, 6.3; CSA:IVS-08; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,DS-6,Compliant,High,"Wiz is used for the IaC scanning. Veracode is used for SAST, SCA, DAST",,Meeting Notes,4,,,,CSF-AZ-DOS-06,DS-6,"7.5, 7.6, 7.7, 16.1, 16.7","CM-2, CM-6, AC-2, AC-3, AC-6","6.1, 6.2, 6.3",IVS-08,,,
+SEC-DEV-0007,DevOps security,DEV,Enable logging and monitoring in DevOps,"Ensure your logging and monitoring scope includes non-production environments and CI/CD workflow elements used in DevOps (and any other development processes). The vulnerabilities and threats targeting these environments can introduce significant risks to your production environment if they are not monitored properly. The events from the CI/CD build, test and deployment workflow should also be monitored to identify any deviations in the CI/CD workflow jobs.
+
+Enable and configure the audit logging capabilities in non-production and CI/CD tooling environments (such as Azure DevOps and GitHub) used throughout the DevOps process.
+
+The events generated from Azure DevOps and the GitHub CI/CD workflow, including the build, test and deployment jobs, should also be monitored to identify any anomalous results.
+
+Ingest the above logs and events into Microsoft Sentinel or other SIEM tools through a logging stream or API to ensure the security incidents are properly monitored and triaged for handling.","1. Are Azure DevOps and GitHub audit logs enabled and exported to Sentinel/Log Analytics?
+2. Are CI/CD pipeline events (build, test, deploy) monitored for anomalies?
+3. Are alerts generated for suspicious activities in DevOps environments?
+4. Are logs from self-hosted build agents centralized in SIEM?","1. Azure DevOps audit streaming config ( az devops audit-log list -- org <org> ).
+2. GitHub org audit log export.
+3. Sentinel analytics rules monitoring DevOps logs.
+4. Log Analytics queries for CI/CD job anomalies.",Azure DevOps audit streaming config ( az devops audit-log list -- org <org> ) | GitHub org audit log export | Sentinel analytics rules monitoring DevOps logs | Log Analytics queries for CI/CD job anomalies,NotStarted,,,0,0.85,,"Excel=CSF-AZ-DOS-07 | MCSB=DS-7 | DocID=DS-7 | CIS=8.2, 8.5, 8.9, 8.11 | NIST=AU-3, AU-6, AU-12, SI-4","CIS:8.2, 8.5, 8.9, 8.11; NIST:AU-3, AU-6, AU-12, SI-4; PCI:10.1, 10.2, 10.3, 10.6; CSA:LOG-04; DocStatus:Non-Compliant",2025-11-11T17:51:32.035526+00:00,DS-7,Non-Compliant,High,,,,4,,,,CSF-AZ-DOS-07,DS-7,"8.2, 8.5, 8.9, 8.11","AU-3, AU-6, AU-12, SI-4","10.1, 10.2, 10.3, 10.6",LOG-04,,,

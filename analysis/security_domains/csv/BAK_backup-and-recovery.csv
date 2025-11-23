@@ -1,0 +1,54 @@
+ControlID,Domain,DomainCode,ControlTitle,ControlDescription,Question,RequiredEvidence,EvidenceItems,Status,Owner,Frequency,ScoreNumeric,Weight,Notes,SourceRef,Tags,UpdatedAt,DocControlId,ComplianceStatus,Criticality,Observations,Gaps,References,EvidenceCount,AvailableEvidenceCount,EvidenceArtifacts,EvidenceLastCollected,ExcelControlId,MCSBMapping,CISMapping,NISTMapping,PCIDSSMapping,CSACCMMapping,IANSMapping,RiskSeverity,ImplementationGap
+SEC-BAK-0001,Backup and recovery,BAK,Ensure regular automated backups,"Ensure backup of business-critical resources, either during resource creation or enforced through policy for existing resources.
+
+For Azure Backup supported resources (such as Azure VMs, SQL Server, HANA databases, Azure PostgreSQL Database, File Shares, Blobs or Disks), enable Azure Backup and configure the desired frequency and retention period. For Azure VM, you can use Azure Policy to have backup automatically enabled using Azure Policy.
+
+For resources or services not supported by Azure Backup, use the native backup capability provided by the resource or service. For example, Azure Key Vault provides a native backup capability.
+
+For resources/services that are neither supported by Azure Backup nor have a native backup capability, evaluate your backup and disaster needs, and create your own mechanism as per your business requirements. For example:
+
+If you use Azure Storage for data storage, enable blob versioning for your storage blobs which will allow you to preserve, retrieve, and restore every version of every object stored in your Azure Storage.
+Service configuration settings can usually be exported to Azure Resource Manager templates.","1. Are Azure Backup policies configured for all supported resources (VMs, SQL, HANA, PostgreSQL, File Shares, Blobs, Disks)?
+2. Are Azure Policies applied to auto-enable backup at resource creation (e.g., VMs)?
+3. Are unsupported services using their native backup features (e.g., Key Vault, Blob versioning)?","1. Azure Policy assignment export for ""Deploy Backup on VMs"" ( az policy assignment list ).
+2. Azure Backup vault policy configuration ( az backup policy list -- vault-name <vault> ).
+3. Azure Resource Graph query for resources missing backup association.
+4. Backup job logs from Backup Center or Recovery Services Vault.","Azure Policy assignment export for ""Deploy Backup on VMs"" ( az policy assignment list ) | Azure Backup vault policy configuration ( az backup policy list -- vault-name <vault> ) | Azure Resource Graph query for resources missing backup association | Backup job logs from Backup Center or Recovery Services Vault",Complete,,,100,0.85,"Observations: CommVault Backup-as-a-Service (for Storage and Databases) - using CommVault agents in Azure Environment, Following 4-3-2 methodology for Data Backups.","Excel=CSF-AZ-B&R-01 | MCSB=BR-1 | DocID=BR-1 | CIS=11.2 | NIST=CP-2, CP-4, CP-9","CIS:11.2; NIST:CP-2, CP-4, CP-9; PCI:N/A; CSA:BCR-09; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,BR-1,Compliant,High,"CommVault Backup-as-a-Service (for Storage and Databases) - using CommVault agents in Azure Environment, Following 4-3-2 methodology for Data Backups.",,,4,,,,CSF-AZ-B&R-01,BR-1,11.2,"CP-2, CP-4, CP-9",N/A,BCR-09,,,
+SEC-BAK-0002,Backup and recovery,BAK,Protect backup and recovery data,"Ensure backup data and operations are protected from data exfiltration, data compromise, ransomware/malware and malicious insiders. The security controls that should be applied include user and network access control, data encryption at-rest and in-transit.
+
+Use multi-factor-authentication and Azure RBAC to secure the critical Azure Backup operations (such as delete, change retention, updates to backup config). For Azure Backup supported resources, use Azure RBAC to segregate duties and enable fine grained access, and create private endpoints within your Azure Virtual Network to securely backup and restore data from your Recovery Services vaults.
+
+For Azure Backup supported resources, backup data is automatically encrypted using Azure platform-managed keys with 256-bit AES encryption. You can also choose to encrypt the backups using a customer managed key. In this case, ensure the customer-managed key in the Azure Key Vault is also in the backup scope. If you use a customer-managed key, use soft delete and purge protection in Azure Key Vault to protect keys from accidental or malicious deletion. For on-premises backups using Azure Backup, encryption-at-rest is provided using the passphrase you provide.
+
+Safeguard backup data from accidental or malicious deletion, such as ransomware attacks/attempts to encrypt or tamper backup data. For Azure Backup supported resources, enable soft delete to ensure recovery of items with no data loss for up to 14 days after an unauthorized deletion, and enable multifactor authentication using a PIN generated in the Azure portal. Also enable geo-redundant storage or cross-region restoration to ensure backup data is restorable when there is a disaster in primary region. You can also enable Zone-redundant Storage (ZRS) to ensure backups are restorable during zonal failures.","1. Is backup data encrypted (platform-managed keys or CMK in Key Vault)?
+2. Are soft delete and purge protection enabled for Recovery Services Vaults and Key Vault keys?
+3. Is RBAC and MFA enforced for critical operations (delete, retention changes)?
+4. Are backups geo-redundant or zone-redundant for resiliency?","1. Recovery Services Vault encryption settings ( az backup vault show -- name <vault> ).
+2. Key Vault soft delete and purge protection status ( az keyvault show -- query ""properties.enableSoftDelete"" ).
+3. Activity Logs for backup operations (delete/change) via Log Analytics.
+4. Storage replication setting (GRS/ZRS) in Recovery Vault ( az backup vault backup-
+properties show ).","Recovery Services Vault encryption settings ( az backup vault show -- name <vault> ) | Key Vault soft delete and purge protection status ( az keyvault show -- query ""properties.enableSoftDelete"" ) | Activity Logs for backup operations (delete/change) via Log Analytics | Storage replication setting (GRS/ZRS) in Recovery Vault ( az backup vault backup | properties show )",InProgress,,,60,0.85,,"Excel=CSF-AZ-B&R-02 | MCSB=BR-2 | DocID=BR-2 | CIS=11.3 | NIST=CP-6, CP-9","CIS:11.3; NIST:CP-6, CP-9; PCI:3.4; CSA:BCR-10; DocStatus:Partial Compliant",2025-11-11T17:51:32.035526+00:00,BR-2,Partial Compliant,High,,,,4,,,,CSF-AZ-B&R-02,BR-2,11.3,"CP-6, CP-9",3.4,BCR-10,,,
+SEC-BAK-0003,Backup and recovery,BAK,Monitor backups,"Ensure all business-critical protectable resources are compliant with the defined backup policy and standard.
+
+Monitor your Azure environment to ensure that all your critical resources are compliant from a backup perspective. Use Azure Policy for backup to audit and enforce such controls. For Azure Backup supported resources, Backup Center helps you centrally govern your backup estate.
+
+Ensure critical backup operations (delete, change retention, updates to backup config) are monitored, audited, and have alerts in place. For Azure Backup supported resources, monitor overall backup health, get alerted to critical backup incidents, and audit triggered user actions on vaults.
+
+Note: Where applicable, also use built-in policies (Azure Policy) to ensure that your Azure resources are configured for backup.","1. Are backup jobs (success/failure) continuously monitored in Backup Center?
+2. Are alerts configured for failed/critical backup incidents?
+3. Are audit logs captured for sensitive backup operations (deletes, retention changes)?
+4. Are compliance checks enforced via Azure Policy for backup-enabled resources?","1. Backup job status logs in Backup Center ( az backup job list -- vault-name <vault> ).
+2. Azure Monitor alert rules for backup failures ( az monitor metrics alert list ).
+3. Azure Activity Logs for backup vault operations.
+4. Defender for Cloud compliance report for ""resources should be backed up"".","Backup job status logs in Backup Center ( az backup job list -- vault-name <vault> ) | Azure Monitor alert rules for backup failures ( az monitor metrics alert list ) | Azure Activity Logs for backup vault operations | Defender for Cloud compliance report for ""resources should be backed up""",InProgress,,,60,0.85,,Excel=CSF-AZ-B&R-03 | MCSB=BR-3 | DocID=BR-3 | CIS=11.3 | NIST=CP-9,CIS:11.3; NIST:CP-9; PCI:N/A; CSA:BCR-11; DocStatus:Partial Compliant,2025-11-11T17:51:32.035526+00:00,BR-3,Partial Compliant,High,,,,4,,,,CSF-AZ-B&R-03,BR-3,11.3,CP-9,N/A,BCR-11,,,
+SEC-BAK-0004,Backup and recovery,BAK,Regularly test backup,"Periodically perform data recovery tests of your backup to verify that the backup configurations and availability of the backup data meets the recovery needs as per defined in the RTO (Recovery Time Objective) and RPO (Recovery Point Objective).
+
+Periodically perform data recovery tests of your backup to verify that the backup configurations and availability of the backup data meets the recovery needs as defined in the RTO and RPO.
+
+You may need to define your backup recovery test strategy, including the test scope, frequency and method as performing the full recovery test each time can be difficult.","1. Are recovery tests performed periodically to validate RPO/RTO?
+2. Are test restores executed for different resource types (VMs, Key Vault keys, SQL DBs)?
+3. Is there a defined strategy for scope, frequency, and method of
+4. Are test results documented and tracked for compliance?","1. Restore operation logs from Recovery Services Vault ( az backup recoveryconfig show ).
+2. Log Analytics reports of restore operations (successful vs failed).
+3. Evidence of restored test VMs, databases, or keys (resource creation events).
+4. Test plans and runbooks stored in Automation or tracked in change management system.","Restore operation logs from Recovery Services Vault ( az backup recoveryconfig show ) | Log Analytics reports of restore operations (successful vs failed) | Evidence of restored test VMs, databases, or keys (resource creation events) | Test plans and runbooks stored in Automation or tracked in change management system",InProgress,,,60,0.85,,"Excel=CSF-AZ-B&R-04 | MCSB=BR-4 | DocID=BR-4 | CIS=11.5 | NIST=CP-4, CP-9","CIS:11.5; NIST:CP-4, CP-9; PCI:N/A; CSA:BCR-12; DocStatus:Partial Compliant",2025-11-11T17:51:32.035526+00:00,BR-4,Partial Compliant,High,,,,4,,,,CSF-AZ-B&R-04,BR-4,11.5,"CP-4, CP-9",N/A,BCR-12,,,

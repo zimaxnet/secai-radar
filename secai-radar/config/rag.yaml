@@ -1,0 +1,58 @@
+# RAG Layer Configuration
+#
+# Configures the RAG (Retrieval-Augmented Generation) layer for agent knowledge base queries.
+# Supports both Google File Search (managed) and Azure AI Search (custom control).
+
+# RAG Provider Selection
+# Options: "google_file_search" | "azure_ai_search"
+provider: "google_file_search"
+
+# Google File Search Configuration (if provider is "google_file_search")
+google_file_search:
+  api_key_env: "GOOGLE_API_KEY"  # Environment variable name for API key
+  file_store_id_env: "GOOGLE_FILE_STORE_ID"  # Optional: existing file store ID
+  # If file_store_id is not provided, a new one will be created
+
+# Azure AI Search Configuration (if provider is "azure_ai_search")
+azure_ai_search:
+  endpoint: ""  # Azure AI Search endpoint
+  api_key_env: "AZURE_SEARCH_API_KEY"
+  index_name: "secai-knowledge-base"
+  api_version: "2023-11-01"
+
+# Agentic Retrieval Settings
+agentic_retrieval:
+  enabled: true  # Enable agentic retrieval (agents decide when to search)
+  auto_query_generation: true  # Let agents generate their own queries
+  relevance_evaluation: true  # Evaluate retrieved content for relevance
+
+# Knowledge Base Documents
+# Documents to ingest into the knowledge base
+documents:
+  - name: "Azure Cloud Adoption Framework"
+    type: "caf"
+    source: "https://learn.microsoft.com/azure/cloud-adoption-framework/"
+    priority: "high"
+  
+  - name: "Azure Well-Architected Framework"
+    type: "waf"
+    source: "https://learn.microsoft.com/azure/architecture/framework/"
+    priority: "high"
+  
+  - name: "Microsoft Customer Agreement Guide"
+    type: "mca"
+    source: "https://learn.microsoft.com/azure/cost-management-billing/microsoft-customer-agreement/"
+    priority: "high"
+  
+  - name: "Azure Security Best Practices"
+    type: "security"
+    source: "https://learn.microsoft.com/azure/security/"
+    priority: "high"
+
+# Document Ingestion Settings
+ingestion:
+  chunk_size: 1000  # Characters per chunk (for Azure AI Search)
+  chunk_overlap: 200  # Overlap between chunks
+  embedding_model: "text-embedding-ada-002"  # For Azure AI Search
+  batch_size: 10  # Documents per batch
+

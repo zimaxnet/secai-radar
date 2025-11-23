@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ControlRequirements",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["controlId", "capabilityId", "weight", "minStrength"],
+    "properties": {
+      "controlId": { "type": "string", "minLength": 1 },
+      "capabilityId": { "type": "string", "minLength": 1 },
+      "weight": { "type": "number", "minimum": 0, "maximum": 1 },
+      "minStrength": { "type": "number", "minimum": 0, "maximum": 1 },
+      "notes": { "type": "string" }
+    },
+    "additionalProperties": false
+  }
+}

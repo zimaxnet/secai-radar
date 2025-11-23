@@ -1,0 +1,134 @@
+ControlID,Domain,DomainCode,ControlTitle,ControlDescription,Question,RequiredEvidence,EvidenceItems,Status,Owner,Frequency,ScoreNumeric,Weight,Notes,SourceRef,Tags,UpdatedAt,DocControlId,ComplianceStatus,Criticality,Observations,Gaps,References,EvidenceCount,AvailableEvidenceCount,EvidenceArtifacts,EvidenceLastCollected,ExcelControlId,MCSBMapping,CISMapping,NISTMapping,PCIDSSMapping,CSACCMMapping,IANSMapping,RiskSeverity,ImplementationGap
+SEC-LOG-0001,Logging and threat detection,LOG,Enable threat detection capabilities,"To support threat detection scenarios, monitor all known resource types for known and expected threats and anomalies. Configure your alert filtering and analytics rules to extract high-quality alerts from log data, agents, or other data sources to reduce false positives.
+
+Use the threat detection capability of Microsoft Defender for Cloud for the respective Azure services.
+
+For threat detection not included in Microsoft Defender services, refer to Microsoft Cloud Security Benchmark service baselines for the respective services to enable the threat detection or security alert capabilities within the service. Ingest alerts and log data from Microsoft Defender for Cloud, Microsoft 365 Defender, and log data from other resources into your Azure Monitor or Microsoft Sentinel instances to build analytics rules, which detect threats and create alerts that match specific criteria across your environment.
+
+For Operational Technology (OT) environments that include computers that control or monitor Industrial Control System (ICS) or Supervisory Control and Data Acquisition (SCADA) resources, use Microsoft Defender for IoT to inventory assets and detect threats and vulnerabilities.
+
+For services that do not have a native threat detection capability, consider collecting the data plane logs and analyze the threats through Microsoft Sentinel.","1.	Which Azure services have Defender threat detection enabled?
+2.	Are workloads integrated with Sentinel?","1.	az security pricing list -- query ""[?pricingTier == 'Standard']"" - confirm which services
+have Defender enabled.
+2.	List of Defender alerts in last 90 days ( az security alert list -- query ""[].
+{Resource:resourceGroup, Alert:alertDisplayName}"" ).
+3.	Sentinel connector inventory ( az sentinel data-connector list ).
+4.	Custom Sentinel rule JSON proving tuning.
+5.	Screenshot of Defender for Cloud recommendations per service.
+6.	Export of cost configuration for Defender (evidence that org pays for coverage).","az security pricing list -- query ""[?pricingTier == 'Standard']"" - confirm which services | have Defender enabled | List of Defender alerts in last 90 days ( az security alert list -- query ""[] | {Resource:resourceGroup, Alert:alertDisplayName}"" ) | Sentinel connector inventory ( az sentinel data-connector list ) | Custom Sentinel rule JSON proving tuning | Screenshot of Defender for Cloud recommendations per service | Export of cost configuration for Defender (evidence that org pays for coverage)",Complete,,,100,0.85,Observations: Google SecOps and Incident Response Partner Managed Services are used for this capability,"Excel=CSF-AZ-LTD-01 | MCSB=LT-1 | DocID=LT-1 | CIS=8.11 | NIST=AU-3, AU-6, AU-12, SI-4","CIS:8.11; NIST:AU-3, AU-6, AU-12, SI-4; PCI:10.6, 10.8, A3.5; CSA:LOG-05, LOG-03, SEF-03; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,LT-1,Compliant,High,Google SecOps and Incident Response Partner Managed Services are used for this capability,,,6,,,,CSF-AZ-LTD-01,LT-1,8.11,"AU-3, AU-6, AU-12, SI-4","10.6, 10.8, A3.5","LOG-05, LOG-03, SEF-03",,,
+SEC-LOG-0002,Logging and threat detection,LOG,Enable threat detection for identity and access management,"Detect threats for identities and access management by monitoring the user and application sign-in and access anomalies. Behavioral patterns such as excessive number of failed login attempts, and deprecated accounts in the subscription, should be alerted.
+
+Azure AD provides the following logs that can be viewed in Azure AD reporting or integrated with Azure Monitor, Microsoft Sentinel or other SIEM/monitoring tools for more sophisticated monitoring and analytics use cases:
+
+Sign-ins: The sign-ins report provides information about the usage of managed applications and user sign-in activities.
+Audit logs: Provides traceability through logs for all changes done by various features within Azure AD. Examples of audit logs include changes made to any resources within Azure AD like adding or removing users, apps, groups, roles and policies.
+Risky sign-ins: A risky sign-in is an indicator for a sign-in attempt that might have been performed by someone who is not the legitimate owner of a user account.
+Users flagged for risk: A risky user is an indicator for a user account that might have been compromised.
+Azure AD also provides an Identity Protection module to detect and remediate risks related to user accounts and sign-in behaviors. Examples of risks include leaked credentials, sign-in from anonymous or malware linked IP addresses, password spray. The policies in Azure AD Identity Protection allow you to enforce risk-based MFA authentication in conjunction with Azure Conditional Access on user accounts.
+
+In addition, Microsoft Defender for Cloud can be configured to alert on deprecated accounts in the subscription and suspicious activities such as an excessive number of failed authentication attempts. In addition to the basic security hygiene monitoring, Microsoft Defender for Cloud's Threat Protection module can also collect more in-depth security alerts from individual Azure compute resources (such as virtual machines, containers, app service), data resources (such as SQL DB and storage), and Azure service layers. This capability allows you to see account anomalies inside the individual resources.","1.	Are Azure AD risky sign-ins and user risk policies enforced?
+2.	Are failed sign-in attempts generating alerts?
+3.	Is MFA enforced for risk-based access?","1.	Azure AD Identity Protection risky sign-in report export.
+2.	Conditional Access policy JSON ( az ad conditional-access policy list ) showing ""Require
+MFA"" for risky sign-in.
+3.	Sentinel analytic rule for password spray detection (export rule JSON).","Azure AD Identity Protection risky sign-in report export | Conditional Access policy JSON ( az ad conditional-access policy list ) showing ""Require | MFA"" for risky sign-in | Sentinel analytic rule for password spray detection (export rule JSON)",Complete,,,100,0.85,,"Excel=CSF-AZ-LTD-02 | MCSB=LT-2 | DocID=LT-2 | CIS=8.11 | NIST=AU-3, AU-6, AU-12, SI-4","CIS:8.11; NIST:AU-3, AU-6, AU-12, SI-4; PCI:10.6, 10.8, A3.5; CSA:LOG-08, LOG-05, IAM-03; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,LT-2,Compliant,High,,,1. Meeting notes.,3,,,,CSF-AZ-LTD-02,LT-2,8.11,"AU-3, AU-6, AU-12, SI-4","10.6, 10.8, A3.5","LOG-08, LOG-05, IAM-03",,,
+SEC-LOG-0003,Logging and threat detection,LOG,Enable logging for security investigation,"Enable logging for your cloud resources to meet the requirements for security incident investigations and security response and compliance purposes.
+
+Enable logging capability for resources at the different tiers, such as logs for Azure resources, operating systems and applications inside in your VMs and other log types.
+
+Be mindful about different types of logs for security, audit, and other operational logs at the management/control plane and data plane tiers. There are three types of the logs available at the Azure platform:
+
+Azure resource log: Logging of operations that are performed within an Azure resource (the data plane). For example, getting a secret from a key vault or making a request to a database. The content of resource logs varies by the Azure service and resource type.
+Azure activity log: Logging of operations on each Azure resource at the subscription layer, from the outside (the management plane). You can use the Activity Log to determine what, who, and when for any write operations (PUT, POST, DELETE) taken on the resources in your subscription. There is a single Activity log for each Azure subscription.
+Azure Active Directory logs: Logs of the history of sign-in activity and audit trail of changes made in the Azure Active Directory for a particular tenant.
+You can also use Microsoft Defender for Cloud and Azure Policy to enable resource logs and log data collecting on Azure resources.","1.	Are logs from data services (SQL, Key Vault, Storage) centralized?
+2.	Is Azure Activity Log streamed to Log Analytics or Sentinel?
+3.	Is retention period aligned with compliance?
+4.	Are VM OS/application logs ingested?
+5.	Are log sources mapped against regulatory audit needs (PCI, SOX, HIPAA)?","1.	Diagnostic settings export for multiple resource types (e.g., Key Vault, SQL DB).
+2.	Activity Log export configuration ( az monitor log-profiles list ).
+3.	Log Analytics retention setting ( az monitor log-analytics workspace show -- query retentionInDays ).
+4.	Log Analytics query proving VM logs ingestion ( Heartbeat table).
+5.	Sentinel workbook screenshot mapping log sources vs MITRE ATT&CK techniques.
+6.	Policy compliance export: ""Resource logs should be enabled for ... ""","Diagnostic settings export for multiple resource types (e.g., Key Vault, SQL DB) | Activity Log export configuration ( az monitor log-profiles list ) | Log Analytics retention setting ( az monitor log-analytics workspace show -- query retentionInDays ) | Log Analytics query proving VM logs ingestion ( Heartbeat table) | Sentinel workbook screenshot mapping log sources vs MITRE ATT&CK techniques | Policy compliance export: ""Resource logs should be enabled for ... """,Complete,,,100,0.85,"Observations: Logs are collected from Azure resources and sent to SIEM (Google SecOps) for real-time analysis.
+
+Gaps: Found 1 failed resource (SQL Server) in the SUB-CONTOSO-PROD-LANDINGZONE-ONLINE-VDI named:
+nmw-app-sql-rd4fwlbf2cg3c","Excel=CSF-AZ-LTD-03 | MCSB=LT-3 | DocID=LT-3 | CIS=8.2, 8.5, 8.12 | NIST=AU-3, AU-6, AU-12, SI-4","CIS:8.2, 8.5, 8.12; NIST:AU-3, AU-6, AU-12, SI-4; PCI:10.1, 10.2, 10.3; CSA:LOG-08, LOG-02, LOG-09; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,LT-3,Compliant,High,Logs are collected from Azure resources and sent to SIEM (Google SecOps) for real-time analysis.,"Found 1 failed resource (SQL Server) in the SUB-CONTOSO-PROD-LANDINGZONE-ONLINE-VDI named:
+nmw-app-sql-rd4fwlbf2cg3c",1. Meeting notes.,6,,,,CSF-AZ-LTD-03,LT-3,"8.2, 8.5, 8.12","AU-3, AU-6, AU-12, SI-4","10.1, 10.2, 10.3","LOG-08, LOG-02, LOG-09",,,
+SEC-LOG-0004,Logging and threat detection,LOG,Enable network logging for security investigation,"Enable logging for your network services to support network-related incident investigations, threat hunting, and security alert generation. The network logs may include logs from network services such as IP filtering, network and application firewall, DNS, flow monitoring and so on.
+
+Enable and collect network security group (NSG) resource logs, NSG flow logs, Azure Firewall logs, and Web Application Firewall (WAF) logs, and logs from virtual machines via the network traffic data collection agent for security analysis to support incident investigations, and security alert generation. You can send the flow logs to an Azure Monitor Log Analytics workspace and then use Traffic Analytics to provide insights.
+
+Collect DNS query logs to assist in correlating other network data.","1.	Are NSG flow logs enabled on all VNets?
+2.	Is Traffic Analytics running for network flows?
+3.	Are DNS logs ingested?","1.	NSG flow log status: az network watcher flow-log show -- nsg <nsgName> -- resource-group <rg>
+2.	Traffic Analytics config export ( az network watcher flow-log show -- query flowAnalyticsConfiguration ).
+3.	Azure Firewall diagnostic log settings export.",NSG flow log status: az network watcher flow-log show -- nsg <nsgName> -- resource-group <rg> | Traffic Analytics config export ( az network watcher flow-log show -- query flowAnalyticsConfiguration ) | Azure Firewall diagnostic log settings export,Complete,,,100,0.85,,"Excel=CSF-AZ-LTD-04 | MCSB=LT-4 | DocID=LT-4 | CIS=8.2, 8.5, 8.6, 8.7, 13.6 | NIST=AU-3, AU-6, AU-12, SI-4","CIS:8.2, 8.5, 8.6, 8.7, 13.6; NIST:AU-3, AU-6, AU-12, SI-4; PCI:10.8; CSA:LOG-08, LOG-03, LOG-05; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,LT-4,Compliant,High,,,1. Meeting notes.,3,,,,CSF-AZ-LTD-04,LT-4,"8.2, 8.5, 8.6, 8.7, 13.6","AU-3, AU-6, AU-12, SI-4",10.8,"LOG-08, LOG-03, LOG-05",,,
+SEC-LOG-0005,Logging and threat detection,LOG,Centralize security log management and analysis,"Centralize logging storage and analysis to enable correlation across log data. For each log source, ensure that you have assigned a data owner, access guidance, storage location, what tools are used to process and access the data, and data retention requirements.
+
+Use Cloud native SIEM if you don't have an existing SIEM solution for CSPs. or aggregate logs/alerts into your existing SIEM.
+
+Ensure that you are integrating Azure activity logs into a centralized Log Analytics workspace. Use Azure Monitor to query and perform analytics and create alert rules using the logs aggregated from Azure services, endpoint devices, network resources, and other security systems.
+
+In addition, enable and onboard data to Microsoft Sentinel which provides security information event management (SIEM) and security orchestration automated response (SOAR) capabilities.","1.	Are logs from Azure resources centralized into Log Analytics or Sentinel?
+2.	Which connectors (Azure AD, Defender, M365, AWS/GCP) are active?
+3.	Is the SIEM ingesting all required categories (Audit, Security, Diagnostics)?
+4.	Are analysts using a single pane of glass for correlation and investigation?","1.	Sentinel data connector list: az sentinel data-connector list -- resource-group <rg> -- workspace-name <ws>
+2.	Screenshot of Sentinel workbooks/dashboard showing multi-source log ingestion.
+3.	Azure Monitor diagnostic settings export for at least 3 resource types (e.g., Storage, SQL,
+Key Vault).
+4.	Log ingestion volume per table in Log Analytics ( Usage | summarize TotalGB =
+sum(Quantity) by DataType ).
+5.	Export of SIEM correlation rules (JSON) demonstrating cross-log analytics.
+6.	Proof of external cloud connectors (AWS CloudTrail, GCP Audit Logs) in Sentinel.","Sentinel data connector list: az sentinel data-connector list -- resource-group <rg> -- workspace-name <ws> | Screenshot of Sentinel workbooks/dashboard showing multi-source log ingestion | Azure Monitor diagnostic settings export for at least 3 resource types (e.g., Storage, SQL, | Key Vault) | Log ingestion volume per table in Log Analytics ( Usage | summarize TotalGB = | sum(Quantity) by DataType ) | Export of SIEM correlation rules (JSON) demonstrating cross-log analytics | Proof of external cloud connectors (AWS CloudTrail, GCP Audit Logs) in Sentinel",Complete,,,100,0.85,"Observations: Logs are aggregated and reformatted using Cribble. From there, they are bifurcated, with some sent to long-term storage and others sent to their SIEM (Google SecOps) for real-time analysis.","Excel=CSF-AZ-LTD-05 | MCSB=LT-5 | DocID=LT-5 | CIS=8.9, 8.11, 13.1 | NIST=AU-3, AU-6, AU-12, SI-4","CIS:8.9, 8.11, 13.1; NIST:AU-3, AU-6, AU-12, SI-4; PCI:N/A; CSA:LOG-05, LOG-08, LOG-02; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,LT-5,Compliant,High,"Logs are aggregated and reformatted using Cribble. From there, they are bifurcated, with some sent to long-term storage and others sent to their SIEM (Google SecOps) for real-time analysis.",,1. Meeting notes.,6,,,,CSF-AZ-LTD-05,LT-5,"8.9, 8.11, 13.1","AU-3, AU-6, AU-12, SI-4",N/A,"LOG-05, LOG-08, LOG-02",,,
+SEC-LOG-0006,Logging and threat detection,LOG,Configure log storage retention,"Plan your log retention strategy according to your compliance, regulation, and business requirements. Configure the log retention policy at the individual logging services to ensure the logs are archived appropriately.
+
+Logs such as Azure Activity Logs are retained for 90 days and then deleted. You should create a diagnostic setting and route the logs to another location (such as Azure Monitor Log Analytics workspace, Event Hubs or Azure Storage) based on your needs. This strategy also applies to other resource logs and resources managed by yourself such as logs in the operating systems and applications inside VMs.
+
+You have the log retention option as below:
+
+Use Azure Monitor Log Analytics workspace for a log retention period of up to 1 year or per your response team requirements.
+Use Azure Storage, Data Explorer or Data Lake for long-term and archival storage for greater than 1 year and to meet your security compliance requirements.
+Use Azure Event Hubs to forward logs to an external resource outside of Azure.","1.	Is log retention configured to meet compliance (90 days, 1 year, 7 years)?
+2.	Are immutable/archival storage accounts used for long-term log retention?
+3.	Are retention settings aligned with incident response and regulatory audit requirements?","1.	Log Analytics workspace retention setting: az monitor log-analytics workspace show -- query retentionInDays
+2.	Screenshot of Sentinel ""Data retention"" blade per workspace.
+3.	Azure Policy compliance for ""Log Analytics workspaces should have at least X days
+retention.""
+4.	Storage Account container properties showing WORM/Immutable blob retention enabled for
+archived logs.
+5.	Export of diagnostic settings proving logs are being sent to long-term storage (e.g., Azure Storage, Event Hub).","Log Analytics workspace retention setting: az monitor log-analytics workspace show -- query retentionInDays | Screenshot of Sentinel ""Data retention"" blade per workspace | Azure Policy compliance for ""Log Analytics workspaces should have at least X days | retention."" | Storage Account container properties showing WORM/Immutable blob retention enabled for | archived logs | Export of diagnostic settings proving logs are being sent to long-term storage (e.g., Azure Storage, Event Hub)",InProgress,,,60,0.85,,"Excel=CSF-AZ-LTD-06 | MCSB=LT-6 | DocID=LT-6 | CIS=8.3, 8.10 | NIST=AU-11","CIS:8.3, 8.10; NIST:AU-11; PCI:10.5, 10.7; CSA:LOG-02, LOG-17, LOG-08; DocStatus:Partial Compliant",2025-11-11T17:51:32.035526+00:00,LT-6,Partial Compliant,High,,,1. Azure environment.,5,,,,CSF-AZ-LTD-06,LT-6,"8.3, 8.10",AU-11,"10.5, 10.7","LOG-02, LOG-17, LOG-08",,,
+SEC-LOG-0007,Logging and threat detection,LOG,Use approved time synchronization sources,"Use approved time synchronization sources for your logging time stamp which include date, time and time zone information.
+
+Microsoft maintains time sources for most Azure PaaS and SaaS services. For your compute resources operating systems, use a Microsoft default NTP server for time synchronization unless you have a specific requirement. If you need to stand up your own network time protocol (NTP) server, ensure you secure the UDP service port 123.
+
+All logs generated by resources within Azure provide time stamps with the time zone specified by default.","1.	Are all VMs synchronized to Azure's NTP or approved enterprise NTP servers?
+2.	Are non-approved/external NTP sources blocked?
+3.	Do logs show consistent timestamps across all resource types?","1.	Windows VM config: powershell w32tm /query /status
+2.	Linux VM config: timedatectl show | grep NTP
+3.	Azure Policy compliance for ""Time synchronization settings should use approved NTP sources.""
+4.	Sample log entries from Sentinel ( Heartbeat | project TimeGenerated ) showing consistent UTC timestamps.","Windows VM config: powershell w32tm /query /status | Linux VM config: timedatectl show | grep NTP | Azure Policy compliance for ""Time synchronization settings should use approved NTP sources."" | Sample log entries from Sentinel ( Heartbeat | project TimeGenerated ) showing consistent UTC timestamps",NotStarted,,,0,0.5,,Excel=CSF-AZ-LTD-07 | MCSB=LT-7 | CIS=8.4 | NIST=AU-8,"CIS:8.4; NIST:AU-8; PCI:10.4; CSA:LOG-08, LOG-02",2025-11-11T17:51:32.035526+00:00,,,,,,,4,,,,CSF-AZ-LTD-07,LT-7,8.4,AU-8,10.4,"LOG-08, LOG-02",,,
+SEC-LOG-0008,Logging and threat detection,LOG,"Core log collection established, but not necessarily consistent","At this level, the core cloud management plane logs are collected, but this may not be centralized or consistent. At a minimum, cloud API logs (e.g., CloudTrail, Azure Activity Log, GCP Cloud Audit Log) are collected for a majority of cloud deployments.
+
+Azure Monitor is configured with at least one EventHub that sends Activity Logs to a Storage Account or external storage/SIEM",Is the organization currently following the Azure Guidance ?,Confirmation of the Assessment question,Confirmation of the Assessment question,NotStarted,,,0,0.5,,Excel=CSF-AZ-LTD-08,,2025-11-11T17:51:32.035526+00:00,,,,,,,1,,,,CSF-AZ-LTD-08,,,,,,,,
+SEC-LOG-0009,Logging and threat detection,LOG,Management plane API activity logs are consistently collected and centralized,"Cloud management plane logs are consistently and centrally collected
+
+Each Azure subscription has an EventHub that sends to the same destination",Is the organization currently following the Azure Guidance ?,Confirmation of the Assessment question,Confirmation of the Assessment question,NotStarted,,,0,0.5,,Excel=CSF-AZ-LTD-09,,2025-11-11T17:51:32.035526+00:00,,,,,,,1,,,,CSF-AZ-LTD-09,,,,,,,,
+SEC-LOG-0010,Logging and threat detection,LOG,CSP threat/detection feeds are enabled and collected for at least production environments,"All cloud providers include add-on security feeds that often require separate subscriptions. While these can incrementally increase costs, they can typically perform monitoring and alerting for active cloud threats that are difficult to otherwise obtain and build.
+
+These feeds should be enabled for at least production deployments, with the results feeding a SIEM or other monitoring platform.
+
+Defender for Cloud Standard is enabled in all subscriptions labeled production. If subscriptions are not labeled, pass if >50% of subscriptions use Defender",Is the organization currently following the Azure Guidance ?,Confirmation of the Assessment question,Confirmation of the Assessment question,NotStarted,,,0,0.5,,Excel=CSF-AZ-LTD-10,,2025-11-11T17:51:32.035526+00:00,,,,,,,1,,,,CSF-AZ-LTD-10,,,,,,,,
+SEC-LOG-0011,Logging and threat detection,LOG,Robust cloud platform security telemetry centrally collected,"Organizations should have a list of required security telemetry from their cloud providers, which will include multiple sources beyond just the management plane logs.
+
+These sources should include a mixture of CSP security feeds, service logs/events and workload logs. This control objective can be automatically assessed by looking for a mixture of common security telemetry feeds, but this needs to be backed by manual assessment because, in many cases, security telemetry will be collected using third-party tooling (especially for workload logs).
+
+Check that more than three of the following security sources are enabled in >50% of monitored subscriptions:
+* Azure Defender for Cloud CSPM
+* AAD sign in logs
+* AAD activity log",Is the organization currently following the Azure Guidance ?,Confirmation of the Assessment question,Confirmation of the Assessment question,NotStarted,,,0,0.5,,Excel=CSF-AZ-LTD-11,,2025-11-11T17:51:32.035526+00:00,,,,,,,1,,,,CSF-AZ-LTD-11,,,,,,,,
+SEC-LOG-0012,Logging and threat detection,LOG,Cloud-native threat detectors are enabled,"Cloud-native threat detectors monitor management plane and other sources for signs of cloud attacks. These are different than traditional threat detectors because they look for cloud platform activity—not necessarily network or workload activity—to indicate potential attacks.
+
+For this control objective, threat detectors beyond those built into the cloud platform's built-in threat monitoring service should be enabled (e.g., custom detectors, not just GuardDuty or Defender). These detectors can be implemented natively in the cloud platform, but will typically be run from an external SIEM or cloud detection and response (CDR) platform. Thus, this detector is difficult to automatically assess, unless the assessment tool itself includes the capability.
+
+Sentinel is running with default detectors (behavioral analytics) running",Is the organization currently following the Azure Guidance ?,Confirmation of the Assessment question,Confirmation of the Assessment question,NotStarted,,,0,0.5,,Excel=CSF-AZ-LTD-12,,2025-11-11T17:51:32.035526+00:00,,,,,,,1,,,,CSF-AZ-LTD-12,,,,,,,,

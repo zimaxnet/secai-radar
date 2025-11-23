@@ -1,0 +1,177 @@
+[
+  {
+    "id": "cloudflare",
+    "name": "Cloudflare",
+    "vendor": "Cloudflare",
+    "capabilities": [
+      "waf",
+      "ddos",
+      "casb",
+      "ztna",
+      "swg"
+    ]
+  },
+  {
+    "id": "cribl",
+    "name": "Cribl",
+    "vendor": "Cribl",
+    "capabilities": [
+      "observability-pipeline",
+      "log-collect"
+    ]
+  },
+  {
+    "id": "crowdstrike-falcon",
+    "name": "CrowdStrike Falcon",
+    "vendor": "CrowdStrike",
+    "capabilities": [
+      "edr",
+      "fim",
+      "identity-protection",
+      "ti"
+    ]
+  },
+  {
+    "id": "google-secops",
+    "name": "Google SecOps (Chronicle)",
+    "vendor": "Google",
+    "capabilities": [
+      "siem",
+      "ueba",
+      "ti"
+    ]
+  },
+  {
+    "id": "google-secops-siemplify",
+    "name": "Google SecOps (Siemplify)",
+    "vendor": "Google",
+    "capabilities": [
+      "soar"
+    ]
+  },
+  {
+    "id": "virustotal",
+    "name": "VirusTotal",
+    "vendor": "Google",
+    "capabilities": [
+      "ti",
+      "sandboxing"
+    ]
+  },
+  {
+    "id": "mandiant-breach-analytics",
+    "name": "Mandiant Breach Analytics",
+    "vendor": "Mandiant",
+    "capabilities": [
+      "ti",
+      "ir"
+    ]
+  },
+  {
+    "id": "mandiant-managed-soc",
+    "name": "Mandiant Managed SOC",
+    "vendor": "Mandiant",
+    "capabilities": [
+      "ir",
+      "ti"
+    ]
+  },
+  {
+    "id": "paloalto-fw",
+    "name": "Palo Alto Firewall",
+    "vendor": "Palo Alto Networks",
+    "capabilities": [
+      "ns-firewall",
+      "ids-ips",
+      "url-filtering"
+    ]
+  },
+  {
+    "id": "paloalto-wildfire",
+    "name": "WildFire",
+    "vendor": "Palo Alto Networks",
+    "capabilities": [
+      "sandboxing",
+      "ti"
+    ]
+  },
+  {
+    "id": "prisma-access",
+    "name": "Prisma Access",
+    "vendor": "Palo Alto Networks",
+    "capabilities": [
+      "ztna",
+      "swg",
+      "casb"
+    ]
+  },
+  {
+    "id": "proofpoint-efd",
+    "name": "Proofpoint EFD",
+    "vendor": "Proofpoint",
+    "capabilities": [
+      "email-sec",
+      "dlp"
+    ]
+  },
+  {
+    "id": "proofpoint-tr",
+    "name": "Proofpoint Threat Response",
+    "vendor": "Proofpoint",
+    "capabilities": [
+      "soar"
+    ]
+  },
+  {
+    "id": "proofpoint-psat",
+    "name": "Proofpoint PSAT",
+    "vendor": "Proofpoint",
+    "capabilities": [
+      "phish-sim"
+    ]
+  },
+  {
+    "id": "proofpoint-phalarm",
+    "name": "Proofpoint PhishAlarm",
+    "vendor": "Proofpoint",
+    "capabilities": [
+      "user-reporting"
+    ]
+  },
+  {
+    "id": "upguard",
+    "name": "UpGuard",
+    "vendor": "UpGuard",
+    "capabilities": [
+      "third-party-risk",
+      "externalscan"
+    ]
+  },
+  {
+    "id": "qualys-vm",
+    "name": "Qualys VM",
+    "vendor": "Qualys",
+    "capabilities": [
+      "vuln-mgmt"
+    ]
+  },
+  {
+    "id": "veracode",
+    "name": "Veracode",
+    "vendor": "Veracode",
+    "capabilities": [
+      "sast",
+      "dast",
+      "sca"
+    ]
+  },
+  {
+    "id": "wiz-cspm",
+    "name": "Wiz",
+    "vendor": "Wiz",
+    "capabilities": [
+      "cspm",
+      "cnapp"
+    ]
+  }
+]

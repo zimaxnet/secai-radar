@@ -1,0 +1,69 @@
+ControlID,Domain,DomainCode,ControlTitle,ControlDescription,Question,RequiredEvidence,EvidenceItems,Status,Owner,Frequency,ScoreNumeric,Weight,Notes,SourceRef,Tags,UpdatedAt,DocControlId,ComplianceStatus,Criticality,Observations,Gaps,References,EvidenceCount,AvailableEvidenceCount,EvidenceArtifacts,EvidenceLastCollected,ExcelControlId,MCSBMapping,CISMapping,NISTMapping,PCIDSSMapping,CSACCMMapping,IANSMapping,RiskSeverity,ImplementationGap
+SEC-ASSET-0001,Asset management,ASSET,Track asset inventory and their risks,"Track your asset inventory by query and discover all your cloud resources. Logically organize your assets by tagging and grouping your assets based on their service nature, location, or other characteristics. Ensure your security organization has access to a continuously updated inventory of assets.
+
+Ensure your security organization can monitor the risks to cloud assets by always having security insights and risks aggregated centrally.
+
+The Microsoft Defender for Cloud inventory feature and Azure Resource Graph can query for and discover all resources in your subscriptions, including Azure services, applications, and network resources. Logically organize assets according to your organization's taxonomy using tags as well as other metadata in Azure (Name, Description, and Category).
+
+Ensure that security organizations have access to a continuously updated inventory of assets on Azure. Security teams often need this inventory to evaluate their organization's potential exposure to emerging risks, and as an input for continuous security improvements.
+
+Ensure security organizations are granted Security Reader permissions in your Azure tenant and subscriptions so they can monitor for security risks using Microsoft Defender for Cloud. Security Reader permissions can be applied broadly to an entire tenant (Root Management Group) or scoped to management groups or specific subscriptions.","1.	How are all Azure resources (VMs, storage, databases, networking) inventoried?
+2.	Is the inventory enriched with tags/metadata for classification?
+3.	How does the security team access this inventory?
+4.	Is risk information (e.g., Defender for Cloud security score) linked to asset records?","1.	Azure Resource Graph query export: az graph query -q ""Resources | summarize count() by type""
+2.	Microsoft Defender for Cloud > Inventory export (CSV of resources + security status).
+3.	Tenant-level RBAC check: az role assignment list -- role ""Security Reader"" showing security team access.
+4.	Tag compliance report from Azure Policy (""Resources should be tagged with environment/owner"").
+5.	Risk findings mapped to assets (screenshot of Defender for Cloud Security Posture per asset).","Azure Resource Graph query export: az graph query -q ""Resources | summarize count() by type"" | Microsoft Defender for Cloud > Inventory export (CSV of resources + security status) | Tenant-level RBAC check: az role assignment list -- role ""Security Reader"" showing security team access | Tag compliance report from Azure Policy (""Resources should be tagged with environment/owner"") | Risk findings mapped to assets (screenshot of Defender for Cloud Security Posture per asset)",InProgress,,,60,0.85,"Observations: A Configuration Management Database (CMDB) exists but has not been fully vetted or populated.
+Tagging Policy is enforced","Excel=CSF-AZ-AM-01 | MCSB=AM-1 | DocID=AM-1 | CIS=1.1, 1.5, 2.1, 2.4 | NIST=CM-8, PM-5","CIS:1.1, 1.5, 2.1, 2.4; NIST:CM-8, PM-5; PCI:2.4; CSA:GRM-01, IPY-02, TVM-01; DocStatus:Partial Compliant",2025-11-11T17:51:32.035526+00:00,AM-1,Partial Compliant,High,"A Configuration Management Database (CMDB) exists but has not been fully vetted or populated.
+Tagging Policy is enforced",,1. Meeting notes.,5,,,,CSF-AZ-AM-01,AM-1,"1.1, 1.5, 2.1, 2.4","CM-8, PM-5",2.4,"GRM-01, IPY-02, TVM-01",,,
+SEC-ASSET-0002,Asset management,ASSET,Use only approved services,"Ensure that only approved cloud services can be used, by auditing and restricting which services users can provision in the environment.
+
+Use Azure Policy to audit and restrict which services users can provision in your environment. Use Azure Resource Graph to query for and discover resources within their subscriptions. You can also use Azure Monitor to create rules to trigger alerts when a non-approved service is detected.","1.	How are unapproved Azure services restricted?
+2.	Which Azure Policies deny or audit new resource types?
+3.	How is non-compliance with approved services detected?","1.	Azure Policy definition export: az policy assignment list -- query ""[?policyDefinitionId == '/providers/Microsoft.Authorj
+2.	Resource Graph query results showing services in use: az graph query -q ""Resources | summarize count() by type""
+3.	Azure Monitor alert rule JSON for detecting non-approved resource types.
+4.	Policy compliance report showing blocked/denied deployments (portal screenshot or CSV).","Azure Policy definition export: az policy assignment list -- query ""[?policyDefinitionId == '/providers/Microsoft.Authorj | Resource Graph query results showing services in use: az graph query -q ""Resources | summarize count() by type"" | Azure Monitor alert rule JSON for detecting non-approved resource types | Policy compliance report showing blocked/denied deployments (portal screenshot or CSV)",InProgress,,,60,0.85,,"Excel=CSF-AZ-AM-02 | MCSB=AM-2 | DocID=AM-2 | CIS=2.5, 2.6 , 2.7, 4.8 | NIST=CM-8, PM-5","CIS:2.5, 2.6 , 2.7, 4.8; NIST:CM-8, PM-5; PCI:6.3; CSA:AAc-02, GRM-02, TVM-02; DocStatus:Partial Compliant",2025-11-11T17:51:32.035526+00:00,AM-2,Partial Compliant,High,,,1.,4,,,,CSF-AZ-AM-02,AM-2,"2.5, 2.6 , 2.7, 4.8","CM-8, PM-5",6.3,"AAc-02, GRM-02, TVM-02",,,
+SEC-ASSET-0003,Asset management,ASSET,Ensure security of asset lifecycle management,"Ensure security attributes or configurations of the assets are always updated during the asset lifecycle.
+
+Establish or update security policies/process that address asset lifecycle management processes for potentially high impact modifications. These modifications include changes to identity providers and access, data sensitivity level, network configuration, and administrative privilege assignment.
+
+Identify and remove Azure resources when they are no longer needed.","1.	How are decommissioned Azure resources (VMs, storage, databases) securely removed?
+2.	Are changes to identity providers, network configuration, or privileged assignments logged
+and reviewed?
+3.	Is there automation to detect and clean up unused resources?","1.	Activity Log export showing Delete operations for resource groups/VMs: az monitor activity-log list -- resource-group <rg> -- status Succeeded -- query ""[?operz
+2.	Azure Policy assignment enforcing ""Resources must have an expiration date tag.""
+3.	Microsoft Defender for Cloud recommendations report (unused or orphaned resources flagged).
+4.	Example cleanup automation script in Azure Automation or Logic App (JSON runbook or execution logs).
+5.	Privileged role audit from Azure AD PIM showing admin assignment lifecycle.","Activity Log export showing Delete operations for resource groups/VMs: az monitor activity-log list -- resource-group <rg> -- status Succeeded -- query ""[?operz | Azure Policy assignment enforcing ""Resources must have an expiration date tag."" | Microsoft Defender for Cloud recommendations report (unused or orphaned resources flagged) | Example cleanup automation script in Azure Automation or Logic App (JSON runbook or execution logs) | Privileged role audit from Azure AD PIM showing admin assignment lifecycle",NotStarted,,,0,0.85,,"Excel=CSF-AZ-AM-03 | MCSB=AM-3 | DocID=AM-3 | CIS=1.1, 2.1 | NIST=CM-8, CM-7","CIS:1.1, 2.1; NIST:CM-8, CM-7; PCI:2.4; CSA:CCC-02, TVM-03; DocStatus:Non-Compliant",2025-11-11T17:51:32.035526+00:00,AM-3,Non-Compliant,High,,,1.,5,,,,CSF-AZ-AM-03,AM-3,"1.1, 2.1","CM-8, CM-7",2.4,"CCC-02, TVM-03",,,
+SEC-ASSET-0004,Asset management,ASSET,Limit access to asset management,"Limit users' access to asset management features, to avoid accidental or malicious modification of the assets in your cloud.
+
+Azure Resource Manager is the deployment and management service for Azure. It provides a management layer that enables you to create, update, and delete resources (assets) in Azure. Use Azure AD Conditional Access to limit users' ability to interact with Azure Resource Manager by configuring ""Block access"" for the ""Microsoft Azure Management"" App.
+
+Use Azure Role-based Access Control (Azure RBAC) to assign roles to identities to control their permissions and access to Azure resources. For example, a user with only the 'Reader' Azure RBAC role can view all resources, but is not allowed to make any changes.
+
+Use Resource Locks to prevent either deletions or modifications to resources. Resource Locks may also be administered through Azure Blueprints.","1.	Who is permitted to manage Azure resources (create, modify, delete)?
+2.	Are asset management permissions restricted to security/operations teams?
+3.	Is least privilege enforced for Resource Graph, Defender for Cloud inventory, and tagging operations?","1.	RBAC export: az role assignment list -- scope /subscriptions/<subID> -- query ""[?roleDefinitionName ==
+2.	Check for assignments of security Reader and Resource Policy Contributor roles at tenant/root management group.
+3.	Activity Log entries showing asset creation/deletion - filter by privileged roles.
+4.	Azure AD PIM report showing eligible vs active assignments for asset management roles.","RBAC export: az role assignment list -- scope /subscriptions/<subID> -- query ""[?roleDefinitionName == | Check for assignments of security Reader and Resource Policy Contributor roles at tenant/root management group | Activity Log entries showing asset creation/deletion - filter by privileged roles | Azure AD PIM report showing eligible vs active assignments for asset management roles",NotStarted,,,0,0.5,,Excel=CSF-AZ-AM-04 | MCSB=AM-4 | CIS=3.3 | NIST=AC-3,"CIS:3.3; NIST:AC-3; PCI:N/A; CSA:TVM-04, AAC-01, GRM-03",2025-11-11T17:51:32.035526+00:00,,,,,,,4,,,,CSF-AZ-AM-04,AM-4,3.3,AC-3,N/A,"TVM-04, AAC-01, GRM-03",,,
+SEC-ASSET-0005,Asset management,ASSET,Use only approved applications in virtual machine,"Ensure that only authorized software executes by creating an allow list and block the unauthorized software from executing in your environment.
+
+Use Microsoft Defender for Cloud adaptive application controls to discover and generate an application allow list. You can also use ASC adaptive application controls to ensure that only authorized software can executes, and all unauthorized software is blocked from executing on Azure Virtual Machines.
+
+Use Azure Automation Change Tracking and Inventory to automate the collection of inventory information from your Windows and Linux VMs. Software name, version, publisher, and refresh time information are available from the Azure portal. To get the software installation date and other information, enable guest-level diagnostics and direct the Windows Event Logs to a Log Analytics workspace.
+
+Depending on the type of scripts, you can use operating system-specific configurations or third-party resources to limit users' ability to execute scripts in Azure compute resources.
+
+You can also use a third-party solution to discover and identify unapproved software.","1.	Are application allowlists defined and enforced for Azure VMs?
+2.	How are unauthorized binaries or scripts detected/blocked?
+3.	Is inventory of installed applications collected and reviewed?
+4.	Is script execution (PowerShell, Bash) restricted by policy?","1.	Microsoft Defender for Cloud Adaptive Application Controls policy export (JSON).
+2.	Azure Automation Change Tracking and Inventory export (list of installed software on
+Windows/Linux VMs).
+3.	Log Analytics query results showing blocked execution attempts ( SecurityEvent with
+""ApplicationBlocked"").
+4.	Policy compliance results: ""Only approved software should run on machines.""
+5.	OS-level config (e.g., PowerShell execution policy Get-ExecutionPolicy ) on sample VMs.","Microsoft Defender for Cloud Adaptive Application Controls policy export (JSON) | Azure Automation Change Tracking and Inventory export (list of installed software on | Windows/Linux VMs) | Log Analytics query results showing blocked execution attempts ( SecurityEvent with | ""ApplicationBlocked"") | Policy compliance results: ""Only approved software should run on machines."" | OS-level config (e.g., PowerShell execution policy Get-ExecutionPolicy ) on sample VMs",Complete,,,100,0.85,Observations: VM’s not in use currently,"Excel=CSF-AZ-AM-05 | MCSB=AM-5 | DocID=AM-5 | CIS=2.5, 2.6, 2.7, 4.8 | NIST=CM-8, CM-7, CM-10, CM-11","CIS:2.5, 2.6, 2.7, 4.8; NIST:CM-8, CM-7, CM-10, CM-11; PCI:6.3; CSA:TVM-05, GRM-05; DocStatus:Compliant",2025-11-11T17:51:32.035526+00:00,AM-5,Compliant,High,VM’s not in use currently,,,5,,,,CSF-AZ-AM-05,AM-5,"2.5, 2.6, 2.7, 4.8","CM-8, CM-7, CM-10, CM-11",6.3,"TVM-05, GRM-05",,,
