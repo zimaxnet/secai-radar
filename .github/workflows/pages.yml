@@ -1,3 +1,5 @@
+name: Deploy Wiki to GitHub Pages
+
 on:
   push:
     branches:
@@ -5,3 +7,143 @@ on:
     paths:
       - 'docs/wiki/**'
       - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Setup Jekyll (optional)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+        continue-on-error: true
+      
+      - name: Build with Jekyll
+        id: jekyll-build
+        run: |
+          cd docs/wiki
+          if [ -f Gemfile ]; then
+            bundle install || true
+            bundle exec jekyll build --destination ../../_site || exit 1
+            # Ensure CNAME is copied to _site root
+            if [ -f CNAME ]; then
+              cp CNAME ../../_site/CNAME
+            fi
+          else
+            exit 1
+          fi
+        continue-on-error: true
+      
+      - name: Prepare static site (fallback)
+        if: steps.jekyll-build.outcome == 'failure'
+        run: |
+          mkdir -p _site
+          # Copy markdown files
+          cp -r docs/wiki/* _site/ 2>/dev/null || true
+          # Copy CNAME to root if it exists
+          if [ -f docs/wiki/CNAME ]; then
+            cp docs/wiki/CNAME _site/CNAME
+          fi
+          # Remove unwanted files
+          rm -f _site/Gemfile* _site/GITHUB-PAGES-SETUP.md _site/DEPLOYMENT-READY.md _site/GitHub-Pages-Deployment-Instructions.md 2>/dev/null || true
+          # Convert markdown files to static HTML when Jekyll is unavailable
+          pip install --quiet 'markdown>=3.5,<3.6'
+          python - <<'PY'
+          from pathlib import Path
+          import markdown
+          import re
+
+          site = Path('_site')
+
+          def rewrite_links(text: str) -> str:
+              pattern = re.compile(r"\[([^\]]+)\]\(([^\)]+)\)")
+              def repl(match: re.Match) -> str:
+                  label, target = match.group(1), match.group(2)
+                  if target.startswith(('http://', 'https://', 'mailto:', '#')):
+                      return match.group(0)
+                  if target.endswith('.html'):
+                      return match.group(0)
+                  if target.endswith('.md'):
+                      target = target[:-3] + '.html'
+                      return f"[{label}]({target})"
+                  return f"[{label}]({target}.html)"
+              return pattern.sub(repl, text)
+
+          def render_markdown(source: Path, destination: Path) -> None:
+              text = source.read_text(encoding='utf-8')
+              text = rewrite_links(text)
+              title_match = re.search(r'^#\s+(.+)', text, flags=re.MULTILINE)
+              title = title_match.group(1).strip() if title_match else destination.stem
+              html_body = markdown.markdown(
+                  text,
+                  extensions=['extra', 'toc', 'tables', 'fenced_code']
+              )
+              template = """<!DOCTYPE html>\n<html lang='en'>\n<head>\n  <meta charset='utf-8' />\n  <title>{title}</title>\n  <meta name='viewport' content='width=device-width, initial-scale=1' />\n  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.min.css' integrity='sha512-0lS5mW+CtyUbiYSrbYIwkd79tryJi3nwoZ+LOrF8lJHkliAQhS4ohmqQVWpW0P8Ym1+H3E0ZCty0uBonHZC3xg==' crossorigin='anonymous' referrerpolicy='no-referrer' />\n  <style>body{{margin:2rem;}} header{{margin-bottom:2rem;}} nav a{{margin-right:1rem;}}</style>\n</head>\n<body>\n  <header>\n    <h1>{title}</h1>\n    <nav><a href='index.html'>Home</a></nav>\n  </header>\n  <main>{body}</main>\n  <footer><p>Generated from Markdown on GitHub Actions.</p></footer>\n</body>\n</html>\n"""
+              destination.write_text(template.format(title=title, body=html_body), encoding='utf-8')
+
+          for md_file in site.glob('*.md'):
+              render_markdown(md_file, md_file.with_suffix('.html'))
+
+          index_html = site / 'index.html'
+          index_md_html = (site / 'index.md').with_suffix('.html')
+          home_html = site / 'Home.html'
+          if index_md_html.exists():
+              index_html.write_text(index_md_html.read_text(encoding='utf-8'), encoding='utf-8')
+          elif home_html.exists():
+              redirect = """<!DOCTYPE html>\n<html lang='en'>\n<head>\n  <meta charset='utf-8' />\n  <meta http-equiv='refresh' content='0; url=Home.html' />\n  <title>SecAI Radar Documentation</title>\n</head>\n<body>\n  <p>Redirecting to <a href='Home.html'>Home</a>…</p>\n</body>\n</html>\n"""
+              index_html.write_text(redirect, encoding='utf-8')
+          PY
+          echo "_site directory created successfully"
+          ls -la _site/ | head -20
+          echo "CNAME file check:"
+          ls -la _site/CNAME 2>/dev/null || echo "CNAME not found in _site"
+      - name: Ensure _site exists
+        if: steps.jekyll-build.outcome != 'failure'
+        run: |
+          if [ ! -d "_site" ]; then
+            echo "Error: _site directory does not exist after Jekyll build"
+            exit 1
+          fi
+      - name: Normalize static output
+        run: |
+          if [ -f "_site/index/index.html" ]; then
+            cp _site/index/index.html _site/index.html
+          elif [ -f "_site/Home/index.html" ] && [ ! -f "_site/index.html" ]; then
+            cp _site/Home/index.html _site/index.html
+          fi
+          if [ -f "_site/index.html" ]; then
+            printf "Created/confirmed root index.html"
+          else
+            echo "Warning: root index.html still missing"
+          fi
+          find _site -name "*.md" -delete || true
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+

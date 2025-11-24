@@ -1,0 +1,100 @@
+# SecAI Radar - Model Layer Configuration
+# 
+# This file defines model roles and their implementations.
+# Models are defined by ROLE (reasoning, classification, generation), not by brand.
+# This allows models to be swapped without changing orchestrator code.
+#
+# Model Roles:
+#   - reasoning_model: Multi-step security analysis and orchestration
+#   - classification_model: Maps evidence to controls/domains
+#   - generation_model: Generates human-readable reports
+
+# Model Provider Configuration
+providers:
+  azure_openai:
+    type: "azure_openai"
+    endpoint_format: "https://{account}.openai.azure.com"
+    api_version: "2024-02-15-preview"
+    # Authentication via Azure AD (Entra ID) or API key
+    auth_method: "azure_ad"  # Options: "azure_ad" | "api_key"
+    # API key is stored in environment variable: AZURE_OPENAI_API_KEY
+    # Azure AD uses managed identity or service principal
+
+# Model Role Assignments
+# Each role can be assigned to a specific model deployment
+roles:
+  reasoning_model:
+    provider: "azure_openai"
+    deployment: "gpt-5-chat"
+    account: "zimax"
+    resource_group: "zimax-ai"
+    subscription_id: "23f4e2c5-0667-4514-8e2e-f02ca7880c95"
+    tenant_id: "8838531d-55dd-4018-8341-77705f4845f4"
+    # Model-specific parameters
+    parameters:
+      temperature: 0.3  # Lower temperature for analytical reasoning
+      max_tokens: 4000
+      top_p: 0.95
+      frequency_penalty: 0.0
+      presence_penalty: 0.0
+    # System prompt template (can reference environment variables)
+    system_prompt: |
+      You are a security analysis expert. Analyze cloud security evidence and provide
+      structured, logical reasoning about security posture, gaps, and recommendations.
+      Be thorough, evidence-based, and explainable.
+
+  classification_model:
+    provider: "azure_openai"
+    deployment: "gpt-5-chat"  # Same model, different role/prompts
+    account: "zimax"
+    resource_group: "zimax-ai"
+    subscription_id: "23f4e2c5-0667-4514-8e2e-f02ca7880c95"
+    tenant_id: "8838531d-55dd-4018-8341-77705f4845f4"
+    parameters:
+      temperature: 0.1  # Very low temperature for consistent classification
+      max_tokens: 2000
+      top_p: 0.9
+    system_prompt: |
+      You are a security control classifier. Analyze evidence and classify it to
+      specific security controls and domains. Provide structured, consistent mappings.
+      Return JSON format with control_id, domain_code, confidence_score.
+
+  generation_model:
+    provider: "azure_openai"
+    deployment: "gpt-5-chat"  # Same model, different role/prompts
+    account: "zimax"
+    resource_group: "zimax-ai"
+    subscription_id: "23f4e2c5-0667-4514-8e2e-f02ca7880c95"
+    tenant_id: "8838531d-55dd-4018-8341-77705f4845f4"
+    parameters:
+      temperature: 0.7  # Higher temperature for natural language generation
+      max_tokens: 8000
+      top_p: 0.95
+      frequency_penalty: 0.3
+      presence_penalty: 0.3
+    system_prompt: |
+      You are a security assessment report writer. Generate clear, professional,
+      executive-level reports based on security findings. Use plain language,
+      structure findings logically, and provide actionable recommendations.
+
+# Fallback Models (optional)
+# If primary model is unavailable, fallback to these
+fallbacks:
+  reasoning_model:
+    provider: "azure_openai"
+    deployment: "gpt-4"  # Example fallback
+    account: "zimax"
+    # ... other config
+
+# Model Selection Strategy
+# Options: "single" (use same model for all roles) | "role_specific" (different models per role)
+selection_strategy: "role_specific"
+
+# Environment Variables Required
+# These should be set in the deployment environment:
+# - AZURE_OPENAI_API_KEY (if using API key auth)
+# - AZURE_CLIENT_ID (if using service principal)
+# - AZURE_CLIENT_SECRET (if using service principal)
+# - AZURE_TENANT_ID (if using service principal)
+# - AZURE_SUBSCRIPTION_ID (for resource management)
+
