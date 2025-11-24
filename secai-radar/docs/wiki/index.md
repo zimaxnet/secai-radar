@@ -32,6 +32,8 @@ SecAI Radar v2.0 is a unified platform combining:
 ### AI Features
 - [Multi-Agent System](Multi-Agent-System.md) - Agent architecture and capabilities
 - [Agent Integration](Agent-Integration.md) - How agents integrate with workflows
+- [Agent Governance Framework](Agent-Governance-Framework.md) - Governance framework for agent personas
+- [Agent Improvements](Agent-Improvements.md) - Agent personas improvements and enhancements
 
 ### Workflows
 - [Assessment Workflow](Assessment-Workflow.md) – End-to-end pipeline for staging sanitized inputs, building CSVs, collecting Azure evidence, and generating questionnaires/reports before import.
