@@ -64,6 +64,7 @@ This document summarizes the implementation of the multi-agent system for SecAI 
 ### ⚠️ Phase 6: Testing and Documentation
 - **Documentation**: In Progress
   - This document
+  - [AI Adoption Guide](AI_ADOPTION_GUIDE.md) - Guide to avoiding common AI pitfalls
   - Need to update main blueprint.md
 - **Unit Tests**: Not Started
 - **Integration Tests**: Not Started
