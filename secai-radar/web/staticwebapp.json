@@ -1,9 +1,0 @@
-{
-  "roles": [
-    {
-      "name": "authenticated",
-      "members": ["*"]
-    }
-  ]
-}
-

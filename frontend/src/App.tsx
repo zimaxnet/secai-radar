@@ -7,6 +7,7 @@ import { ToolsPage } from './pages/ToolsPage';
 import { GapsPage } from './pages/GapsPage';
 import { ReportPage } from './pages/ReportPage';
 import { LandingPage } from './pages/LandingPage';
+import VoiceAgentInterface from './pages/VoiceAgentInterface';
 
 function App() {
   const defaultTenant = 'default';
@@ -17,6 +18,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/tenant/:id/dashboard" element={<Dashboard />} />
         <Route path="/tenant/:id/agents" element={<AgentShowcase />} />
+        <Route path="/tenant/:id/voice" element={<VoiceAgentInterface />} />
         <Route path="/tenant/:id/controls" element={<ControlsPage />} />
         <Route path="/tenant/:id/control/:controlId" element={<ControlDetail />} />
         <Route path="/tenant/:id/tools" element={<ToolsPage />} />

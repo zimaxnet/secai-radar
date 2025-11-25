@@ -1,46 +1,20 @@
-# SecAI Documentation
+# SecAI Radar Docs
 
-This directory contains all documentation for the SecAI Radar project.
+This folder contains the working documentation for the SecAI Radar project.
 
-## Structure
+- `SEC_AI_Radar_Brief.md` — high-level build brief you can load into Cursor context.
+- `PROMPTING-GUIDE.md` — Advanced prompting principles and templates for SecAI Radar development (ensures highest quality, accuracy, and explainability).
+- `PROMPTING-QUICK-REF.md` — Quick reference card for common prompting patterns.
+- `adr/` — Architecture Decision Records (ADRs): short, dated notes capturing key technical decisions and their rationale.
+- `decision-log.md` — index of ADRs with statuses.
+- `deployment.md` — Azure Static Web Apps deployment guide.
+- `backlog.md` — Next features and roadmap.
 
-```
-docs/
-├── wiki/              # Wiki documentation (for gh-pages)
-├── summaries/         # Implementation summaries and comparisons
-├── guides/            # Comprehensive guides and readouts
-└── README.md         # This file
-```
+## What is an ADR?
+An **Architecture Decision Record** is a lightweight design note that captures:
+- the **context** and problem
+- the **decision** taken
+- the **options** considered
+- the **consequences** (trade-offs, follow-ups)
 
-## Documentation Organization
-
-### Wiki Documentation (`wiki/`)
-Documentation for GitHub Pages/wiki:
-- Platform Features
-- Agent Integration
-- Evidence Collection
-- User Guides
-- API Reference
-
-### Summaries (`summaries/`)
-Implementation summaries and comparisons:
-- `ARCHITECTURE_COMPARISON.md` - Architecture comparison between versions
-- `ENHANCEMENTS_COMPLETED.md` - Completed enhancements summary
-- `IMPLEMENTATION_SUMMARY.md` - Overall implementation summary
-- `WIKI_DOCUMENTATION_SUMMARY.md` - Wiki documentation summary
-- `BRANCH_ROOTS_GUIDE.md` - Branch organization guide
-- `BRANCH_ORGANIZATION_COMPLETE.md` - Branch organization status
-
-### Guides (`guides/`)
-Comprehensive guides and readouts:
-- `SECAI_RADAR_COMPREHENSIVE_READOUT.md` - Comprehensive project readout
-
-## Usage
-
-- **For GitHub Pages**: Files in `wiki/` are published to gh-pages branch
-- **For Reference**: Files in `summaries/` and `guides/` are for internal reference
-
----
-
-**Last Updated**: 2025-01-15
-
+ADRs prevent "why did we choose this?" amnesia and speed up onboarding and audits.

@@ -32,58 +32,26 @@ class GoogleFileSearchRetriever(BaseRetriever):
         
         Args:
             api_key: Google API key (or set GOOGLE_API_KEY env var)
-            file_store_id: File store ID (or will create one)
+            file_store_id: Not used in this implementation (kept for compatibility)
         """
         self.api_key = api_key or os.getenv("GOOGLE_API_KEY")
+        if not self.api_key:
+            # Try to get from Key Vault if not in env
+            try:
+                from shared.key_vault import get_secret_from_key_vault_or_env
+                self.api_key = get_secret_from_key_vault_or_env("google-api-key", "GOOGLE_API_KEY")
+            except ImportError:
+                pass
+                
         if not self.api_key:
             raise ValueError("GOOGLE_API_KEY environment variable or api_key parameter required")
         
         genai.configure(api_key=self.api_key)
         self.client = genai
         
-        # Get or create file store
-        self.file_store_id = file_store_id
-        if not self.file_store_id:
-            # Try to get from environment or create new
-            self.file_store_id = os.getenv("GOOGLE_FILE_STORE_ID")
-            if not self.file_store_id:
-                # Create a new file store
-                self.file_store_id = self._create_file_store()
-    
-    def _create_file_store(self) -> str:
-        """
-        Create a new file store.
-        
-        Returns:
-            File store ID
-        """
-        try:
-            # Try different API methods based on SDK version
-            try:
-                # Method 1: Direct create_file_store
-                file_store = self.client.create_file_store(
-                    display_name="SecAI Radar Knowledge Base"
-                )
-                # Extract ID from name (format: "fileStores/{id}")
-                if hasattr(file_store, 'name'):
-                    return file_store.name.split("/")[-1]
-                elif hasattr(file_store, 'id'):
-                    return file_store.id
-                else:
-                    return str(file_store)
-            except AttributeError:
-                # Method 2: Use genai.create_file_store if available
-                file_store = genai.create_file_store(
-                    display_name="SecAI Radar Knowledge Base"
-                )
-                if hasattr(file_store, 'name'):
-                    return file_store.name.split("/")[-1]
-                return "default_store"
-        except Exception as e:
-            print(f"Error creating file store: {e}")
-            print(f"Note: File store creation API may need updating")
-            # Return a placeholder - user should set GOOGLE_FILE_STORE_ID manually
-            return "default_store"
+        # Track uploaded files
+        self.uploaded_files = []
+        self.model_name = "gemini-flash-latest"
     
     async def retrieve(
         self,
@@ -92,65 +60,52 @@ class GoogleFileSearchRetriever(BaseRetriever):
         top_k: int = 5
     ) -> Optional[str]:
         """
-        Retrieve relevant context using Google File Search.
+        Retrieve relevant context using Google Gemini Long Context.
         
         Args:
             query: Search query
-            context: Additional context (not used by Google File Search directly)
-            top_k: Number of results (handled by Google internally)
+            context: Additional context
+            top_k: Not used
             
         Returns:
             Retrieved context as string
         """
         try:
-            # Create a model with file search enabled
-            # Note: File Search is enabled via tools parameter
-            # The exact API may vary - this is a placeholder implementation
-            # that should be updated based on actual google-generativeai SDK version
-            
-            # Try the protos approach first (for newer SDK versions)
-            try:
-                from google.generativeai import protos
-                model = self.client.GenerativeModel(
-                    model_name="gemini-1.5-pro",
-                    tools=[protos.Tool(
-                        file_search=protos.FileSearch(
-                            file_store=protos.FileStore(
-                                name=f"fileStores/{self.file_store_id}"
-                            )
-                        )
-                    )]
-                )
-            except (ImportError, AttributeError):
-                # Fallback: Use file_store parameter if available
+            if not self.uploaded_files:
+                print("Warning: No files uploaded for retrieval")
+                return None
+                
+            # Get file handles
+            file_handles = []
+            for file_name in self.uploaded_files:
                 try:
-                    model = self.client.GenerativeModel(
-                        model_name="gemini-1.5-pro",
-                        file_store=f"fileStores/{self.file_store_id}"
-                    )
-                except Exception:
-                    # If file_store parameter not available, use standard model
-                    # and include file store reference in prompt
-                    model = self.client.GenerativeModel(
-                        model_name="gemini-1.5-pro"
-                    )
+                    file_obj = self.client.get_file(file_name)
+                    file_handles.append(file_obj)
+                except Exception as e:
+                    print(f"Error getting file {file_name}: {e}")
             
-            # Build prompt with query
-            prompt = f"Search the knowledge base (file store: {self.file_store_id}) for: {query}\n\n"
+            if not file_handles:
+                return None
+                
+            # Create model
+            model = self.client.GenerativeModel(model_name=self.model_name)
+            
+            # Build prompt
+            prompt = f"Answer the following query based on the provided documents: {query}\n\n"
             if context:
                 prompt += f"Context: {context}\n\n"
-            prompt += "Provide relevant information from the knowledge base."
+            prompt += "Provide relevant information from the documents."
             
-            # Generate response with file search
-            response = model.generate_content(prompt)
+            # Generate content with files in context
+            content = [prompt] + file_handles
+            response = model.generate_content(content)
             
             if response and response.text:
                 return response.text
             
             return None
         except Exception as e:
-            print(f"Error retrieving from Google File Search: {e}")
-            print(f"Note: API may need updating based on google-generativeai SDK version")
+            print(f"Error retrieving from Google: {e}")
             return None
     
     async def upload_document(
@@ -159,7 +114,7 @@ class GoogleFileSearchRetriever(BaseRetriever):
         metadata: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
-        Upload a document to Google File Search.
+        Upload a document to Google.
         
         Args:
             document_path: Path to document file
@@ -169,47 +124,27 @@ class GoogleFileSearchRetriever(BaseRetriever):
             True if successful
         """
         try:
-            # Upload file to file store
-            # Try different API methods based on SDK version
-            try:
-                # Method 1: Direct upload_file
-                uploaded_file = self.client.upload_file(
-                    path=document_path,
-                    display_name=metadata.get("display_name", os.path.basename(document_path)) if metadata else os.path.basename(document_path)
-                )
-            except AttributeError:
-                # Method 2: Use genai.upload_file
-                uploaded_file = genai.upload_file(
-                    path=document_path,
-                    display_name=metadata.get("display_name", os.path.basename(document_path)) if metadata else os.path.basename(document_path)
-                )
+            display_name = metadata.get("display_name", os.path.basename(document_path)) if metadata else os.path.basename(document_path)
             
-            # Get file ID
-            file_id = None
-            if hasattr(uploaded_file, 'name'):
-                file_id = uploaded_file.name.split("/")[-1]
-            elif hasattr(uploaded_file, 'id'):
-                file_id = uploaded_file.id
-            else:
-                file_id = str(uploaded_file)
+            uploaded_file = self.client.upload_file(
+                path=document_path,
+                display_name=display_name
+            )
             
-            # Add to file store
-            try:
-                self.client.add_file_to_file_store(
-                    file_store_id=self.file_store_id,
-                    file_id=file_id
-                )
-            except AttributeError:
-                # Alternative: Use genai.add_file_to_file_store
-                genai.add_file_to_file_store(
-                    file_store_id=self.file_store_id,
-                    file_id=file_id
-                )
-            
+            # Wait for processing
+            import time
+            while uploaded_file.state.name == "PROCESSING":
+                time.sleep(1)
+                uploaded_file = self.client.get_file(uploaded_file.name)
+                
+            if uploaded_file.state.name == "FAILED":
+                print(f"File upload failed: {uploaded_file.state.name}")
+                return False
+                
+            self.uploaded_files.append(uploaded_file.name)
             return True
         except Exception as e:
             print(f"Error uploading document: {e}")
-            print(f"Note: Upload API may need updating based on SDK version")
             return False
     
     async def upload_text(
@@ -219,7 +154,7 @@ class GoogleFileSearchRetriever(BaseRetriever):
         metadata: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
-        Upload text content directly to file store.
+        Upload text content directly.
         
         Args:
             text: Text content
@@ -249,4 +184,5 @@ class GoogleFileSearchRetriever(BaseRetriever):
         except Exception as e:
             print(f"Error uploading text: {e}")
             return False
+
 
