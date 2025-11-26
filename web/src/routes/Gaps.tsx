@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getGaps, getAIRecommendation, getAIUsageSummary } from '../api'
 import GlassCard from '../components/ui/GlassCard'
 import PageHeader from '../components/ui/PageHeader'
