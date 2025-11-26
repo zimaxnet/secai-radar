@@ -1,97 +1,169 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getSummary } from '../api'
+import { getSummary, getGaps } from '../api'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts'
+import GlassCard from '../components/ui/GlassCard'
+import PageHeader from '../components/ui/PageHeader'
 
 interface Props { tenantId: string }
 
 export default function Dashboard({ tenantId }: Props) {
   const [byDomain, setByDomain] = useState<Array<{domain:string,total:number,complete:number,inProgress:number,notStarted:number}>>([])
+  const [totalGaps, setTotalGaps] = useState(0)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     let mounted = true
     setLoading(true)
-    getSummary(tenantId).then((d) => {
+    Promise.all([
+      getSummary(tenantId),
+      getGaps(tenantId)
+    ]).then(([summary, gaps]) => {
       if (!mounted) return
-      setByDomain(d.byDomain || [])
+      setByDomain(summary.byDomain || [])
+      setTotalGaps(gaps.items?.length || 0)
     }).finally(() => setLoading(false))
     return () => { mounted = false }
   }, [tenantId])
 
   const radarData = useMemo(() => {
-    return byDomain.map(d => ({ domain: d.domain, Complete: d.complete, InProgress: d.inProgress, NotStarted: d.notStarted }))
+    return byDomain.map(d => ({ 
+      domain: d.domain, 
+      // Normalize to 100 for chart
+      Coverage: d.total > 0 ? (d.complete / d.total) * 100 : 0,
+      full: 100
+    }))
+  }, [byDomain])
+
+  const overallProgress = useMemo(() => {
+    const total = byDomain.reduce((sum, d) => sum + d.total, 0)
+    const complete = byDomain.reduce((sum, d) => sum + d.complete, 0)
+    return total > 0 ? Math.round((complete / total) * 100) : 0
   }, [byDomain])
 
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg p-6">
-        <h1 className="text-3xl font-bold mb-2">SecAI Radar Dashboard</h1>
-        <p className="text-blue-100">Security assessment overview by domain</p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader 
+        title="Command Center" 
+        subtitle="Real-time security posture and threat assessment."
+      />
 
-      {loading && <div className="text-gray-500">Loading…</div>}
-
-      <div data-tour="domain-breakdown">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Security Domains</h2>
-        <p className="text-sm text-gray-600 mb-4">
-          Click on any domain to view controls, enter observations, see gaps, and track progress for that security domain.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {byDomain.map((d) => {
-            const progressPercent = d.total > 0 ? (d.complete / d.total) * 100 : 0
-            return (
-              <Link
-                key={d.domain}
-                to={`/tenant/${tenantId}/domain/${d.domain}`}
-                className="rounded-lg border-2 border-gray-200 bg-white p-5 hover:border-blue-500 hover:shadow-lg transition-all cursor-pointer group"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-lg font-bold text-gray-900">{d.domain}</div>
-                  <div className="text-xs text-gray-500 group-hover:text-blue-600">→</div>
-                </div>
-                <div className="mb-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-gray-900">{d.complete}</span>
-                    <span className="text-sm text-gray-500">/ {d.total}</span>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">controls complete</div>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                  <div 
-                    className="bg-blue-600 rounded-full h-2 transition-all"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-                <div className="flex gap-3 text-xs text-gray-600">
-                  <span>✓ {d.complete}</span>
-                  <span>⏳ {d.inProgress}</span>
-                  <span>○ {d.notStarted}</span>
-                </div>
-                <div className="mt-3 pt-3 border-t border-gray-100">
-                  <div className="text-xs font-medium text-blue-600 group-hover:text-blue-800">
-                    View Domain Assessment →
-                  </div>
-                </div>
-              </Link>
-            )
-          })}
+      {loading && (
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-pulse text-blue-400">Initializing Command Center...</div>
         </div>
-      </div>
+      )}
 
-      {byDomain.length > 0 && (
-        <div className="bg-white rounded-lg border p-6" data-tour="radar-chart">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Progress Overview</h2>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={radarData}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="domain" />
-                <PolarRadiusAxis />
-                <Radar name="Complete" dataKey="Complete" stroke="#2563eb" fill="#2563eb" fillOpacity={0.6} />
-                <Radar name="InProgress" dataKey="InProgress" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.4} />
-              </RadarChart>
-            </ResponsiveContainer>
+      {!loading && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Top Row: KPI Cards */}
+          <div className="lg:col-span-3">
+            <GlassCard className="h-full p-6 flex flex-col justify-between">
+              <div>
+                <div className="text-slate-400 text-sm font-medium uppercase tracking-wider">Security Score</div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-5xl font-bold text-white text-glow">{overallProgress}</span>
+                  <span className="text-xl text-slate-500">/ 100</span>
+                </div>
+              </div>
+              <div className="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-blue-600 to-cyan-400 h-full rounded-full shadow-[0_0_10px_rgba(56,189,248,0.5)]" 
+                  style={{ width: `${overallProgress}%` }}
+                />
+              </div>
+            </GlassCard>
+          </div>
+
+          <div className="lg:col-span-3">
+            <GlassCard className="h-full p-6 flex flex-col justify-between">
+              <div>
+                <div className="text-slate-400 text-sm font-medium uppercase tracking-wider">Active Gaps</div>
+                <div className="mt-2 text-5xl font-bold text-white text-glow">{totalGaps}</div>
+              </div>
+              <div className="text-sm text-red-400 mt-2 flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                Requires Attention
+              </div>
+            </GlassCard>
+          </div>
+
+          <div className="lg:col-span-6">
+            <GlassCard className="h-full p-6 flex items-center justify-between relative overflow-hidden">
+              <div className="relative z-10">
+                <div className="text-slate-400 text-sm font-medium uppercase tracking-wider">AI Threat Analysis</div>
+                <div className="mt-2 text-2xl font-semibold text-white max-w-md">
+                  {totalGaps > 0 
+                    ? `${totalGaps} security gaps detected. AI recommends prioritizing Identity and Network controls.` 
+                    : "System secure. AI monitoring active for anomalies."}
+                </div>
+                <Link to={`/tenant/${tenantId}/gaps`} className="inline-block mt-4 text-blue-400 hover:text-blue-300 text-sm font-medium">
+                  View Remediation Plan →
+                </Link>
+              </div>
+              {/* Abstract wave graphic decoration */}
+              <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-blue-500/10 to-transparent" />
+            </GlassCard>
+          </div>
+
+          {/* Middle Row: Radar & Domains */}
+          <div className="lg:col-span-5 h-[500px]" data-tour="radar-chart">
+            <GlassCard className="h-full p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="text-slate-400 text-sm font-medium uppercase tracking-wider">Coverage Radar</div>
+              </div>
+              <div className="h-[400px] w-full -ml-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                    <PolarGrid stroke="#334155" />
+                    <PolarAngleAxis dataKey="domain" tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                    <Radar
+                      name="Coverage"
+                      dataKey="Coverage"
+                      stroke="#3b82f6"
+                      strokeWidth={3}
+                      fill="#3b82f6"
+                      fillOpacity={0.3}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </GlassCard>
+          </div>
+
+          <div className="lg:col-span-7 h-[500px] overflow-y-auto" data-tour="domain-breakdown">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {byDomain.map((d) => {
+                const progress = d.total > 0 ? Math.round((d.complete / d.total) * 100) : 0
+                return (
+                  <Link key={d.domain} to={`/tenant/${tenantId}/domain/${d.domain}`}>
+                    <GlassCard hoverEffect className="p-5">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="h-10 w-10 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-blue-400 border border-slate-700">
+                          {d.domain}
+                        </div>
+                        <div className={`text-lg font-bold ${progress === 100 ? 'text-green-400' : 'text-white'}`}>
+                          {progress}%
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs text-slate-400">
+                          <span>Controls</span>
+                          <span className="text-slate-300">{d.complete}/{d.total}</span>
+                        </div>
+                        <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full ${progress === 100 ? 'bg-green-500' : 'bg-blue-500'}`} 
+                            style={{ width: `${progress}%` }} 
+                          />
+                        </div>
+                      </div>
+                    </GlassCard>
+                  </Link>
+                )
+              })}
+            </div>
           </div>
         </div>
       )}

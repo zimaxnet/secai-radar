@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getSummary, getDomains, getGaps } from '../api'
+import PageHeader from '../components/ui/PageHeader'
+import GlassCard from '../components/ui/GlassCard'
 
 interface Props { tenantId: string }
 
@@ -29,7 +31,7 @@ export default function AssessmentOverview({ tenantId }: Props) {
   }, [tenantId])
 
   if (loading) {
-    return <div className="text-gray-500">Loading assessment overview...</div>
+    return <div className="flex items-center justify-center py-20 text-blue-400 animate-pulse">Loading assessment overview...</div>
   }
 
   const totalControls = summary?.byDomain?.reduce((sum: number, d: any) => sum + (d.total || 0), 0) || 0
@@ -40,17 +42,14 @@ export default function AssessmentOverview({ tenantId }: Props) {
   const domainsWithData = summary?.byDomain?.filter((d: any) => (d.total || 0) > 0) || []
   const completeDomains = summary?.byDomain?.filter((d: any) => d.total > 0 && d.complete === d.total).length || 0
 
-  // Determine assessment status
   let assessmentStatus = 'not_started'
   if (progressPercent === 100) assessmentStatus = 'complete'
   else if (progressPercent > 0) assessmentStatus = 'in_progress'
 
-  // Find next recommended action
   const getNextAction = () => {
     if (totalControls === 0) {
       return { text: 'Import controls to begin assessment', action: `/tenant/${tenantId}/controls`, label: 'Import Controls' }
     }
-    // Find first domain with incomplete controls
     const nextDomain = summary?.byDomain?.find((d: any) => d.total > 0 && d.complete < d.total)
     if (nextDomain) {
       return { text: `Continue with ${nextDomain.domain} domain`, action: `/tenant/${tenantId}/domain/${nextDomain.domain}`, label: 'Continue Assessment' }
@@ -67,105 +66,92 @@ export default function AssessmentOverview({ tenantId }: Props) {
   const nextAction = getNextAction()
 
   return (
-    <div className="space-y-6">
-      {/* Assessment Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg p-8">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <Link to="/assessments" className="text-blue-200 hover:text-white text-sm mb-2 inline-block">
-              ← Back to Assessments
-            </Link>
-            <h1 className="text-4xl font-bold mb-2">{tenantId} Assessment</h1>
-            <p className="text-blue-100">SecAI Framework Security Assessment</p>
-          </div>
-          <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-            assessmentStatus === 'complete' ? 'bg-green-500' :
-            assessmentStatus === 'in_progress' ? 'bg-blue-500' :
-            'bg-gray-500'
+    <div className="space-y-8">
+      <PageHeader 
+        title="Assessment Overview" 
+        subtitle="Track your progress across all security domains."
+        action={
+          <div className={`px-4 py-2 rounded-full text-sm font-semibold border ${
+            assessmentStatus === 'complete' ? 'bg-green-500/20 text-green-400 border-green-500/50' :
+            assessmentStatus === 'in_progress' ? 'bg-blue-500/20 text-blue-400 border-blue-500/50' :
+            'bg-slate-800 text-slate-400 border-slate-700'
           }`}>
-            {assessmentStatus === 'complete' ? 'Complete' :
+            {assessmentStatus === 'complete' ? 'Assessment Complete' :
              assessmentStatus === 'in_progress' ? 'In Progress' :
              'Not Started'}
-          </span>
-        </div>
+          </div>
+        }
+      />
 
-        {/* Overall Progress */}
-        <div className="mt-6" data-tour="progress-bar">
-          <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-blue-100">Overall Progress</span>
-            <span className="font-bold text-lg">{Math.round(progressPercent)}%</span>
+      {/* Progress Bar */}
+      <GlassCard className="p-8 bg-gradient-to-r from-blue-900/40 to-slate-900/40 border-blue-500/30">
+        <div className="flex justify-between items-end mb-4">
+          <div>
+            <div className="text-sm text-blue-400 uppercase tracking-wider font-medium mb-1">Overall Completion</div>
+            <div className="text-3xl font-bold text-white">{Math.round(progressPercent)}%</div>
           </div>
-          <div className="w-full bg-blue-900 rounded-full h-4">
-            <div
-              className="bg-white rounded-full h-4 transition-all"
-              style={{ width: `${progressPercent}%` }}
-            />
+          <div className="text-right">
+            <div className="text-sm text-slate-400">{completeControls} of {totalControls} Controls</div>
           </div>
         </div>
-      </div>
+        <div className="w-full bg-slate-800/50 h-4 rounded-full overflow-hidden border border-white/5">
+          <div
+            className="bg-gradient-to-r from-blue-600 to-cyan-400 h-full rounded-full shadow-[0_0_15px_rgba(56,189,248,0.6)] transition-all duration-1000 ease-out"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </GlassCard>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4" data-tour="quick-stats">
-        <div className="bg-white rounded-lg border p-4">
-          <div className="text-sm text-gray-500 mb-1">Controls</div>
-          <div className="text-2xl font-bold text-gray-900">{completeControls} / {totalControls}</div>
-          <div className="text-xs text-gray-500 mt-1">complete</div>
-        </div>
-        <div className="bg-white rounded-lg border p-4">
-          <div className="text-sm text-gray-500 mb-1">Domains</div>
-          <div className="text-2xl font-bold text-gray-900">{completeDomains} / {domainsWithData.length}</div>
-          <div className="text-xs text-gray-500 mt-1">complete</div>
-        </div>
-        <div className="bg-white rounded-lg border p-4">
-          <div className="text-sm text-gray-500 mb-1">Gaps</div>
-          <div className="text-2xl font-bold text-gray-900">{totalGaps}</div>
-          <div className="text-xs text-gray-500 mt-1">identified</div>
-        </div>
-        <div className="bg-white rounded-lg border p-4">
-          <div className="text-sm text-gray-500 mb-1">Status</div>
-          <div className="text-2xl font-bold text-gray-900">
-            {inProgressControls > 0 ? '⏳' : completeControls > 0 ? '✓' : '○'}
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <GlassCard className="p-6 flex flex-col items-center justify-center text-center">
+          <div className="text-slate-400 text-xs uppercase tracking-wider mb-2">Domains Active</div>
+          <div className="text-4xl font-bold text-white mb-1">{completeDomains} <span className="text-slate-600 text-2xl">/ {domainsWithData.length}</span></div>
+          <div className="text-xs text-green-400">Fully Compliant</div>
+        </GlassCard>
+        
+        <GlassCard className="p-6 flex flex-col items-center justify-center text-center">
+          <div className="text-slate-400 text-xs uppercase tracking-wider mb-2">Risk Exposure</div>
+          <div className="text-4xl font-bold text-white mb-1">{totalGaps}</div>
+          <div className="text-xs text-red-400">Identified Gaps</div>
+        </GlassCard>
+
+        <GlassCard className="p-6 flex flex-col items-center justify-center text-center">
+          <div className="text-slate-400 text-xs uppercase tracking-wider mb-2">Current Status</div>
+          <div className="text-4xl font-bold text-white mb-1">
+            {inProgressControls > 0 ? 'Active' : completeControls > 0 ? 'Stable' : 'Idle'}
           </div>
-          <div className="text-xs text-gray-500 mt-1">
-            {inProgressControls > 0 ? 'In Progress' : completeControls > 0 ? 'Active' : 'Not Started'}
+          <div className="text-xs text-blue-400">
+            {inProgressControls} Controls In Progress
           </div>
-        </div>
+        </GlassCard>
       </div>
 
       {/* Next Action */}
       {nextAction && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6" data-tour="next-action">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm font-semibold text-blue-900 mb-1">Recommended Next Action</div>
-              <div className="text-lg text-blue-800">{nextAction.text}</div>
-            </div>
-            <Link
-              to={nextAction.action}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-            >
-              {nextAction.label} →
-            </Link>
+        <GlassCard className="p-8 flex flex-col md:flex-row items-center justify-between gap-6 border-blue-500/30 bg-blue-900/10">
+          <div>
+            <div className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-1">Recommended Next Step</div>
+            <div className="text-xl text-white font-medium">{nextAction.text}</div>
           </div>
-        </div>
+          <Link
+            to={nextAction.action}
+            className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-semibold shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all transform hover:scale-105"
+          >
+            {nextAction.label} →
+          </Link>
+        </GlassCard>
       )}
 
-      {/* Domain Progress */}
-      <div className="bg-white rounded-lg border p-6" data-tour="domain-grid">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">Security Domains</h2>
-        <p className="text-sm text-gray-600 mb-6">
-          Work through each security domain to complete your assessment. Click a domain to view controls, 
-          enter observations, and track progress.
-        </p>
+      {/* Domain Grid */}
+      <div>
+        <h2 className="text-lg font-semibold text-white mb-4 px-2">Domain Breakdown</h2>
         
         {domainsWithData.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-4">📋</div>
-            <p className="text-gray-600 mb-4">No controls imported yet.</p>
-            <Link
-              to={`/tenant/${tenantId}/controls`}
-              className="text-blue-600 hover:underline font-semibold"
-            >
+          <div className="text-center py-12 border border-dashed border-slate-700 rounded-xl">
+            <div className="text-4xl mb-4 opacity-50">📋</div>
+            <p className="text-slate-400 mb-4">No controls imported yet.</p>
+            <Link to={`/tenant/${tenantId}/controls`} className="text-blue-400 hover:text-blue-300 font-medium">
               Import controls to begin →
             </Link>
           </div>
@@ -174,76 +160,36 @@ export default function AssessmentOverview({ tenantId }: Props) {
             {summary?.byDomain?.map((domain: any) => {
               const domainProgress = domain.total > 0 ? (domain.complete / domain.total) * 100 : 0
               const isComplete = domain.total > 0 && domain.complete === domain.total
-              const hasControls = (domain.total || 0) > 0
               
               return (
-                <Link
-                  key={domain.domain}
-                  to={`/tenant/${tenantId}/domain/${domain.domain}`}
-                  className={`p-4 rounded-lg border-2 transition-all ${
-                    isComplete 
-                      ? 'border-green-300 bg-green-50' 
-                      : hasControls 
-                        ? 'border-blue-200 bg-white hover:border-blue-500 hover:shadow-md' 
-                        : 'border-gray-200 bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="font-semibold text-gray-900">{domain.domain}</div>
-                    {isComplete && <span className="text-green-600">✓</span>}
-                  </div>
-                  <div className="mb-2">
-                    <div className="text-sm text-gray-600">
-                      {domain.complete} / {domain.total} controls
+                <Link key={domain.domain} to={`/tenant/${tenantId}/domain/${domain.domain}`}>
+                  <GlassCard hoverEffect className="p-5 group">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="h-10 w-10 rounded bg-slate-800 flex items-center justify-center font-bold text-slate-300 group-hover:text-white group-hover:bg-blue-600 transition-all">
+                        {domain.domain}
+                      </div>
+                      {isComplete && <span className="text-green-400">✓</span>}
                     </div>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`rounded-full h-2 transition-all ${
-                        isComplete ? 'bg-green-600' : 'bg-blue-600'
-                      }`}
-                      style={{ width: `${domainProgress}%` }}
-                    />
-                  </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs text-slate-400">
+                        <span>Completion</span>
+                        <span>{Math.round(domainProgress)}%</span>
+                      </div>
+                      <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${isComplete ? 'bg-green-500' : 'bg-blue-500'}`}
+                          style={{ width: `${domainProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  </GlassCard>
                 </Link>
               )
             })}
           </div>
         )}
       </div>
-
-      {/* Quick Actions */}
-      <div className="grid md:grid-cols-3 gap-4">
-        <Link
-          to={`/tenant/${tenantId}/controls`}
-          className="bg-white rounded-lg border p-4 hover:border-blue-500 hover:shadow-md transition-all"
-        >
-          <div className="text-lg font-semibold text-gray-900 mb-2">📋 Controls</div>
-          <div className="text-sm text-gray-600">View and manage all controls</div>
-        </Link>
-        <Link
-          to={`/tenant/${tenantId}/gaps`}
-          className="bg-white rounded-lg border p-4 hover:border-blue-500 hover:shadow-md transition-all"
-        >
-          <div className="text-lg font-semibold text-gray-900 mb-2">⚠️ Gaps</div>
-          <div className="text-sm text-gray-600">Review identified security gaps</div>
-        </Link>
-        <Link
-          to={`/tenant/${tenantId}/tools`}
-          className="bg-white rounded-lg border p-4 hover:border-blue-500 hover:shadow-md transition-all"
-        >
-          <div className="text-lg font-semibold text-gray-900 mb-2">🔧 Tools</div>
-          <div className="text-sm text-gray-600">Manage security tool inventory</div>
-        </Link>
-        <Link
-          to={`/tenant/${tenantId}/report`}
-          className="bg-white rounded-lg border p-4 hover:border-blue-500 hover:shadow-md transition-all"
-        >
-          <div className="text-lg font-semibold text-gray-900 mb-2">📊 Report</div>
-          <div className="text-sm text-gray-600">Generate assessment report</div>
-        </Link>
-      </div>
     </div>
   )
 }
-

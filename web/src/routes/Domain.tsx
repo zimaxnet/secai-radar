@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getControlsByDomain, getDomains, getGaps } from '../api'
+import PageHeader from '../components/ui/PageHeader'
+import GlassCard from '../components/ui/GlassCard'
 
 interface Props { tenantId: string }
 
@@ -34,6 +36,34 @@ const FRAMEWORKS: Record<string, string[]> = {
   GOV: ["CIS Controls 20", "NIST CSF GV.RM-1", "Azure Security Benchmark GS-1"]
 }
 
+const ProgressRing = ({ percent }: { percent: number }) => {
+  const r = 18
+  const c = 2 * Math.PI * r
+  const offset = c - (percent / 100) * c
+  const color = percent >= 80 ? 'text-green-500' : percent >= 50 ? 'text-yellow-500' : 'text-red-500'
+
+  return (
+    <div className="relative h-12 w-12 flex items-center justify-center">
+      <svg className="h-full w-full -rotate-90" viewBox="0 0 48 48">
+        <circle className="text-slate-800" strokeWidth="4" stroke="currentColor" fill="transparent" r={r} cx="24" cy="24" />
+        <circle 
+          className={`${color} transition-all duration-1000 ease-out`} 
+          strokeWidth="4" 
+          strokeDasharray={c} 
+          strokeDashoffset={offset} 
+          strokeLinecap="round" 
+          stroke="currentColor" 
+          fill="transparent" 
+          r={r} 
+          cx="24" 
+          cy="24" 
+        />
+      </svg>
+      <span className="absolute text-[10px] font-bold text-slate-300">{percent}%</span>
+    </div>
+  )
+}
+
 export default function Domain({ tenantId }: Props) {
   const { domainCode } = useParams<{ domainCode: string }>()
   const [controls, setControls] = useState<any[]>([])
@@ -47,190 +77,135 @@ export default function Domain({ tenantId }: Props) {
     let mounted = true
     setLoading(true)
 
-    // Load domain info
-    getDomains().then(domains => {
+    Promise.all([
+      getDomains(),
+      getControlsByDomain(tenantId, domainCode),
+      getGaps(tenantId)
+    ]).then(([domains, controlsData, gapsData]) => {
       if (!mounted) return
       const domain = domains.find((d: any) => d.code === domainCode)
       setDomainInfo(domain)
-    })
-
-    // Load controls for this domain
-    getControlsByDomain(tenantId, domainCode).then(d => {
-      if (!mounted) return
-      setControls(d.items || [])
-    })
-
-    // Load gaps for all controls
-    getGaps(tenantId).then(d => {
-      if (!mounted) return
+      setControls(controlsData.items || [])
+      
       const gapsMap: Record<string, any> = {}
-      d.items?.forEach((g: any) => {
+      gapsData.items?.forEach((g: any) => {
         if (g.DomainPartition?.endsWith(`|${domainCode}`) || g.ControlID?.startsWith(`SEC-${domainCode}-`)) {
           gapsMap[g.ControlID] = g
         }
       })
       setGaps(gapsMap)
+    }).finally(() => {
+      if (mounted) setLoading(false)
     })
 
-    setLoading(false)
     return () => { mounted = false }
   }, [tenantId, domainCode])
 
-  if (!domainCode) return <div>Domain not specified</div>
+  if (!domainCode) return <div className="text-red-500">Domain not specified</div>
 
   const domainName = domainInfo?.name || domainCode
-  const description = DOMAIN_DESCRIPTIONS[domainCode] || "Security domain for comprehensive assessment."
+  const description = DOMAIN_DESCRIPTIONS[domainCode] || "Security domain assessment."
   const frameworks = FRAMEWORKS[domainCode] || []
 
-  // Filter controls by status
   const filteredControls = statusFilter
     ? controls.filter(c => (c.Status || '').toLowerCase() === statusFilter.toLowerCase())
     : controls
 
-  // Calculate progress
-  const totalControls = controls.length
-  const completeControls = controls.filter(c => (c.Status || '').toLowerCase() === 'complete').length
-  const inProgressControls = controls.filter(c => (c.Status || '').toLowerCase() === 'inprogress').length
-  const notStartedControls = controls.filter(c => !c.Status || (c.Status || '').toLowerCase() === 'notstarted').length
-  const progressPercent = totalControls > 0 ? (completeControls / totalControls) * 100 : 0
-
-  // Calculate domain-level gaps
-  const domainGaps = Object.values(gaps).filter((g: any) => 
-    (g.HardGaps?.length || 0) + (g.SoftGaps?.length || 0) > 0
-  ).length
-
   return (
-    <div className="space-y-6">
-      {/* Domain Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg p-6">
-        <Link to={`/tenant/${tenantId}/assessment`} className="text-blue-200 hover:text-white text-sm mb-2 inline-block">
-          ← Back to Assessment Overview
-        </Link>
-        <h1 className="text-3xl font-bold mb-2">{domainCode}: {domainName}</h1>
-        <p className="text-blue-100 text-lg">{description}</p>
-        
-        {/* Progress Bar */}
-        <div className="mt-4">
-          <div className="flex items-center justify-between text-sm mb-2">
-            <span>Domain Progress</span>
-            <span className="font-semibold">{progressPercent.toFixed(0)}%</span>
-          </div>
-          <div className="w-full bg-blue-900 rounded-full h-3">
-            <div 
-              className="bg-white rounded-full h-3 transition-all"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <div className="flex gap-4 mt-3 text-sm">
-            <span>Complete: {completeControls}</span>
-            <span>In Progress: {inProgressControls}</span>
-            <span>Not Started: {notStartedControls}</span>
-            <span>Total: {totalControls}</span>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-8">
+      <PageHeader 
+        title={`${domainCode}: ${domainName}`} 
+        subtitle={description}
+        parentLink={{ to: `/tenant/${tenantId}/dashboard`, label: 'Dashboard' }}
+      />
 
-      {/* Framework Mappings */}
+      {/* Framework Tags */}
       {frameworks.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h2 className="text-sm font-semibold text-yellow-900 mb-2">Mapped Frameworks</h2>
-          <div className="flex flex-wrap gap-2">
-            {frameworks.map((framework, idx) => (
-              <span key={idx} className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-sm">
-                {framework}
-              </span>
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-2 -mt-4 mb-8">
+          {frameworks.map((fw, idx) => (
+            <span key={idx} className="px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs text-slate-400 font-mono">
+              {fw}
+            </span>
+          ))}
         </div>
       )}
 
-      {/* Domain Gaps Summary */}
-      {domainGaps > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h2 className="text-sm font-semibold text-red-900 mb-2">Domain Gaps</h2>
-          <p className="text-sm text-red-800">
-            {domainGaps} control{domainGaps !== 1 ? 's' : ''} with identified gaps requiring attention.
-          </p>
+      {/* Filters */}
+      <div className="flex justify-end">
+        <div className="bg-slate-900/50 p-1 rounded-lg border border-white/5 flex gap-1">
+          {['', 'Not Started', 'In Progress', 'Complete'].map(status => (
+            <button
+              key={status}
+              onClick={() => setStatusFilter(status === 'Not Started' ? 'notstarted' : status === 'In Progress' ? 'inprogress' : status === 'Complete' ? 'complete' : '')}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                (status === '' && !statusFilter) || (status.toLowerCase().replace(' ', '') === statusFilter)
+                  ? 'bg-blue-600 text-white shadow-sm' 
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {status || 'All Controls'}
+            </button>
+          ))}
         </div>
-      )}
-
-      {/* Controls List */}
-      <div className="bg-white border rounded-lg">
-        <div className="p-4 border-b flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">Controls</h2>
-          <select
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-            className="border rounded px-3 py-1 text-sm"
-          >
-            <option value="">All Statuses</option>
-            <option value="complete">Complete</option>
-            <option value="inprogress">In Progress</option>
-            <option value="notstarted">Not Started</option>
-          </select>
-        </div>
-
-        {loading ? (
-          <div className="p-4 text-gray-500">Loading controls...</div>
-        ) : filteredControls.length === 0 ? (
-          <div className="p-4 text-gray-500">No controls found for this domain.</div>
-        ) : (
-          <div className="divide-y">
-            {filteredControls.map((control) => {
-              const controlGaps = gaps[control.RowKey || control.ControlID]
-              const hasGaps = controlGaps && (
-                (controlGaps.HardGaps?.length || 0) + (controlGaps.SoftGaps?.length || 0) > 0
-              )
-              const coverage = controlGaps?.Coverage || 0
-              const status = (control.Status || '').toLowerCase()
-
-              return (
-                <Link
-                  key={control.RowKey || control.ControlID}
-                  to={`/tenant/${tenantId}/control/${control.RowKey || control.ControlID}`}
-                  className="block p-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3">
-                        <span className="font-medium text-gray-900">{control.RowKey || control.ControlID}</span>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          status === 'complete' ? 'bg-green-100 text-green-800' :
-                          status === 'inprogress' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {control.Status || 'Not Started'}
-                        </span>
-                        {hasGaps && (
-                          <span className="px-2 py-1 rounded text-xs bg-red-100 text-red-800">
-                            Has Gaps
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-sm text-gray-700 mt-1">{control.ControlTitle}</div>
-                      {control.Owner && (
-                        <div className="text-xs text-gray-500 mt-1">Owner: {control.Owner}</div>
-                      )}
-                    </div>
-                    <div className="text-right ml-4">
-                      <div className="text-sm text-gray-600">Coverage</div>
-                      <div 
-                        className="text-lg font-bold"
-                        style={{ 
-                          color: coverage >= 0.7 ? 'green' : coverage >= 0.5 ? 'orange' : 'red' 
-                        }}
-                      >
-                        {(coverage * 100).toFixed(0)}%
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        )}
       </div>
+
+      {/* Controls Grid */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[1,2,3,4,5,6].map(i => (
+            <div key={i} className="h-48 bg-slate-900/50 rounded-xl animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredControls.map((control) => {
+            const controlGaps = gaps[control.RowKey || control.ControlID]
+            const coverage = controlGaps?.Coverage || 0
+            const status = (control.Status || 'Not Started')
+            
+            return (
+              <Link key={control.RowKey} to={`/tenant/${tenantId}/control/${control.RowKey}`}>
+                <GlassCard hoverEffect className="h-full p-5 flex flex-col">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <ProgressRing percent={Math.round(coverage * 100)} />
+                      <div>
+                        <div className="font-mono text-xs text-blue-400">{control.RowKey}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">{control.Owner || 'Unassigned'}</div>
+                      </div>
+                    </div>
+                    <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border ${
+                      status === 'Complete' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                      status === 'In Progress' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
+                      'bg-slate-800 text-slate-400 border-slate-700'
+                    }`}>
+                      {status}
+                    </span>
+                  </div>
+                  
+                  <h3 className="text-white font-medium mb-2 line-clamp-2 min-h-[3rem]">
+                    {control.ControlTitle}
+                  </h3>
+                  
+                  <p className="text-sm text-slate-400 line-clamp-3 flex-1">
+                    {control.ControlDescription}
+                  </p>
+
+                  <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
+                    <span className="text-xs text-slate-500">Click to assess →</span>
+                    {controlGaps && (
+                      <div className="flex gap-1">
+                        {(controlGaps.HardGaps?.length || 0) > 0 && <div className="h-2 w-2 rounded-full bg-red-500" title="Hard Gaps" />}
+                        {(controlGaps.SoftGaps?.length || 0) > 0 && <div className="h-2 w-2 rounded-full bg-orange-500" title="Soft Gaps" />}
+                      </div>
+                    )}
+                  </div>
+                </GlassCard>
+              </Link>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
-
