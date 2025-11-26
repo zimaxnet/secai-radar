@@ -45,7 +45,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if req.method == "POST":
             try:
                 body = req.get_json()
-            except:
+            except ValueError:
                 body = {}
         else:
             # For GET, use query parameters

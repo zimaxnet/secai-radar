@@ -5,10 +5,20 @@ Provides secure access to secrets, keys, and certificates from Azure Key Vault.
 Uses Managed Identity for authentication when available, falls back to client credentials.
 """
 
+import logging
 import os
 from typing import Optional
+
+from azure.core.exceptions import ClientAuthenticationError, ResourceNotFoundError
+from azure.identity import (
+    ClientSecretCredential,
+    DefaultAzureCredential,
+    ManagedIdentityCredential,
+)
 from azure.keyvault.secrets import SecretClient
-from azure.identity import DefaultAzureCredential, ManagedIdentityCredential, ClientSecretCredential
+
+logger = logging.getLogger(__name__)
+
 
 class KeyVaultService:
     """Service for accessing Azure Key Vault secrets"""
@@ -26,37 +36,51 @@ class KeyVaultService:
         if not self.vault_url:
             raise ValueError("KEY_VAULT_URL environment variable or vault_url parameter is required")
         
+        self._initialize_client()
+    
+    def _initialize_client(self) -> None:
+        """Initialize the Key Vault client with appropriate credentials."""
         # Try Managed Identity first (for Azure-hosted environments)
-        # Then fall back to DefaultAzureCredential (for local dev with Azure CLI)
         try:
-            # Try Managed Identity (works in Azure Functions)
             self.credential = ManagedIdentityCredential()
             self.client = SecretClient(vault_url=self.vault_url, credential=self.credential)
-            # Test connection
-            try:
-                self.client.get_secret("test")  # This will fail but verify auth works
-            except:
-                pass  # Expected to fail, but credential is valid
-        except:
-            try:
-                # Fall back to DefaultAzureCredential (Azure CLI, VS Code, etc.)
-                self.credential = DefaultAzureCredential()
-                self.client = SecretClient(vault_url=self.vault_url, credential=self.credential)
-            except Exception as e:
-                # If both fail, try client credentials (for service principal)
-                tenant_id = os.getenv("AZURE_TENANT_ID")
-                client_id = os.getenv("AZURE_CLIENT_ID")
-                client_secret = os.getenv("AZURE_CLIENT_SECRET")
-                
-                if tenant_id and client_id and client_secret:
-                    self.credential = ClientSecretCredential(
-                        tenant_id=tenant_id,
-                        client_id=client_id,
-                        client_secret=client_secret
-                    )
-                    self.client = SecretClient(vault_url=self.vault_url, credential=self.credential)
-                else:
-                    raise ValueError(f"Unable to authenticate to Key Vault: {e}")
+            # Validate by attempting to list (will fail fast if auth is invalid)
+            logger.debug("Attempting Managed Identity authentication for Key Vault")
+            return
+        except ClientAuthenticationError:
+            logger.debug("Managed Identity not available, trying DefaultAzureCredential")
+        except Exception as e:
+            logger.debug("Managed Identity failed: %s", e)
+        
+        # Fall back to DefaultAzureCredential (Azure CLI, VS Code, etc.)
+        try:
+            self.credential = DefaultAzureCredential()
+            self.client = SecretClient(vault_url=self.vault_url, credential=self.credential)
+            logger.debug("Using DefaultAzureCredential for Key Vault")
+            return
+        except ClientAuthenticationError as e:
+            logger.debug("DefaultAzureCredential failed: %s", e)
+        except Exception as e:
+            logger.debug("DefaultAzureCredential error: %s", e)
+        
+        # If both fail, try client credentials (for service principal)
+        tenant_id = os.getenv("AZURE_TENANT_ID")
+        client_id = os.getenv("AZURE_CLIENT_ID")
+        client_secret = os.getenv("AZURE_CLIENT_SECRET")
+        
+        if tenant_id and client_id and client_secret:
+            self.credential = ClientSecretCredential(
+                tenant_id=tenant_id,
+                client_id=client_id,
+                client_secret=client_secret
+            )
+            self.client = SecretClient(vault_url=self.vault_url, credential=self.credential)
+            logger.debug("Using ClientSecretCredential for Key Vault")
+        else:
+            raise ValueError(
+                "Unable to authenticate to Key Vault. "
+                "Ensure Managed Identity, Azure CLI login, or service principal credentials are available."
+            )
     
     def get_secret(self, secret_name: str) -> str:
         """
@@ -104,24 +128,34 @@ def get_key_vault() -> Optional[KeyVaultService]:
 
 def get_secret_from_key_vault_or_env(secret_name: str, env_var_name: Optional[str] = None) -> Optional[str]:
     """
-    Get secret from Key Vault, or fall back to environment variable
+    Get secret from Key Vault, or fall back to environment variable.
+    
+    This function provides a seamless way to retrieve secrets that works both
+    in Azure (using Key Vault) and locally (using environment variables).
     
     Args:
         secret_name: Key Vault secret name
         env_var_name: Environment variable name (defaults to secret_name)
         
     Returns:
-        Secret value or None if not found
+        Secret value or None if not found in either location
     """
     # Try Key Vault first
     kv = get_key_vault()
     if kv:
         try:
-            return kv.get_secret(secret_name)
-        except:
-            pass
+            secret = kv.get_secret(secret_name)
+            logger.debug("Retrieved secret '%s' from Key Vault", secret_name)
+            return secret
+        except ResourceNotFoundError:
+            logger.debug("Secret '%s' not found in Key Vault, falling back to env var", secret_name)
+        except Exception as e:
+            logger.warning("Error retrieving secret '%s' from Key Vault: %s", secret_name, e)
     
     # Fall back to environment variable
     env_name = env_var_name or secret_name
-    return os.getenv(env_name)
+    value = os.getenv(env_name)
+    if value:
+        logger.debug("Retrieved secret from environment variable '%s'", env_name)
+    return value
 

@@ -5,6 +5,7 @@ Handles evidence file uploads to Blob Storage with auto-classification.
 """
 
 import json
+import logging
 import os
 import uuid
 from datetime import datetime, timedelta
@@ -106,7 +107,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     if e.get("PartitionKey") == tenant_id and e.get("ControlID") == control_id
                 ]
                 metadata_by_filename = {e.get("FileName"): e for e in evidence_entities}
-            except:
+            except Exception as e:
+                logging.warning("Could not load evidence metadata: %s", e)
                 metadata_by_filename = {}
             
             for blob in blobs:
@@ -150,7 +152,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             # Azure Functions HTTP trigger - expect JSON body with base64 file or multipart
             try:
                 body = req.get_json()
-            except:
+            except ValueError:
                 body = {}
             
             # Check for base64 encoded file
@@ -205,7 +207,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     )
                 except Exception as e:
                     # Classification failed, continue without it
-                    pass
+                    logging.warning("Evidence classification failed: %s", e)
             
             # Store metadata in Evidence table
             try:
@@ -228,7 +230,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 evidence_table.upsert_entity(evidence_entity)
             except Exception as e:
                 # Table storage failed, but blob upload succeeded
-                pass
+                logging.warning("Failed to store evidence metadata: %s", e)
             
             # Generate download URL
             download_url = _generate_sas_url(blob_path, permission="read", expiry_hours=24)
