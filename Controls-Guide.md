@@ -5,213 +5,72 @@ title: Controls Guide
 
 # Controls Guide
 
-Complete guide to managing security controls in SecAI Radar.
+Complete guide to managing security controls using the **Masonry Grid** and **Station View**.
 
 ---
 
 ## Overview
 
-The Controls page allows you to manage security control assessments, import controls, and track their status.
+Controls are the fundamental units of the SecAI Radar assessment. You interact with them in two main views:
+1. **Domain View**: A high-level masonry grid of all controls in a domain.
+2. **Station View (Detail)**: A focused workspace for assessing a single control.
 
 ---
 
-## Control List
+## Domain View (Masonry Grid)
 
-### Table Columns
+When you click a domain (e.g., "Network Security"), you see a **Masonry Grid** of control cards.
 
-The control table displays:
-- **Control ID**: Unique identifier (e.g., SEC-NET-0001)
-- **Domain**: Security domain code (e.g., NET, IDM, LOG)
-- **Title**: Human-readable control title
-- **Status**: Current assessment status
-- **Owner**: Control owner or responsible party
+### Control Card Anatomy
+- **Progress Ring**: A visual SVG ring showing the coverage percentage (Green/Orange/Red).
+- **Status Badge**: "Complete", "In Progress", or "Not Started".
+- **Title & Description**: Brief summary of the control.
+- **Gap Indicators**: Small red/orange dots indicating if issues exist.
 
-### Status Values
-
-- **Complete**: Control is fully implemented and compliant
-- **InProgress** or **In Progress**: Control is being worked on
-- **NotStarted** or **Not Started**: Control has not been started
-- **NotApplicable**: Control does not apply to this environment
+**Action**: Click any card to enter the **Station View**.
 
 ---
 
-## Filters
+## Station View (Control Detail)
 
-### Domain Filter
+This is where the actual work happens. It follows a logical left-to-right flow:
 
-Filter controls by security domain:
-- Enter domain code (e.g., `NET`, `IDM`, `LOG`)
-- Case-insensitive matching
-- Partial matches supported
+### Left Column: Assessment Form
+- **Status Selector**: Dropdown to change status (Not Started -> Complete).
+- **Owner**: Assign a responsible person.
+- **Notes**: Text area for your findings.
+- **Evidence Drop Zone**: Modern drag-and-drop area to upload screenshots/PDFs.
 
-**Common Domains**:
-- `NET` - Network Security
-- `IDM` - Identity Management
-- `LOG` - Logging and Monitoring
-- `SEC` - Security Operations
-- `POST` - Posture Management
-
-### Status Filter
-
-Filter by assessment status:
-- `Complete` - Fully compliant controls
-- `InProgress` - Active work items
-- `NotStarted` - Not yet started
-- `NotApplicable` - N/A controls
-
-### Search Filter
-
-Search across multiple fields:
-- Control ID
-- Control Title
-- Domain
-- Description
-
-**Search Tips**:
-- Use partial matches (e.g., "NET" finds all NET-* controls)
-- Search is case-insensitive
-- Search across all visible columns
+### Right Column: Context Panel
+- **Description**: Full detailed text of the control requirement.
+- **Validation Question**: The specific question you need to answer (e.g., "Is MFA enabled on root?").
+- **AI Insight**: A floating glass card that offers guidance. Click "Generate AI Guidance" if you're stuck.
 
 ---
 
 ## Importing Controls
 
-### CSV Format
+To bulk-import controls:
+1. Go to the **Controls** page via the top nav.
+2. Click the **Import CSV** button (if available in your version).
+3. Paste your CSV content.
 
-Required CSV headers (exact order):
-```
-ControlID,Domain,ControlTitle,ControlDescription,Question,RequiredEvidence,
-Status,Owner,Frequency,ScoreNumeric,Weight,Notes,SourceRef,Tags,UpdatedAt
-```
-
-### Required Fields
-
-- **ControlID**: Unique identifier (e.g., `SEC-NET-0001`)
-- **Domain**: Security domain code (e.g., `NET`)
-- **ControlTitle**: Human-readable title
-- **ControlDescription**: Detailed description
-- **Status**: Complete, InProgress, NotStarted, NotApplicable
-- **UpdatedAt**: Timestamp (ISO 8601 format)
-
-### Optional Fields
-
-- **Question**: Assessment question
-- **RequiredEvidence**: Required evidence types
-- **Owner**: Control owner
-- **Frequency**: Assessment frequency
-- **ScoreNumeric**: Numeric score (0-100)
-- **Weight**: Control weight (0-1)
-- **Notes**: Additional notes
-- **SourceRef**: Source reference
-- **Tags**: Comma-separated tags
-
-### CSV Import Steps
-
-1. **Prepare CSV**: Create CSV file with required headers
-2. **Click Import CSV**: Button on Controls page
-3. **Paste Content**: Paste CSV content into text area
-4. **Validate**: System validates header format
-5. **Import**: Click "Import Controls" button
-6. **Review**: Check success/error messages
-
-### Import Validation
-
-The system validates:
-- **Header Format**: Exact header match required
-- **Required Fields**: All required fields must be present
-- **Data Types**: Numeric fields must be valid numbers
-- **Status Values**: Status must be valid value
-
-### Common Import Errors
-
-**Invalid Header Format**
-- Error: "CSV header must be: ControlID,Domain,..."
-- Solution: Ensure exact header order and spelling
-
-**Missing Required Fields**
-- Error: "Required field missing"
-- Solution: Include all required fields
-
-**Invalid Status Value**
-- Error: "Invalid status value"
-- Solution: Use valid status: Complete, InProgress, NotStarted, NotApplicable
-
----
-
-## CSV Format Example
-
-```csv
-ControlID,Domain,ControlTitle,ControlDescription,Question,RequiredEvidence,Status,Owner,Frequency,ScoreNumeric,Weight,Notes,SourceRef,Tags,UpdatedAt
-SEC-NET-0001,NET,Network Security Group Rules,Ensure NSG rules restrict access appropriately,Are NSG rules configured to restrict access?,nsg_rules,NotStarted,Network Team,Monthly,0,0.5,Initial assessment,Framework-v1,network,2025-01-15T10:00:00Z
-SEC-IDM-0001,IDM,Multi-Factor Authentication,Enable MFA for all users,Is MFA enabled for all user accounts?,mfa_config,InProgress,Security Team,Quarterly,50,0.8,Partially implemented,Framework-v1,identity,2025-01-15T10:00:00Z
-```
+**Required Columns**:
+`ControlID, Domain, ControlTitle, ControlDescription, Status`
 
 ---
 
 ## Best Practices
 
-### 1. Consistent Naming
+### 1. Evidence First
+Don't just mark it "Complete". Upload evidence to the **Drop Zone** to prove it. This is critical for audits.
 
-- Use consistent ControlID format (e.g., `SEC-{DOMAIN}-{NUMBER}`)
-- Keep domain codes consistent
-- Use descriptive titles
+### 2. Use the Notes
+Use the **Notes** field to document *why* you marked it complete or why it's stuck.
 
-### 2. Complete Information
-
-- Fill in all required fields
-- Include detailed descriptions
-- Add notes for context
-
-### 3. Regular Updates
-
-- Update status as work progresses
-- Update timestamps regularly
-- Keep owner information current
-
-### 4. Organization
-
-- Group controls by domain
-- Use consistent tags
-- Maintain source references
-
-### 5. Validation
-
-- Validate CSV format before importing
-- Check for duplicate ControlIDs
-- Verify status values
+### 3. Check the Ring
+In the Domain View, look for "broken rings" (incomplete circles). These are your to-do list.
 
 ---
 
-## Tips & Tricks
-
-1. **Bulk Import**: Prepare CSV files in Excel or similar tools
-2. **Template**: Save a CSV template for future imports
-3. **Backup**: Keep CSV files as backup
-4. **Filtering**: Use filters to focus on specific domains or statuses
-5. **Export**: Export filtered results for reporting (if available)
-
----
-
-## Troubleshooting
-
-### Controls Not Showing
-
-- **Check Filters**: Clear filters to see all controls
-- **Check Tenant**: Verify correct tenant ID
-- **Check Import**: Verify controls were imported successfully
-
-### Import Fails
-
-- **Check Header**: Verify exact header format
-- **Check Encoding**: Ensure UTF-8 encoding
-- **Check Format**: Verify CSV format (commas, not semicolons)
-
-### Status Not Updating
-
-- **Check Format**: Verify status value spelling
-- **Check Case**: Status matching is case-sensitive
-- **Refresh**: Refresh page to see updates
-
----
-
-**Related Guides**: [User Guide](/wiki/User-Guide) | [Dashboard Guide](/wiki/Dashboard-Guide)
+**Related Guides**: [Gaps Guide](/wiki/Gaps-Guide) | [Dashboard Guide](/wiki/Dashboard-Guide)

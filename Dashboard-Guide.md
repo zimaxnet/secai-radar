@@ -5,179 +5,92 @@ title: Dashboard Guide
 
 # Dashboard Guide
 
-Complete guide to understanding and using the SecAI Radar Dashboard.
+Complete guide to understanding and using the SecAI Radar **Command Center**.
 
 ---
 
 ## Overview
 
-The Dashboard provides a comprehensive overview of your security posture, showing key metrics, domain breakdowns, and visual analytics.
+The Dashboard (Command Center) provides a comprehensive, high-density overview of your security posture. It uses a **Bento Grid** layout to organize key metrics, domain breakdowns, and visual analytics into a unified "Heads Up Display" (HUD).
 
 ---
 
-## Key Metrics
+## Key Metrics (Top Row)
 
-### Overall Statistics Cards
+Three primary glass panels display high-level KPIs:
 
-Four primary metrics displayed at the top:
+### 1. Security Score
+- **Display**: Large percentage ring (0-100)
+- **Meaning**: Overall compliance score across all controls
+- **Visual**: Glowing cyan progress bar
+- **Goal**: Aim for >80%
 
-#### Total Controls
-- **Purpose**: Shows total number of controls being assessed
-- **Icon**: Document icon
-- **Color**: Slate (neutral)
-- **Use**: Baseline for understanding assessment scope
+### 2. Active Gaps
+- **Display**: Large count number
+- **Meaning**: Total number of identified security gaps (Hard + Soft)
+- **Visual**: Red "Requires Attention" pulse if >0
+- **Goal**: 0 active gaps
 
-#### Complete
-- **Purpose**: Number of controls marked as complete
-- **Icon**: Checkmark icon
-- **Color**: Green
-- **Use**: Track compliance progress
-- **Additional Info**: Shows overall compliance percentage
-
-#### In Progress
-- **Purpose**: Number of controls currently being worked on
-- **Icon**: Clock icon
-- **Color**: Yellow
-- **Use**: Identify active work items
-
-#### Not Started
-- **Purpose**: Number of controls not yet started
-- **Icon**: X icon
-- **Color**: Red
-- **Use**: Identify work backlog
+### 3. AI Threat Analysis
+- **Display**: Text summary inside a wide glass card
+- **Meaning**: Generative AI summary of your current risk posture
+- **Visual**: Dynamic text that changes based on detected gaps
+- **Action**: Click "View Remediation Plan" to jump to the Gaps view
 
 ---
 
-## Domain Breakdown
+## Coverage Radar (Middle Left)
 
-### Domain Cards
+The centerpiece of the Command Center is the **Glowing Radar Chart**.
 
-Each security domain is displayed as a card showing:
+### Visualization
+- **Axes**: Each axis represents one of the 12 Security Domains (NET, IDM, DATA, etc.)
+- **Shape**: The blue filled area represents your current coverage
+- **Goal**: A full, balanced shape (filling the outer edges)
 
-#### Header Section
-- **Domain Name**: Full domain name (e.g., "Network Security")
-- **Compliance Badge**: Color-coded percentage badge
-  - Green (≥80%): Good compliance
-  - Yellow (50-79%): Fair compliance
-  - Red (<50%): Poor compliance
-
-#### Metrics Section
-- **Complete**: Number and percentage of complete controls
-- **In Progress**: Number of controls in progress
-- **Not Started**: Number of controls not started
-
-#### Progress Bar
-- Visual representation of completion percentage
-- Green bar showing progress toward 100%
-- Updates in real-time as controls are updated
-
-### Understanding Domain Cards
-
-1. **Quick Assessment**: Glance at badges to see which domains need attention
-2. **Detailed Review**: Click or expand cards for detailed metrics
-3. **Progress Tracking**: Watch progress bars improve over time
-4. **Comparison**: Compare domains to identify patterns
+### Interpretation
+- **Spike**: Good coverage in that specific domain
+- **Dip**: Low coverage/gaps in that domain
+- **Small Shape**: Early stage assessment (mostly Not Started)
 
 ---
 
-## Compliance Overview (Radar Chart)
+## Domain Breakdown (Middle Right)
 
-### Radar Chart Visualization
+To the right of the Radar is the **Domain Grid**.
 
-Multi-series radar chart showing:
-
-#### Series
-- **Complete** (Green): Controls marked as complete
-- **In Progress** (Yellow): Controls currently in progress
-- **Not Started** (Red): Controls not yet started
-
-#### Axes
-- Each axis represents a security domain
-- Distance from center indicates quantity
-- Multiple series show distribution across statuses
-
-### Using the Radar Chart
-
-1. **Overall View**: See all domains at once
-2. **Pattern Recognition**: Identify domains with similar patterns
-3. **Progress Tracking**: Watch chart change as controls are updated
-4. **Gap Analysis**: Identify domains with high "Not Started" values
-
-### Interpreting the Chart
-
-- **Balanced Shape**: All domains progressing evenly
-- **Spiky Shape**: Some domains ahead, others behind
-- **Small Center**: Many controls not started
-- **Large Green**: Good compliance overall
+### Interaction
+- **Layout**: Scrollable grid of domain cards
+- **Card Details**:
+  - **Domain Code**: (e.g., NET)
+  - **Score**: Percentage completion
+  - **Progress Bar**: Blue (In Progress) or Green (Complete)
+- **Action**: Click any card to drill down into that domain's controls
 
 ---
 
-## Loading States
+## Navigation
 
-### While Loading Data
-
-- **Spinner**: Shows loading animation
-- **Message**: "Loading..." text
-- **Placeholder**: Content area reserved for data
-
-### Empty States
-
-- **No Data**: Message when no controls are configured
-- **Help Text**: Guidance on next steps
-- **Action Links**: Links to relevant pages (e.g., Import Controls)
+The Command Center uses a glassmorphic top navigation bar:
+- **Overview**: High-level status (Assessment Overview)
+- **Dashboard**: The Command Center view
+- **Controls**: Manage individual controls
+- **Tools**: Manage tool inventory
+- **Gaps**: AI-powered gap analysis
+- **Report**: Generate executive reports
 
 ---
 
 ## Best Practices
 
-### 1. Regular Review
-- Check dashboard daily/weekly for progress
-- Track trends over time
-- Identify domains needing attention
+### 1. Daily Check-in
+Use the Command Center as your morning landing page. Check the **Active Gaps** count and read the **AI Threat Analysis** for new priorities.
 
-### 2. Set Goals
-- Target compliance percentages (e.g., 80% complete)
-- Set domain-specific goals
-- Track progress toward goals
+### 2. Drill Down
+Don't just stare at the numbers. Click the **Domain Cards** to fix specific controls or click the **AI Analysis** to jump straight to remediation.
 
-### 3. Prioritize Work
-- Focus on domains with low compliance
-- Address "Not Started" controls first
-- Balance "In Progress" workload
-
-### 4. Use for Reporting
-- Export dashboard metrics for reports
-- Share dashboard with stakeholders
-- Use for executive briefings
-
----
-
-## Troubleshooting
-
-### No Data Showing
-- **Check**: Controls have been imported
-- **Check**: Tenant ID is correct
-- **Action**: Import controls or check filters
-
-### Metrics Not Updating
-- **Check**: Controls have been updated recently
-- **Check**: Browser cache (refresh page)
-- **Action**: Refresh page or clear cache
-
-### Chart Not Rendering
-- **Check**: Browser supports SVG
-- **Check**: JavaScript is enabled
-- **Action**: Try different browser or update browser
-
----
-
-## Tips
-
-1. **Bookmark**: Bookmark dashboard for quick access
-2. **Refresh**: Refresh page to get latest data
-3. **Compare**: Compare current metrics to previous periods
-4. **Export**: Take screenshots for documentation
-5. **Share**: Share dashboard URL with team members
+### 3. Monitor the Radar
+Watch for "dips" in the radar chart. A balanced security posture is better than being 100% secure in Network but 0% in Identity.
 
 ---
 

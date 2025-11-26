@@ -13,6 +13,8 @@ SecAI Radar is an open-source, cloud-security assessment application that:
 
 SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded customer names, vendor names, or consulting firm names.
 
+**New in v2.0**: The interface has been overhauled into a **"Command Center"** experience—a dark-mode, glassmorphism-styled interface designed for high-density information and immersive analysis.
+
 ---
 
 ## Quick Links
@@ -20,7 +22,7 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 ### For Users
 - **[Getting Started](/wiki/Getting-Started)** - Quick start guide
 - **[User Guide](/wiki/User-Guide)** - Complete user documentation
-- **[Dashboard Guide](/wiki/Dashboard-Guide)** - Understanding the dashboard
+- **[Dashboard Guide](/wiki/Dashboard-Guide)** - Understanding the Command Center
 - **[Controls Guide](/wiki/Controls-Guide)** - Managing security controls
 - **[Tools Guide](/wiki/Tools-Guide)** - Configuring security tools
 - **[Gaps Guide](/wiki/Gaps-Guide)** - Understanding security gaps
@@ -50,15 +52,15 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 - Multi-tenant support
 - Assessment runs with progress tracking
 
-### 📊 Dashboard & Analytics
-- Real-time dashboard with security posture overview
-- Domain-based compliance metrics
-- Radar charts for visual analysis
+### 📊 Command Center Dashboard
+- **Bento Grid Layout**: High-density visualization of key metrics
+- **Glowing Radar**: Real-time visual analysis of domain coverage
+- **Glassmorphism UI**: Modern, immersive dark mode interface
 
 ### 🎯 Control Management
-- Security control assessment
-- CSV import/export
-- Status tracking (Complete, In Progress, Not Started)
+- **Masonry Grid**: Visual control cards with status rings
+- **Station Layout**: Dedicated focus view for assessment
+- **Status Tracking**: Complete, In Progress, Not Started
 
 ### 🔧 Tool Configuration
 - Security tool inventory management
@@ -66,9 +68,9 @@ SecAI Radar is designed to be **vendor-agnostic** and **generic**—no hardcoded
 - Capability coverage analysis
 
 ### 📈 Gap Analysis
-- Hard gap identification (missing capabilities)
-- Soft gap analysis (configuration issues)
-- Remediation recommendations
+- **Split-Screen View**: List vs. AI Analysis panel
+- **AI Remediation**: Generative AI insights for closing gaps
+- **Gap Types**: Hard (missing tool) vs. Soft (misconfiguration)
 
 ### 🧭 Guided Onboarding
 - First-run tour powered by React Joyride
@@ -120,5 +122,4 @@ SecAI Radar is open-source. See the repository LICENSE file for details.
 
 ---
 
-**Last Updated**: 2025-11-12
-
+**Last Updated**: 2025-11-26
