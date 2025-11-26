@@ -1,25 +1,37 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  body {
-    @apply bg-slate-950 text-slate-50 antialiased;
-  }
+/* Base body styles using standard CSS instead of @apply for v4 compatibility */
+body {
+  background-color: #020617; /* slate-950 */
+  color: #f8fafc; /* slate-50 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@layer components {
-  .glass-panel {
-    @apply bg-white/5 backdrop-blur-lg border border-white/10 shadow-xl;
-  }
-  
-  .glass-card {
-    @apply bg-slate-900/50 backdrop-blur-md border border-slate-800/50 shadow-lg hover:border-slate-700/50 transition-all duration-300;
-  }
+/* Glass panel component */
+.glass-panel {
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
 
-  .text-glow {
-    text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-  }
+/* Glass card component */
+.glass-card {
+  background-color: rgba(15, 23, 42, 0.5); /* slate-900/50 */
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 41, 59, 0.5); /* slate-800/50 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(51, 65, 85, 0.5); /* slate-700/50 */
+}
+
+/* Text glow effect */
+.text-glow {
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
 }
 
 /* Custom Scrollbar */
