@@ -46,7 +46,6 @@ jobs:
           if [ -f Gemfile ]; then
             bundle install || true
             bundle exec jekyll build --destination _site || exit 1
-            # Ensure CNAME is copied to _site root
             if [ -f CNAME ]; then
               cp CNAME _site/CNAME
             fi
@@ -59,193 +58,16 @@ jobs:
         if: steps.jekyll-build.outcome == 'failure'
         run: |
           mkdir -p _site
-          # Copy root markdown files (wiki content)
           cp *.md _site/ 2>/dev/null || true
-          # Copy CNAME to _site if it exists
           if [ -f CNAME ]; then
             cp CNAME _site/CNAME
           fi
-          # Remove unwanted files
-          rm -f _site/README.md _site/GITHUB-PAGES-SETUP.md _site/DEPLOYMENT-READY.md _site/GitHub-Pages-Deployment-Instructions.md 2>/dev/null || true
-          # Convert markdown files to static HTML when Jekyll is unavailable
-          pip install --quiet 'markdown>=3.5,<3.6'
-          python - <<'PY'
-          from pathlib import Path
-          import markdown
-          import re
-
-          site = Path('_site')
-
-          def rewrite_links(text: str) -> str:
-              pattern = re.compile(r"\[([^\]]+)\]\(([^\)]+)\)")
-              def repl(match: re.Match) -> str:
-                  label, target = match.group(1), match.group(2)
-                  if target.startswith(('http://', 'https://', 'mailto:', '#')):
-                      return match.group(0)
-                  if target.endswith('.html'):
-                      return match.group(0)
-                  if target.endswith('.md'):
-                      target = target[:-3] + '.html'
-                      return f"[{label}]({target})"
-                  # Handle /wiki/ paths - remove /wiki/ prefix
-                  if target.startswith('/wiki/'):
-                      target = target[6:] + '.html'
-                      return f"[{label}]({target})"
-                  return f"[{label}]({target}.html)"
-              return pattern.sub(repl, text)
-
-          def render_markdown(source: Path, destination: Path) -> None:
-              text = source.read_text(encoding='utf-8')
-              text = rewrite_links(text)
-              title_match = re.search(r'^#\s+(.+)', text, flags=re.MULTILINE)
-              title = title_match.group(1).strip() if title_match else destination.stem
-              html_body = markdown.markdown(
-                  text,
-                  extensions=['extra', 'toc', 'tables', 'fenced_code']
-              )
-              template = """<!DOCTYPE html>
-<html lang='en'>
-<head>
-  <meta charset='utf-8' />
-  <title>{title} - SecAI Radar Wiki</title>
-  <meta name='viewport' content='width=device-width, initial-scale=1' />
-  <style>
-    :root {{
-      --bg: #0f172a;
-      --bg-card: #1e293b;
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --accent: #38bdf8;
-      --border: #334155;
-    }}
-    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-    body {{
-      font-family: system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      padding: 2rem;
-      max-width: 900px;
-      margin: 0 auto;
-    }}
-    header {{
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 1rem;
-      margin-bottom: 2rem;
-    }}
-    header h1 {{
-      font-size: 1.5rem;
-      color: var(--accent);
-      margin-bottom: 0.5rem;
-    }}
-    nav a {{
-      color: var(--text-muted);
-      text-decoration: none;
-      margin-right: 1rem;
-      font-size: 0.875rem;
-    }}
-    nav a:hover {{ color: var(--accent); }}
-    main h1, main h2, main h3 {{
-      color: var(--text);
-      margin: 1.5rem 0 0.75rem;
-    }}
-    main h1 {{ font-size: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }}
-    main h2 {{ font-size: 1.5rem; }}
-    main h3 {{ font-size: 1.25rem; }}
-    main p {{ margin: 0.75rem 0; }}
-    main a {{ color: var(--accent); text-decoration: none; }}
-    main a:hover {{ text-decoration: underline; }}
-    main ul, main ol {{ margin: 0.75rem 0 0.75rem 1.5rem; }}
-    main li {{ margin: 0.25rem 0; }}
-    main code {{
-      background: var(--bg-card);
-      padding: 0.125rem 0.375rem;
-      border-radius: 0.25rem;
-      font-size: 0.875em;
-    }}
-    main pre {{
-      background: var(--bg-card);
-      padding: 1rem;
-      border-radius: 0.5rem;
-      overflow-x: auto;
-      margin: 1rem 0;
-    }}
-    main pre code {{ background: none; padding: 0; }}
-    main table {{
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1rem 0;
-    }}
-    main th, main td {{
-      border: 1px solid var(--border);
-      padding: 0.5rem;
-      text-align: left;
-    }}
-    main th {{ background: var(--bg-card); }}
-    main blockquote {{
-      border-left: 3px solid var(--accent);
-      padding-left: 1rem;
-      margin: 1rem 0;
-      color: var(--text-muted);
-    }}
-    main hr {{
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 2rem 0;
-    }}
-    footer {{
-      margin-top: 3rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 0.875rem;
-    }}
-  </style>
-</head>
-<body>
-  <header>
-    <h1>SecAI Radar</h1>
-    <nav>
-      <a href='index.html'>Home</a>
-      <a href='Getting-Started.html'>Getting Started</a>
-      <a href='User-Guide.html'>User Guide</a>
-      <a href='API-Reference.html'>API</a>
-    </nav>
-  </header>
-  <main>{body}</main>
-  <footer><p>SecAI Radar Documentation • Command Center Interface</p></footer>
-</body>
-</html>
-"""
-              destination.write_text(template.format(title=title, body=html_body), encoding='utf-8')
-
-          for md_file in site.glob('*.md'):
-              render_markdown(md_file, md_file.with_suffix('.html'))
-
-          index_html = site / 'index.html'
-          index_md_html = (site / 'index.md').with_suffix('.html')
-          home_html = site / 'Home.html'
-          if index_md_html.exists():
-              index_html.write_text(index_md_html.read_text(encoding='utf-8'), encoding='utf-8')
-          elif home_html.exists():
-              redirect = """<!DOCTYPE html>
-<html lang='en'>
-<head>
-  <meta charset='utf-8' />
-  <meta http-equiv='refresh' content='0; url=Home.html' />
-  <title>SecAI Radar Documentation</title>
-</head>
-<body>
-  <p>Redirecting to <a href='Home.html'>Home</a>…</p>
-</body>
-</html>
-"""
-              index_html.write_text(redirect, encoding='utf-8')
-          PY
+          rm -f _site/README.md _site/GITHUB-PAGES-SETUP.md _site/DEPLOYMENT-READY.md 2>/dev/null || true
+          pip install --quiet markdown
+          python3 scripts/build_wiki.py
           echo "_site directory created successfully"
           ls -la _site/ | head -20
-          echo "CNAME file check:"
-          ls -la _site/CNAME 2>/dev/null || echo "CNAME not found in _site"
+
       - name: Ensure _site exists
         if: steps.jekyll-build.outcome != 'failure'
         run: |
@@ -253,17 +75,13 @@ jobs:
             echo "Error: _site directory does not exist after Jekyll build"
             exit 1
           fi
+
       - name: Normalize static output
         run: |
           if [ -f "_site/index/index.html" ]; then
             cp _site/index/index.html _site/index.html
           elif [ -f "_site/Home/index.html" ] && [ ! -f "_site/index.html" ]; then
             cp _site/Home/index.html _site/index.html
-          fi
-          if [ -f "_site/index.html" ]; then
-            printf "Created/confirmed root index.html"
-          else
-            echo "Warning: root index.html still missing"
           fi
           find _site -name "*.md" -delete || true
       
