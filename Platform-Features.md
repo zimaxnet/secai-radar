@@ -8,109 +8,87 @@ permalink: /platform-features/
 
 ## Overview
 
-SecAI Radar v2.0 is a unified platform that combines comprehensive security assessment workflows with an advanced multi-agent AI system. All features are brought front and center in a professional, compelling interface.
+SecAI Radar v2.0 is a unified platform that combines comprehensive security assessment workflows with an advanced multi-agent AI system. The interface has been completely redesigned into a **"Command Center"** experience—featuring a dark-mode, glassmorphism-styled UI with high-density Bento Grid layouts.
 
 ---
 
-## Unified Platform
+## Command Center Interface
 
-### Architecture
+### Visual Design
 
-SecAI Radar combines:
+The new interface features:
 
-1. **Assessment Workflow System** - Complete security assessment lifecycle
-2. **Multi-Agent AI System** - 7 specialized AI agents working together
-3. **Modern Web Interface** - Professional, responsive UI with seamless navigation
+- **Dark Theme** - Deep navy/slate background (#020617) with layered depth
+- **Glassmorphism** - Frosted glass panels with backdrop blur effects
+- **Bento Grid Layout** - High-density information display in organized grid cells
+- **Glowing Accents** - Cyan/blue glow effects on interactive elements
+- **Progress Rings** - SVG-based circular progress indicators
 
 ### Navigation
 
-The platform features a unified navigation structure:
+The platform features a glassmorphic top navigation bar:
 
-- **Dashboard** - Overview of assessment progress and agent status
-- **AI Agents** - Interactive agent showcase with chat interfaces
-- **Controls** - Control management and evidence collection
+- **Overview** - Assessment overview and status
+- **Dashboard** - Command Center with radar and KPIs
+- **Controls** - Masonry grid control management
 - **Tools** - Security tools inventory
-- **Gap Analysis** - AI-powered gap identification and recommendations
+- **Gaps** - Split-screen AI-powered gap analysis
 - **Report** - Assessment report generation
 
 ---
 
 ## Assessment Workflow Features
 
-### Dashboard
+### Command Center Dashboard
 
-The Dashboard provides a comprehensive overview:
+The Dashboard provides a comprehensive overview using a **Bento Grid Layout**:
 
-- **Assessment Statistics**
-  - Total controls count
-  - Completed controls tracking
-  - In-progress controls monitoring
-  - Overall progress percentage
+- **Security Score Ring** - Large percentage ring showing overall compliance (0-100%)
+- **Active Gaps Counter** - Real-time count of identified security gaps
+- **AI Threat Analysis** - Generative AI summary of current risk posture
+- **Coverage Radar** - Glowing multi-axis radar chart showing domain coverage
+- **Domain Grid** - Scrollable grid of domain cards with progress bars
 
-- **Domain Progress**
-  - Visual progress bars per domain
-  - Status breakdown (Complete/In Progress/Not Started)
-  - Clickable domain cards for navigation
+### Controls Management (Masonry Grid)
 
-- **AI Agents Status**
-  - Real-time agent availability
-  - Last activity timestamps
-  - Quick access to agent chat
+**Domain View**
+- Masonry grid layout of control cards
+- Each card features an SVG progress ring
+- Status badges (Complete, In Progress, Not Started)
+- Gap indicators (red/orange dots)
 
-### Controls Management
+**Station View (Control Detail)**
+- Split-column layout: Assessment Form | Context Panel
+- Drag-and-drop evidence upload zone
+- AI Insight panel with "Generate AI Guidance" button
+- Detected gaps card with deficiency breakdown
 
-**Control Listing**
-- Search and filter controls by domain, status, or keywords
-- Import controls from CSV or JSON
-- Export controls for reporting
-- Status indicators and progress tracking
+### Gap Analysis (Split-Screen)
 
-**Control Detail Page**
-- Complete control information display
-- Status management (Not Started → In Progress → Complete)
-- Owner assignment
-- Notes and comments
-- Evidence collection and upload
-- Agent chat integration for context-aware assistance
+**Left Panel: Gaps List**
+- Scrollable list of controls with gaps
+- Hard gaps (red badges) and Soft gaps (orange badges)
+- Click to load details in right panel
 
-**Evidence Collection**
-- Upload evidence files directly to controls
-- Evidence file management and viewing
-- Evidence metadata tracking (filename, size, upload date)
-- Direct links to evidence files
+**Right Panel: AI Glass Panel**
+- Control context header
+- Deficiency breakdown
+- AI Remediation Plan (when Copilot active)
+- "Activate AI Copilot" toggle button
 
 ### Tools Inventory
 
-- Security tools catalog
-- Tenant tool configuration
-- Configuration scoring (ConfigScore)
-- Enabled/disabled status
-- Tool capability mapping
-
-### Gap Analysis
-
-- **Automated Gap Detection**
-  - Hard gaps (missing capabilities)
-  - Soft gaps (configuration issues)
-  - Coverage scoring per control
-
-- **AI-Powered Recommendations**
-  - Toggle AI recommendations on/off
-  - Elena agent generates business-focused recommendations
-  - Prioritizes tool tuning before suggesting new tools
-  - Actionable advice with implementation steps
-
-- **Visual Gap Display**
-  - Color-coded gap severity
-  - Coverage percentage visualization
-  - Gap breakdown by control
+- Security tools catalog with capability mapping
+- Configuration scoring (ConfigScore 0.0 - 1.0)
+- Enabled/disabled status toggles
+- Glass card styling with hover effects
 
 ### Report Generation
 
-- Executive summary generation
-- Detailed findings reports
+- Executive summary generation with AI
+- Domain-by-domain breakdown
+- Gap remediation recommendations
 - PDF export capability
-- Print-friendly formatting
 
 ---
 
@@ -120,155 +98,81 @@ The Dashboard provides a comprehensive overview:
 
 SecAI Radar features 7 specialized AI agents:
 
-1. **Aris** - Knowledge Base Guardian (Framework expertise)
-2. **Leo** - Identity & Access Analyst (IAM specialist)
-3. **Ravi** - Infrastructure Architect (Infrastructure analysis)
-4. **Kenji** - Findings Analyst (Data correlation)
-5. **Elena** - Business Impact Strategist (Risk and recommendations)
-6. **Marcus** - Conflict Resolution (Trade-off analysis)
-7. **Coordinator** - System Orchestrator (Workflow management)
+1. **Aris Thorne** - Knowledge Base Guardian (Framework expertise)
+2. **Leo Vance** - Identity & Access Analyst (IAM specialist)
+3. **Ravi Patel** - Infrastructure Architect (Infrastructure analysis)
+4. **Kenji Sato** - Findings Analyst (Data correlation)
+5. **Elena Bridges** - Business Impact Strategist (Risk and recommendations)
+6. **Marcus Sterling** - Conflict Resolution (Trade-off analysis)
+7. **Priya Desai** - System Orchestrator (Workflow management)
 
 ### Agent Integration
 
-**Gap Analysis Integration**
-- Elena agent automatically generates recommendations for controls with gaps
-- Business-focused advice prioritizing ROI and risk reduction
-- Actionable steps for improving coverage
+**Gap Analysis AI Copilot**
+- Toggle "Enable AI Copilot" in the Gaps view
+- Automatically generates remediation plans for selected controls
+- Prioritizes tuning existing tools before suggesting new ones
 
-**Control Detail Integration**
-- Agents available directly from control detail pages
-- Context-aware chat automatically includes control information
-- Specialized agents for different types of questions:
-  - **Aris** for framework questions
-  - **Elena** for recommendations and risk analysis
-  - **Leo** for IAM-specific guidance
+**Control Detail AI Insight**
+- Click "Generate AI Guidance" for control-specific help
+- Context-aware recommendations based on control metadata
 
-**Agent Showcase**
-- Interactive agent cards with animations
-- Detailed agent descriptions and capabilities
-- Live chat interfaces embedded in agent detail views
-- Professional UI with gradient designs
-
-### Agent Capabilities
-
-**Aris (Knowledge Base Guardian)**
-- Answers framework questions (CAF, CIS, NIST)
-- Provides control requirements and best practices
-- Accesses uploaded knowledge base documents
-- Framework guidance and implementation help
-
-**Elena (Business Impact Strategist)**
-- Generates gap analysis recommendations
-- Translates technical findings to business language
-- Provides ROI-focused advice
-- Prioritizes actions by business impact
-
-**Leo (Identity & Access Analyst)**
-- IAM-specific control guidance
-- RBAC and privilege analysis
-- Access pattern recognition
-- Conditional access policy help
+**Voice Interaction**
+- Opt-in microphone mode for voice queries
+- Streams audio to Azure OpenAI `gpt-realtime`
+- Spoken replies with text transcription
 
 ---
 
 ## User Experience Features
 
-### Professional Design
+### Onboarding Tour
 
-- **Dark Theme** - Modern slate background with gradient accents
-- **Responsive Layout** - Mobile-friendly with collapsible navigation
-- **Smooth Animations** - Framer Motion transitions and animations
-- **Visual Feedback** - Loading states, progress indicators, status badges
-- **Consistent UI** - Unified design language across all pages
+- First-run guided tour powered by React Joyride
+- Highlights key interface elements
+- "Restart tour" option in help assistant
 
-### Navigation
+### Conversational Assistant
 
-- **Top Navigation Bar** - Persistent header with all main sections
-- **Mobile Sidebar** - Collapsible sidebar for mobile devices
-- **Active Route Highlighting** - Clear indication of current page
-- **Breadcrumbs** - Context-aware navigation paths
-- **Quick Actions** - Shortcuts to common tasks
+- Floating help widget (bottom-right corner)
+- Azure OpenAI powered responses
+- Context-aware based on current page
+- FAQ shortcuts
 
-### Interactive Elements
+### Accessibility
 
-- **Chat Interfaces** - Embedded chat for agent interactions
-- **Progress Bars** - Visual progress tracking
-- **Status Badges** - Color-coded status indicators
-- **File Upload** - Drag-and-drop evidence upload
-- **Search and Filter** - Quick control and tool discovery
+- Keyboard navigation support
+- ARIA labels on interactive elements
+- High contrast text on dark backgrounds
+- Responsive design for all screen sizes
 
 ---
 
-## Technical Integration
+## Technical Stack
 
-### Backend Architecture
+### Frontend
 
-- **FastAPI** - Modern Python web framework
-- **Azure Storage** - Table Storage for controls, Blob Storage for evidence
-- **Google Generative AI** - Gemini 1.5 Pro for agent interactions
-- **RESTful APIs** - Clean API structure for all features
+- **React 18** with TypeScript
+- **Vite 7** build tool
+- **Tailwind CSS 4** utility-first styling
+- **Recharts** for radar and chart visualizations
+- **React Router 7** client-side routing
+- **React Joyride** onboarding tours
 
-### Frontend Architecture
+### Backend
 
-- **React 19** - Latest React with TypeScript
-- **Vite** - Fast build tool and development server
-- **Tailwind CSS 4** - Modern utility-first CSS framework
-- **Framer Motion** - Smooth animations and transitions
-- **React Router 7** - Client-side routing
+- **Azure Functions** (Python) HTTP triggers
+- **Azure Table Storage** for assessment data
+- **Azure Blob Storage** for evidence files
+- **Azure OpenAI Service** for AI features
+- **Azure Key Vault** for secrets management
 
-### Data Flow
+### AI/ML
 
-1. **Assessment Data** → Azure Table Storage
-2. **Evidence Files** → Azure Blob Storage
-3. **Agent Queries** → Google Generative AI
-4. **Real-time Updates** → React state management
-
----
-
-## Getting Started
-
-### For New Users
-
-1. **Visit Landing Page** - Learn about SecAI Radar
-2. **Navigate to Dashboard** - View assessment overview
-3. **Import Controls** - Get started with your security controls
-4. **Configure Tools** - Add your security tools inventory
-5. **Run Gap Analysis** - Identify security gaps with AI recommendations
-6. **Chat with Agents** - Get expert help when needed
-
-### For Assessment Teams
-
-1. **Set Up Tenant** - Configure your assessment scope
-2. **Import Framework Controls** - Load controls from CSV/JSON
-3. **Collect Evidence** - Upload evidence for each control
-4. **Analyze Gaps** - Use AI-powered gap analysis
-5. **Generate Report** - Create comprehensive assessment reports
-
----
-
-## Best Practices
-
-### Assessment Workflow
-
-1. **Start with Controls** - Import or create your control framework
-2. **Configure Tools** - Map your security tools to capabilities
-3. **Collect Evidence** - Upload evidence as you assess controls
-4. **Review Gaps** - Use AI recommendations to prioritize remediation
-5. **Track Progress** - Monitor completion status on the dashboard
-
-### Agent Usage
-
-1. **Aris for Frameworks** - Ask about CAF, CIS, NIST requirements
-2. **Elena for Recommendations** - Get business-focused gap remediation advice
-3. **Leo for IAM** - Seek identity and access control guidance
-4. **Context is Key** - Chat from control pages for context-aware responses
-
-### Evidence Management
-
-1. **Organize by Control** - Upload evidence directly to relevant controls
-2. **Use Descriptive Names** - Name files clearly for easy identification
-3. **Include Metadata** - Add descriptions when uploading
-4. **Review Regularly** - Keep evidence up-to-date as assessments progress
+- **Azure OpenAI GPT-4** for recommendations
+- **Azure OpenAI Realtime** for voice interaction
+- **Google File Search** for RAG retrieval
+- **LangGraph** for multi-agent orchestration
 
 ---
 
@@ -276,12 +180,11 @@ SecAI Radar features 7 specialized AI agents:
 
 - [User Guide](User-Guide.md) - Complete user documentation
 - [Multi-Agent System](Multi-Agent-System.md) - Agent architecture details
-- [Dashboard Guide](Dashboard-Guide.md) - Dashboard usage
-- [Controls Guide](Controls-Guide.md) - Control management
-- [Gaps Guide](Gaps-Guide.md) - Gap analysis
+- [Dashboard Guide](Dashboard-Guide.md) - Command Center usage
+- [Controls Guide](Controls-Guide.md) - Masonry Grid control management
+- [Gaps Guide](Gaps-Guide.md) - Split-screen gap analysis
 - [API Reference](API-Reference.md) - API documentation
 
 ---
 
-**Last Updated**: 2025-01-15
-
+**Last Updated**: 2025-11-27

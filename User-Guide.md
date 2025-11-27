@@ -13,29 +13,28 @@ Complete guide to using SecAI Radar for cloud security assessments.
 
 1. [Overview](#overview)
 2. [Getting Started](#getting-started)
-3. [Complete User Journey](#complete-user-journey)
-4. [Navigation](#navigation)
-5. [Dashboard](#dashboard)
-6. [Controls](#controls)
-7. [Tools](#tools)
-8. [Gaps](#gaps)
-9. [Report Generation](#report-generation)
-10. [Best Practices](#best-practices)
+3. [Command Center Dashboard](#command-center-dashboard)
+4. [Controls Management](#controls-management)
+5. [Tools Inventory](#tools-inventory)
+6. [Gap Analysis](#gap-analysis)
+7. [AI Features](#ai-features)
+8. [Report Generation](#report-generation)
+9. [Best Practices](#best-practices)
 
 ---
 
 ## Overview
 
-SecAI Radar provides a web-based interface for managing cloud security assessments using the SecAI Framework. The application guides users through a complete assessment journey from initial setup to final report generation.
+SecAI Radar provides a web-based **Command Center** interface for managing cloud security assessments. The application features a dark-mode, glassmorphism-styled UI with high-density Bento Grid layouts designed for immersive security analysis.
 
 ### Key Features
 
-- **Vendor-Neutral Assessment**: Capability-driven approach that works with any security tool stack
-- **Complete Journey**: From landing page to assessment completion
-- **Domain-Based Workflow**: Work through 12 security domains systematically
-- **AI-Powered Insights**: Get recommendations and gap analysis
-- **Evidence Management**: Upload and classify evidence for each control
-- **Progress Tracking**: Visual progress indicators at all levels
+- **Command Center Interface**: Dark theme with glass panels and glowing accents
+- **Bento Grid Layout**: High-density information visualization
+- **Masonry Grid Controls**: Visual control cards with progress rings
+- **Split-Screen Gap Analysis**: List view + AI Copilot panel
+- **Multi-Agent AI System**: 7 specialized agents for intelligent assistance
+- **Voice Interaction**: Speak to the AI assistant using your microphone
 
 ---
 
@@ -43,273 +42,194 @@ SecAI Radar provides a web-based interface for managing cloud security assessmen
 
 ### First Time Users
 
-1. **Visit the Landing Page**: Learn about SecAI Framework and the assessment process
+1. **Visit the Landing Page**: Learn about SecAI Framework
 2. **Start New Assessment**: Create a new tenant/assessment
-3. **Complete Setup Wizard**: Configure tools and select domains
-4. **Begin Assessment**: Work through domains and controls
+3. **Take the Tour**: Follow the onboarding tour to learn the interface
+4. **Configure Tools**: Add your security tools inventory
+5. **Import Controls**: Load your control framework
 
-### Returning Users
+### Navigation
 
-1. **Continue Assessment**: Select existing assessment from the assessments page
-2. **Resume Work**: Continue where you left off
-3. **Review Progress**: Check overall progress and next actions
+The Command Center uses a glassmorphic top navigation bar:
 
-For a complete walkthrough, see the [User Journey](User-Journey) guide.
-
----
-
-## Complete User Journey
-
-The SecAI Radar assessment follows a structured journey:
-
-1. **Landing & Introduction** - Learn about SecAI Framework
-2. **Assessment Selection** - Choose or create an assessment
-3. **Assessment Setup** - Configure tools and scope
-4. **Assessment Overview** - Central hub with progress tracking
-5. **Domain Assessment** - Work through security domains
-6. **Control Assessment** - Complete individual controls
-7. **Gap Review** - Review and address identified gaps
-8. **Report Generation** - Generate final assessment report
-
-See the [User Journey](User-Journey) page for detailed information about each phase.
+| Link | Description |
+|------|-------------|
+| **Overview** | Assessment overview and status |
+| **Dashboard** | Command Center with radar chart and KPIs |
+| **Controls** | Masonry grid control management |
+| **Tools** | Security tools inventory |
+| **Gaps** | Split-screen AI-powered gap analysis |
+| **Report** | Generate assessment reports |
 
 ---
 
-## Navigation
+## Command Center Dashboard
 
-### Header Navigation
+The Dashboard is the heart of the Command Center.
 
-The header displays:
-- **Application Name**: "SecAI Radar"
-- **Tenant ID**: Current tenant identifier
-- **Navigation Links**: Dashboard, Controls, Tools, Gaps
+### Top Row: Key Performance Indicators
 
-### Active Page Indicator
+Three glass panels display high-level metrics:
 
-The current page is highlighted in the navigation bar with a dark background.
+1. **Security Score** - Overall compliance percentage (ring chart)
+2. **Active Gaps** - Count of identified security gaps
+3. **AI Threat Analysis** - Generative AI summary of risk posture
 
-### Breadcrumbs
+### Coverage Radar (Middle Left)
 
-Pages show their location in the application hierarchy.
+A glowing multi-axis radar chart showing domain coverage:
+- Each axis = one security domain
+- Filled area = current coverage
+- Goal: Full, balanced shape
 
----
+### Domain Grid (Middle Right)
 
-## Dashboard
-
-The Dashboard provides a comprehensive overview of your security posture.
-
-### Overall Statistics
-
-Four key metrics cards:
-- **Total Controls**: Total number of controls assessed
-- **Complete**: Number of controls marked as complete
-- **In Progress**: Number of controls currently in progress
-- **Not Started**: Number of controls not yet started
-
-### Domain Breakdown
-
-Each security domain shows:
-- Domain name
-- Total controls
-- Complete, In Progress, Not Started counts
-- Compliance percentage
-- Progress bar
-
-### Compliance Overview
-
-Radar chart showing:
-- Compliance status across domains
-- Visual comparison of Complete, In Progress, Not Started
-- Domain-specific metrics
-
-### Using the Dashboard
-
-1. **View Overall Metrics**: Check the top cards for quick status
-2. **Review Domain Status**: Scroll through domain cards for detailed breakdown
-3. **Analyze Trends**: Use radar chart to identify domains needing attention
-4. **Navigate to Details**: Click on domains or use filters to drill down
-
-See [Dashboard Guide](/wiki/Dashboard-Guide) for detailed information.
+Scrollable grid of domain cards:
+- Domain code and score
+- Progress bar (blue/green)
+- Click to drill into controls
 
 ---
 
-## Controls
+## Controls Management
 
-The Controls page manages security control assessments.
+### Domain View (Masonry Grid)
 
-### Control List
+When you select a domain, you see a **Masonry Grid** of control cards:
 
-Table showing:
-- **Control ID**: Unique identifier
-- **Domain**: Security domain
-- **Title**: Control title
-- **Status**: Current status (Complete, InProgress, NotStarted)
-- **Owner**: Control owner
+- **Progress Ring**: SVG circle showing coverage %
+- **Status Badge**: Complete | In Progress | Not Started
+- **Gap Indicators**: Red/orange dots if issues exist
 
-### Filters
+**Action**: Click any card to enter the Station View.
 
-Use filters to find specific controls:
-- **Domain**: Filter by security domain (e.g., NET, IDM, LOG)
-- **Status**: Filter by status
-- **Search**: Search by control ID or title
+### Station View (Control Detail)
 
-### Importing Controls
+A focused workspace for assessing individual controls:
 
-1. Click **Import CSV** button
-2. Prepare CSV with required headers:
-   ```
-   ControlID,Domain,ControlTitle,ControlDescription,Question,RequiredEvidence,
-   Status,Owner,Frequency,ScoreNumeric,Weight,Notes,SourceRef,Tags,UpdatedAt
-   ```
-3. Paste CSV content into text area
-4. Click **Import Controls**
-5. Review success/error messages
+**Left Column: Assessment Form**
+- Status selector dropdown
+- Owner assignment field
+- Notes/findings textarea
+- Evidence drop zone (drag-and-drop upload)
 
-### CSV Format
-
-Required columns:
-- `ControlID`: Unique control identifier (e.g., SEC-NET-0001)
-- `Domain`: Security domain code (e.g., NET, IDM)
-- `ControlTitle`: Human-readable control title
-- `ControlDescription`: Detailed description
-- `Status`: Complete, InProgress, NotStarted, NotApplicable
-- Additional fields as needed
-
-See [Controls Guide](/wiki/Controls-Guide) for detailed CSV format.
+**Right Column: Context Panel**
+- Control description
+- Validation question
+- Detected gaps card (if any)
+- AI Insight panel with "Generate AI Guidance" button
 
 ---
 
-## Tools
-
-The Tools page manages security tool configurations.
+## Tools Inventory
 
 ### Adding a Tool
 
-1. Enter **Vendor Tool ID**:
-   - Use standard tool identifiers (e.g., `wiz-cspm`, `crowdstrike-falcon`)
-   - Check available tools in the catalog
-2. **Enable/Disable**: Toggle tool activation
-3. **Configuration Score**: Set quality score (0.0 - 1.0)
-   - Use slider or enter value directly
-   - Higher scores indicate better configuration
+1. Enter **Vendor Tool ID** (e.g., `wiz-cspm`, `crowdstrike-falcon`)
+2. Toggle **Enabled/Disabled**
+3. Set **Configuration Score** (0.0 - 1.0)
 4. Click **Save Tool Configuration**
 
 ### Configuration Score Guide
 
-- **0.9 - 1.0**: Excellent configuration, fully optimized
-- **0.7 - 0.89**: Good configuration, minor improvements possible
-- **0.5 - 0.69**: Fair configuration, significant improvements needed
-- **0.0 - 0.49**: Poor configuration, major improvements required
-
-### Tool Tips
-
-- **Prioritize Tuning**: Improve existing tool configurations before adding new tools
-- **Regular Updates**: Update configuration scores as tools are tuned
-- **Accurate Scoring**: Use realistic scores based on actual configuration quality
-
-See [Tools Guide](/wiki/Tools-Guide) for detailed information.
+| Score | Quality |
+|-------|---------|
+| 0.9 - 1.0 | Excellent configuration |
+| 0.7 - 0.89 | Good configuration |
+| 0.5 - 0.69 | Fair configuration |
+| 0.0 - 0.49 | Poor configuration |
 
 ---
 
-## Gaps
+## Gap Analysis
 
-The Gaps page analyzes capability coverage and identifies security gaps.
+### Split-Screen Interface
 
-### Gap Analysis
+**Left Panel: Gaps List**
+- All controls with identified gaps
+- Hard gaps (red) = missing capability
+- Soft gaps (orange) = misconfiguration
+- Click to load details
 
-For each control, you'll see:
-- **Control ID**: Control identifier
-- **Coverage Percentage**: Overall capability coverage (0-100%)
-- **Status Badge**: Good/Fair/Poor based on coverage
-- **Hard Gaps**: Missing capabilities (no tool coverage)
-- **Soft Gaps**: Configuration issues (tool exists but misconfigured)
+**Right Panel: AI Glass Panel**
+- Control context header
+- Deficiency breakdown
+- AI Remediation Plan (when Copilot active)
 
-### Hard Gaps
+### Using the AI Copilot
 
-Hard gaps indicate:
-- Missing capabilities
-- No tool provides the required capability
-- May require adding new tools
+1. Click **"Enable AI Copilot"** toggle in the header
+2. Select a gap from the left list
+3. Wait for AI analysis to load
+4. Read remediation steps
+5. Take action (update tools, fix config)
 
-### Soft Gaps
+---
 
-Soft gaps indicate:
-- Capabilities exist but are misconfigured
-- Configuration scores too low
-- Can often be fixed by improving tool configuration
+## AI Features
 
-### Understanding Coverage
+### Conversational Assistant
 
-Coverage calculation:
-- Each control has required capabilities with weights
-- Best tool for each capability is selected (strength × configScore)
-- Coverage = weighted sum of best tool coverage
+A floating help widget in the bottom-right corner:
+- Click to expand chat interface
+- Ask questions about the current page
+- Get context-aware guidance
 
-### Remediation Priority
+### Voice Interaction
 
-1. **Tune Existing Tools**: Improve configuration scores first
-2. **Review Soft Gaps**: Address configuration issues
-3. **Add New Tools**: Only for hard gaps where no tool exists
+If supported by your browser:
+1. Click the microphone icon in the assistant
+2. Speak your question
+3. Hear the AI response
+4. Transcription appears in chat
 
-See [Gaps Guide](/wiki/Gaps-Guide) for detailed analysis.
+### Multi-Agent System
+
+7 specialized agents available:
+- **Aris** - Framework knowledge
+- **Elena** - Business recommendations
+- **Leo** - IAM specialist
+- **Ravi** - Infrastructure
+- **Kenji** - Data analysis
+- **Marcus** - Conflict resolution
+- **Priya** - Orchestration
+
+---
+
+## Report Generation
+
+1. Navigate to **Report** in the top nav
+2. Click **Generate Report**
+3. Wait for AI to generate executive summary
+4. Review domain breakdowns
+5. Download PDF or print
 
 ---
 
 ## Best Practices
 
-### 1. Start with Configuration
+### 1. Configure Tools First
+Before importing controls, set up your security tool inventory with accurate configuration scores.
 
-Before importing controls:
-- Configure all active security tools
-- Set realistic configuration scores
-- Enable/disable tools appropriately
+### 2. Use the Tour
+First-time users should complete the onboarding tour to learn the interface.
 
-### 2. Import Controls Systematically
+### 3. Work Domain by Domain
+Focus on one security domain at a time rather than jumping around.
 
-- Start with one domain
-- Use consistent ControlID format
-- Ensure all required fields are populated
-- Validate CSV format before importing
+### 4. Upload Evidence
+Don't just mark controls "Complete" - upload evidence to prove compliance.
 
-### 3. Regular Updates
+### 5. Leverage AI
+Use the AI Copilot for gap analysis and the AI Insight button for control guidance.
 
-- Update control status as assessments progress
-- Adjust tool configuration scores regularly
-- Review gaps periodically
-- Track progress over time
-
-### 4. Prioritize Remediation
-
-- Focus on high-severity controls first
-- Tune existing tools before adding new ones
-- Address soft gaps (configuration) before hard gaps (missing tools)
-- Document remediation steps
-
-### 5. Use Filters Effectively
-
-- Filter by domain for focused analysis
-- Use status filters to track progress
-- Search for specific controls quickly
-- Export filtered results for reporting
-
----
-
-## Keyboard Shortcuts
-
-- **`/`**: Focus search field
-- **`Esc`**: Clear filters
-- **`Tab`**: Navigate between form fields
-
----
-
-## Tips & Tricks
-
-1. **Bulk Import**: Prepare CSV files in Excel or similar tools
-2. **Status Tracking**: Use consistent status values (Complete, InProgress, NotStarted)
-3. **Domain Organization**: Group related controls by domain
-4. **Configuration Scores**: Be honest—accurate scores lead to better analysis
-5. **Regular Reviews**: Schedule weekly/monthly reviews of gaps and controls
+### 6. Check the Radar
+Regularly check the Coverage Radar for imbalanced areas.
 
 ---
 
 **Need Help?** See [FAQ](/wiki/FAQ) or [Troubleshooting](/wiki/Troubleshooting) for assistance.
+
+---
+
+**Last Updated**: 2025-11-27
