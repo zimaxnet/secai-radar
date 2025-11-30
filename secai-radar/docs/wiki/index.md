@@ -50,3 +50,7 @@ SecAI Radar v2.0 is a unified platform combining:
 - [Configuration](Configuration.md) - Configuration guide
 - [FAQ](FAQ.md) - Frequently asked questions
 - [Troubleshooting](Troubleshooting.md) - Common issues and solutions
+
+---
+
+**Last Updated**: 2025-01-15
