@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecAI Radar: Entra Agent ID, Registry & Foundry Control Plane Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #1e3a8a;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3b82f6;
+        }
+
+        .section h3 {
+            color: #2563eb;
+            font-size: 1.5em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .section h4 {
+            color: #1e40af;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .feature-card h4 {
+            color: #1e3a8a;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .feature-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-card ul li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .feature-card ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .architecture-diagram {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .architecture-diagram pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin: 5px;
+        }
+
+        .badge-new {
+            background: #10b981;
+            color: white;
+        }
+
+        .badge-enterprise {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .badge-security {
+            background: #ef4444;
+            color: white;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+            margin: 30px 0;
+        }
+
+        .timeline:before {
+            content: "";
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #3b82f6;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .timeline-item:before {
+            content: "";
+            position: absolute;
+            left: -32px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #3b82f6;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+
+        .timeline-item h4 {
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        table th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+
+        table tr:hover {
+            background: #f8fafc;
+        }
+
+        .footer {
+            background: #1e293b;
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SecAI Radar</h1>
+            <p>Entra Agent ID, Registry & Foundry Control Plane Integration</p>
+            <p style="margin-top: 15px; font-size: 0.9em; opacity: 0.8;">
+                Enterprise-Grade Agent Governance, Observability, and Security
+            </p>
+        </header>
+
+        <div class="content">
+            <!-- Executive Summary -->
+            <section class="section">
+                <h2>Executive Summary</h2>
+                <p>
+                    SecAI Radar has been enhanced with Microsoft's enterprise agent governance stack, 
+                    transforming it from a standalone assessment tool into an enterprise-ready, 
+                    agent-governed security platform. This integration adds unique agent identities, 
+                    centralized inventory, comprehensive observability, and built-in security controls.
+                </p>
+                <div style="margin-top: 20px;">
+                    <span class="badge badge-new">NEW</span>
+                    <span class="badge badge-enterprise">ENTERPRISE</span>
+                    <span class="badge badge-security">SECURITY</span>
+                </div>
+            </section>
+
+            <!-- Phase 1: Entra Agent ID -->
+            <section class="section">
+                <h2>Phase 1: Entra Agent ID Integration</h2>
+                <p>
+                    Every AI agent in SecAI Radar now has a unique <span class="highlight">Entra Agent ID</span>, 
+                    providing enterprise-grade identity management similar to user identities in Microsoft Entra ID.
+                </p>
+
+                <h3>Key Features</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Unique Identity</h4>
+                        <ul>
+                            <li>Each agent has unique Entra Agent ID</li>
+                            <li>Service principal per agent</li>
+                            <li>Lifecycle management</li>
+                            <li>Identity validation</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Authentication</h4>
+                        <ul>
+                            <li>Token-based authentication</li>
+                            <li>Automatic token refresh</li>
+                            <li>Per-agent, per-scope caching</li>
+                            <li>Secure credential management</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Access Control</h4>
+                        <ul>
+                            <li>Granular permissions</li>
+                            <li>Blueprint-based policies</li>
+                            <li>Tool authorization</li>
+                            <li>Resource scoping</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Auditing</h4>
+                        <ul>
+                            <li>Action-level auditing</li>
+                            <li>Compliance reporting</li>
+                            <li>Security monitoring</li>
+                            <li>Audit trail</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Registered Agents</h3>
+                <p>All 7 SecAI Radar agents are registered with Entra Agent IDs:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Agent ID</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>aris_thorne</code></td>
+                            <td>Dr. Aris Thorne</td>
+                            <td>Knowledge Base Guardian</td>
+                            <td>Active</td>
+                        </tr>
+                        <tr>
+                            <td><code>leo_vance</code></td>
+                            <td>Leo Vance</td>
+                            <td>Identity & Access Analyst</td>
+                            <td>Active</td>
+                        </tr>
+                        <tr>
+                            <td><code>ravi_patel</code></td>
+                            <td>Ravi Patel</td>
+                            <td>Infrastructure Architect</td>
+                            <td>Active</td>
+                        </tr>
+                        <tr>
+                            <td><code>kenji_sato</code></td>
+                            <td>Kenji Sato</td>
+                            <td>Findings Analyst</td>
+                            <td>Active</td>
+                        </tr>
+                        <tr>
+                            <td><code>elena_bridges</code></td>
+                            <td>Elena Bridges</td>
+                            <td>Business Impact Strategist</td>
+                            <td>Active</td>
+                        </tr>
+                        <tr>
+                            <td><code>marcus_sterling</code></td>
+                            <td>Marcus Sterling</td>
+                            <td>Conflict Resolution & Governance</td>
+                            <td>Active</td>
+                        </tr>
+                        <tr>
+                            <td><code>supervisor</code></td>
+                            <td>Supervisor</td>
+                            <td>System Orchestrator</td>
+                            <td>Active</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Phase 2: Agent Registry -->
+            <section class="section">
+                <h2>Phase 2: Agent Registry</h2>
+                <p>
+                    The <span class="highlight">Agent Registry</span> serves as the single source of truth 
+                    for all AI agents, providing centralized inventory, discoverability, and governance.
+                </p>
+
+                <h3>Registry Features</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Centralized Inventory</h4>
+                        <ul>
+                            <li>Complete agent catalog</li>
+                            <li>Status tracking</li>
+                            <li>Activity monitoring</li>
+                            <li>Metadata management</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Collections</h4>
+                        <ul>
+                            <li>Organize agents into groups</li>
+                            <li>Built-in collections (quarantine)</li>
+                            <li>Custom collections</li>
+                            <li>Collection-based filtering</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Quarantine</h4>
+                        <ul>
+                            <li>Isolate untrusted agents</li>
+                            <li>Prevent discovery</li>
+                            <li>Security review workflow</li>
+                            <li>Unquarantine process</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Discoverability</h4>
+                        <ul>
+                            <li>Agent-to-agent discovery</li>
+                            <li>Human discovery</li>
+                            <li>Search and filter</li>
+                            <li>Capability-based search</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>API Endpoints</h3>
+                <div class="code-block">
+GET    /api/registry/agents                    # List all agents
+GET    /api/registry/agents/{agentId}          # Get agent details
+POST   /api/registry/agents                    # Register new agent
+PUT    /api/registry/agents/{agentId}/status   # Update agent status
+POST   /api/registry/agents/{agentId}/quarantine    # Quarantine agent
+DELETE /api/registry/agents/{agentId}/quarantine    # Unquarantine agent
+                </div>
+            </section>
+
+            <!-- Phase 3: Foundry Control Plane -->
+            <section class="section">
+                <h2>Phase 3: Foundry Control Plane</h2>
+                <p>
+                    The <span class="highlight">Foundry Control Plane</span> provides comprehensive 
+                    observability, evaluation, and security controls for all AI agents.
+                </p>
+
+                <h3>Observability</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>OpenTelemetry</h4>
+                        <ul>
+                            <li>Distributed tracing</li>
+                            <li>Performance metrics</li>
+                            <li>Structured logging</li>
+                            <li>Azure Monitor integration</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Metrics Tracked</h4>
+                        <ul>
+                            <li>Response time (ms)</li>
+                            <li>Token usage</li>
+                            <li>Tool call counts</li>
+                            <li>Success/failure rates</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Evaluation Scores</h4>
+                        <ul>
+                            <li>Groundedness (0-1)</li>
+                            <li>Task adherence (0-1)</li>
+                            <li>Tool accuracy (0-1)</li>
+                            <li>Relevance (0-1)</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Real-time Monitoring</h4>
+                        <ul>
+                            <li>Live activity feed</li>
+                            <li>Performance dashboards</li>
+                            <li>Alert notifications</li>
+                            <li>Cost tracking</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>AI-Powered Evaluators</h3>
+                <p>
+                    Continuous evaluation using AI-powered evaluators ensures agent quality and detects behavioral drift:
+                </p>
+                <ul style="margin-left: 30px; margin-top: 15px;">
+                    <li><strong>Groundedness Evaluator</strong> - Verifies responses are grounded in provided context</li>
+                    <li><strong>Task Adherence Evaluator</strong> - Checks agent followed assigned task instructions</li>
+                    <li><strong>Tool Accuracy Evaluator</strong> - Validates tool call correctness</li>
+                    <li><strong>Relevance Evaluator</strong> - Assesses response relevance to query</li>
+                </ul>
+
+                <h3>Guardrails & Content Safety</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Input Validation</h4>
+                        <ul>
+                            <li>Prompt injection detection</li>
+                            <li>Length limits</li>
+                            <li>Content safety checks</li>
+                            <li>Pattern matching</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Output Filtering</h4>
+                        <ul>
+                            <li>PII detection & redaction</li>
+                            <li>Sensitive data masking</li>
+                            <li>Content safety filtering</li>
+                            <li>Automatic sanitization</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Tool Authorization</h4>
+                        <ul>
+                            <li>Per-agent tool permissions</li>
+                            <li>Blueprint-based policies</li>
+                            <li>Violation logging</li>
+                            <li>Automatic blocking</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Rate Limiting</h4>
+                        <ul>
+                            <li>Per-minute limits (60 req/min)</li>
+                            <li>Per-hour limits (1000 req/hr)</li>
+                            <li>Per-agent enforcement</li>
+                            <li>Automatic throttling</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Phase 4: Security Integration -->
+            <section class="section">
+                <h2>Phase 4: Security Integration</h2>
+                <p>
+                    Integration with <span class="highlight">Microsoft Defender</span> and 
+                    <span class="highlight">Microsoft Purview</span> provides enterprise-grade 
+                    security and compliance capabilities.
+                </p>
+
+                <h3>Microsoft Defender</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Security Posture</h4>
+                        <ul>
+                            <li>Agent vulnerability scanning</li>
+                            <li>Security recommendations</li>
+                            <li>Risk assessment</li>
+                            <li>Compliance scoring</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Threat Detection</h4>
+                        <ul>
+                            <li>Activity monitoring</li>
+                            <li>Threat intelligence</li>
+                            <li>Anomaly detection</li>
+                            <li>Incident correlation</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Microsoft Purview</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Data Classification</h4>
+                        <ul>
+                            <li>Automatic classification</li>
+                            <li>PII detection</li>
+                            <li>Sensitivity labeling</li>
+                            <li>Compliance tagging</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Data Loss Prevention</h4>
+                        <ul>
+                            <li>DLP policy enforcement</li>
+                            <li>Automatic redaction</li>
+                            <li>Watermarking</li>
+                            <li>Access controls</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Phase 5: UI/UX -->
+            <section class="section">
+                <h2>Phase 5: Dashboard & UI/UX</h2>
+                <p>
+                    New dashboards and UI components provide comprehensive visibility and control 
+                    over agent operations.
+                </p>
+
+                <h3>Agent Command Center</h3>
+                <p>
+                    The main dashboard for agent governance and monitoring:
+                </p>
+                <ul style="margin-left: 30px; margin-top: 15px;">
+                    <li><strong>Agent Health Overview</strong> - Real-time status of all agents</li>
+                    <li><strong>Activity Feed</strong> - Live agent actions and tool calls</li>
+                    <li><strong>Performance Metrics</strong> - Response times, token usage, success rates</li>
+                    <li><strong>Evaluation Scores</strong> - Groundedness, task adherence, tool accuracy</li>
+                    <li><strong>Security Alerts</strong> - Content safety violations and anomalies</li>
+                </ul>
+
+                <h3>Agent Registry View</h3>
+                <p>
+                    Centralized inventory with filtering and management:
+                </p>
+                <ul style="margin-left: 30px; margin-top: 15px;">
+                    <li>Filter by status, collection, blueprint, or capability</li>
+                    <li>View agent details and capabilities</li>
+                    <li>Manage agent status and collections</li>
+                    <li>Quarantine/unquarantine agents</li>
+                </ul>
+
+                <h3>Agent Detail View</h3>
+                <p>
+                    Individual agent profile and monitoring:
+                </p>
+                <ul style="margin-left: 30px; margin-top: 15px;">
+                    <li>Agent profile and identity information</li>
+                    <li>Activity history with traces</li>
+                    <li>Evaluation score trends</li>
+                    <li>Configuration and guardrails</li>
+                    <li>Tool usage breakdown</li>
+                </ul>
+
+                <h3>Observability Dashboard</h3>
+                <p>
+                    Comprehensive observability and monitoring:
+                </p>
+                <ul style="margin-left: 30px; margin-top: 15px;">
+                    <li><strong>Trace Explorer</strong> - End-to-end request traces</li>
+                    <li><strong>Metric Charts</strong> - Time-series performance data</li>
+                    <li><strong>Evaluation Results</strong> - Quality scores over time</li>
+                    <li><strong>Cost Tracking</strong> - Token usage and estimated costs</li>
+                    <li><strong>Drift Detection</strong> - Behavioral drift alerts</li>
+                </ul>
+            </section>
+
+            <!-- Architecture -->
+            <section class="section">
+                <h2>Architecture Overview</h2>
+                <div class="architecture-diagram">
+                    <h3>Integration Architecture</h3>
+                    <pre>
+┌─────────────────────────────────────────────────────────────┐
+│                    SecAI Radar Application                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │  7 AI Agents │  │   Registry   │  │ Observability│      │
+│  │              │  │   Service    │  │   Service    │      │
+│  │ • Aris       │  │              │  │              │      │
+│  │ • Leo        │  │ • Inventory  │  │ • Tracing    │      │
+│  │ • Ravi       │  │ • Collections│  │ • Metrics    │      │
+│  │ • Kenji      │  │ • Quarantine │  │ • Evaluation │      │
+│  │ • Elena      │  │              │  │              │      │
+│  │ • Marcus     │  └──────────────┘  └──────────────┘      │
+│  │ • Supervisor │                                            │
+│  └──────┬───────┘                                            │
+│         │                                                     │
+│         ▼                                                     │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │         Entra Agent ID Service                       │   │
+│  │  • Identity Provisioning                             │   │
+│  │  • Token Management                                  │   │
+│  │  • Access Control                                    │   │
+│  │  • Auditing                                          │   │
+│  └──────────────┬───────────────────────────────────────┘   │
+│                 │                                            │
+└─────────────────┼──────────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Microsoft Entra ID (Azure AD)                   │
+│  • Service Principals                                        │
+│  • Identity Management                                       │
+│  • Access Policies                                           │
+└─────────────────────────────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Foundry Control Plane                           │
+│  • OpenTelemetry (Azure Monitor)                            │
+│  • AI Evaluators                                             │
+│  • Guardrails                                                │
+│  • Content Safety                                            │
+└─────────────────────────────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────────┐
+│         Microsoft Defender & Purview                         │
+│  • Security Posture Management                               │
+│  • Threat Detection                                          │
+│  • Data Classification                                       │
+│  • Data Loss Prevention                                      │
+└─────────────────────────────────────────────────────────────┘
+                    </pre>
+                </div>
+            </section>
+
+            <!-- Implementation Timeline -->
+            <section class="section">
+                <h2>Implementation Timeline</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h4>Phase 1: Entra Agent ID (Completed)</h4>
+                        <p>Agent identity provisioning and authentication for all 7 agents</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Identity service implementation</li>
+                            <li>Agent registration</li>
+                            <li>Token management</li>
+                            <li>Base agent integration</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>Phase 2: Agent Registry (Completed)</h4>
+                        <p>Centralized agent inventory with collections and quarantine</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Registry service</li>
+                            <li>API endpoints</li>
+                            <li>Collection management</li>
+                            <li>Quarantine workflow</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>Phase 3: Foundry Control Plane (Completed)</h4>
+                        <p>Observability, evaluation, and guardrails</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>OpenTelemetry integration</li>
+                            <li>AI-powered evaluators</li>
+                            <li>Content safety guardrails</li>
+                            <li>Tool authorization</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>Phase 4: Security Integration (Completed)</h4>
+                        <p>Microsoft Defender and Purview integration</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Defender security posture</li>
+                            <li>Purview data classification</li>
+                            <li>DLP policies</li>
+                            <li>Compliance monitoring</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>Phase 5: UI/UX (Completed)</h4>
+                        <p>Dashboards and user interfaces</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Agent Command Center</li>
+                            <li>Agent Registry view</li>
+                            <li>Agent Detail view</li>
+                            <li>Observability dashboard</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Benefits -->
+            <section class="section">
+                <h2>Key Benefits</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Enterprise Security</h4>
+                        <ul>
+                            <li>Identity-based access control</li>
+                            <li>Comprehensive auditing</li>
+                            <li>Threat detection</li>
+                            <li>Compliance monitoring</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Operational Excellence</h4>
+                        <ul>
+                            <li>Real-time monitoring</li>
+                            <li>Performance optimization</li>
+                            <li>Quality assurance</li>
+                            <li>Cost management</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Governance & Control</h4>
+                        <ul>
+                            <li>Centralized management</li>
+                            <li>Quarantine capabilities</li>
+                            <li>Policy enforcement</li>
+                            <li>Lifecycle management</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Developer Experience</h4>
+                        <ul>
+                            <li>Easy integration</li>
+                            <li>Comprehensive APIs</li>
+                            <li>Rich dashboards</li>
+                            <li>Detailed documentation</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Next Steps -->
+            <section class="section">
+                <h2>Next Steps</h2>
+                <p>
+                    To get started with the new features:
+                </p>
+                <ol style="margin-left: 30px; margin-top: 15px;">
+                    <li><strong>Review Documentation</strong> - Check the wiki for detailed guides</li>
+                    <li><strong>Configure Identities</strong> - Ensure agent identities are registered</li>
+                    <li><strong>Set Up Observability</strong> - Configure Application Insights connection</li>
+                    <li><strong>Enable Guardrails</strong> - Review and configure guardrail policies</li>
+                    <li><strong>Explore Dashboards</strong> - Navigate to Agent Command Center</li>
+                    <li><strong>Monitor Agents</strong> - Use Observability dashboard for monitoring</li>
+                </ol>
+            </section>
+        </div>
+
+        <footer class="footer">
+            <p>
+                <strong>SecAI Radar</strong> - Enterprise Security Assessment Platform
+            </p>
+            <p style="margin-top: 10px; opacity: 0.8;">
+                For more information, visit the 
+                <a href="https://github.com/zimaxnet/secai-radar">GitHub repository</a> 
+                or check the <a href="https://github.com/zimaxnet/secai-radar/wiki">documentation wiki</a>.
+            </p>
+            <p style="margin-top: 15px; font-size: 0.9em; opacity: 0.7;">
+                Last Updated: January 2025
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
+
