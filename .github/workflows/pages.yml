@@ -41,24 +41,20 @@ jobs:
           bundler-cache: true
         continue-on-error: true
       
-      - name: Prepare _site directory
+      - name: Copy wiki files to root for Jekyll
         run: |
-          mkdir -p _site
-          # Always copy wiki files from secai-radar/docs/wiki/ to _site/
+          # Copy wiki files from secai-radar/docs/wiki/ to root so Jekyll can process them
           if [ -d "secai-radar/docs/wiki" ]; then
-            echo "Copying wiki files from secai-radar/docs/wiki/ to _site/"
-            cp secai-radar/docs/wiki/*.md _site/ 2>/dev/null || true
+            echo "Copying wiki files from secai-radar/docs/wiki/ to root"
+            cp secai-radar/docs/wiki/*.md . 2>/dev/null || true
             if [ -f secai-radar/docs/wiki/CNAME ]; then
-              cp secai-radar/docs/wiki/CNAME _site/CNAME
+              cp secai-radar/docs/wiki/CNAME CNAME
             fi
-            echo "Copied $(ls -1 _site/*.md 2>/dev/null | wc -l) markdown files"
+            echo "Copied $(ls -1 *.md 2>/dev/null | wc -l) markdown files to root"
+            ls -1 *.md | head -10
           fi
-          # Also copy root-level markdown files if they exist
-          cp *.md _site/ 2>/dev/null || true
-          if [ -f CNAME ]; then
-            cp CNAME _site/CNAME
-          fi
-          rm -f _site/README.md _site/GITHUB-PAGES-SETUP.md _site/DEPLOYMENT-READY.md 2>/dev/null || true
+          # Remove unwanted files
+          rm -f README.md GITHUB-PAGES-SETUP.md DEPLOYMENT-READY.md 2>/dev/null || true
       
       - name: Build with Jekyll
         id: jekyll-build
@@ -69,6 +65,8 @@ jobs:
             if [ -f CNAME ]; then
               cp CNAME _site/CNAME
             fi
+            echo "Jekyll build completed"
+            ls -la _site/ | head -20
           else
             echo "No Gemfile found, skipping Jekyll build"
             exit 1
@@ -78,7 +76,13 @@ jobs:
       - name: Build static HTML (fallback)
         if: steps.jekyll-build.outcome == 'failure'
         run: |
-          echo "Building static HTML from markdown files"
+          echo "Building static HTML from markdown files (Jekyll failed)"
+          mkdir -p _site
+          # Copy markdown files to _site for processing
+          cp *.md _site/ 2>/dev/null || true
+          if [ -f CNAME ]; then
+            cp CNAME _site/CNAME
+          fi
           pip install --quiet markdown
           python3 scripts/build_wiki.py
           echo "_site directory created successfully"
