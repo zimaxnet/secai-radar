@@ -6,6 +6,7 @@ on:
       - gh-pages
     paths:
       - '*.md'
+      - 'secai-radar/docs/wiki/**/*.md'
       - '_config.yml'
       - 'Gemfile'
       - '.github/workflows/pages.yml'
@@ -58,6 +59,14 @@ jobs:
         if: steps.jekyll-build.outcome == 'failure'
         run: |
           mkdir -p _site
+          # Copy wiki files from secai-radar/docs/wiki/ to _site/
+          if [ -d "secai-radar/docs/wiki" ]; then
+            cp secai-radar/docs/wiki/*.md _site/ 2>/dev/null || true
+            if [ -f secai-radar/docs/wiki/CNAME ]; then
+              cp secai-radar/docs/wiki/CNAME _site/CNAME
+            fi
+          fi
+          # Also copy root-level markdown files
           cp *.md _site/ 2>/dev/null || true
           if [ -f CNAME ]; then
             cp CNAME _site/CNAME
