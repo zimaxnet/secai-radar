@@ -15,6 +15,10 @@ const Gaps = lazy(() => import('./routes/Gaps'))
 const Domain = lazy(() => import('./routes/Domain'))
 const ControlDetail = lazy(() => import('./routes/ControlDetail'))
 const Report = lazy(() => import('./routes/Report'))
+const AgentCommandCenter = lazy(() => import('./routes/AgentCommandCenter'))
+const AgentRegistry = lazy(() => import('./routes/AgentRegistry'))
+const AgentDetail = lazy(() => import('./routes/AgentDetail'))
+const Observability = lazy(() => import('./routes/Observability'))
 
 function Shell() {
   const { id } = useParams()
@@ -27,7 +31,9 @@ function Shell() {
     { to: 'controls', label: 'Controls' },
     { to: 'tools', label: 'Tools' },
     { to: 'gaps', label: 'Gaps' },
-    { to: 'report', label: 'Report' }
+    { to: 'report', label: 'Report' },
+    { to: 'agents', label: 'Agents' },
+    { to: 'observability', label: 'Observability' }
   ]
 
   return (
@@ -96,6 +102,10 @@ function Shell() {
             <Route path="tools" element={<Tools tenantId={tenantId} />} />
             <Route path="gaps" element={<Gaps tenantId={tenantId} />} />
             <Route path="report" element={<Report tenantId={tenantId} />} />
+            <Route path="agents" element={<AgentCommandCenter tenantId={tenantId} />} />
+            <Route path="agents/registry" element={<AgentRegistry tenantId={tenantId} />} />
+            <Route path="agent/:agentId" element={<AgentDetail tenantId={tenantId} />} />
+            <Route path="observability" element={<Observability tenantId={tenantId} />} />
             <Route path="domain/:domainCode" element={<Domain tenantId={tenantId} />} />
             <Route path="control/:controlId" element={<ControlDetail tenantId={tenantId} />} />
             <Route path="*" element={<Navigate to={`/tenant/${tenantId}/assessment`} replace />} />

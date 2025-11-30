@@ -1,0 +1,71 @@
+# Guardrails Configuration
+# 
+# Defines content safety policies, tool authorization, and rate limiting for agents.
+
+input_validation:
+  enabled: true
+  prompt_injection_detection: true
+  max_input_length: 10000
+
+output_filtering:
+  enabled: true
+  pii_detection: true
+  sensitive_data_detection: true
+
+tool_authorization:
+  enabled: true
+  default_policy: "deny_all"  # deny_all, allow_all, or custom
+  agent_tools:
+    aris_thorne:
+      - "query_framework_knowledge"
+      - "map_control_to_framework"
+      - "validate_framework_alignment"
+      - "generate_framework_citation"
+      - "assess_best_practices"
+    leo_vance:
+      - "analyze_iam_controls"
+      - "review_rbac_config"
+      - "assess_conditional_access"
+      - "validate_privilege_management"
+      - "check_framework_compliance"
+    ravi_patel:
+      - "scan_infrastructure"
+      - "inventory_resources"
+      - "map_topology"
+      - "validate_caf_alignment"
+      - "assess_infrastructure_risk"
+    kenji_sato:
+      - "correlate_findings"
+      - "filter_false_positives"
+      - "detect_patterns"
+      - "assess_evidence_quality"
+      - "prioritize_findings"
+    elena_bridges:
+      - "quantify_risk"
+      - "assess_business_impact"
+      - "generate_executive_summary"
+      - "calculate_roi"
+      - "translate_to_governance"
+    marcus_sterling:
+      - "resolve_conflicts"
+      - "analyze_tradeoffs"
+      - "align_stakeholders"
+      - "allocate_resources"
+      - "ensure_governance_compliance"
+    supervisor:
+      - "manage_workflow"
+      - "dispatch_agents"
+      - "enforce_quality_gates"
+      - "maintain_audit_trail"
+      - "synthesize_outputs"
+
+rate_limiting:
+  enabled: true
+  max_requests_per_minute: 60
+  max_requests_per_hour: 1000
+
+content_safety:
+  enabled: true
+  check_output: true
+  check_input: false  # Set to true for stricter input validation
+

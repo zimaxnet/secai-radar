@@ -98,3 +98,52 @@ export const updateControl = (tenant=TENANT, controlId: string, updates: any) =>
     body: JSON.stringify(updates)
   }).then(r=>r.json());
 
+// Agent Registry API
+export const getAgents = (filters?: { status?: string; collection?: string; blueprint?: string; capability?: string }) => {
+  const qs = new URLSearchParams(filters as any).toString();
+  return fetch(`${API}/registry/agents${qs ? `?${qs}` : ''}`).then(r => r.json());
+};
+
+export const getAgent = (agentId: string) =>
+  fetch(`${API}/registry/agents/${agentId}`).then(r => r.json());
+
+export const updateAgentStatus = (agentId: string, status: string) =>
+  fetch(`${API}/registry/agents/${agentId}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status })
+  }).then(r => r.json());
+
+export const quarantineAgent = (agentId: string) =>
+  fetch(`${API}/registry/agents/${agentId}/quarantine`, {
+    method: 'POST'
+  }).then(r => r.json());
+
+export const unquarantineAgent = (agentId: string) =>
+  fetch(`${API}/registry/agents/${agentId}/quarantine`, {
+    method: 'DELETE'
+  }).then(r => r.json());
+
+// Agent Observability API
+export const getAgentObservability = (agentId?: string, timeRange?: string) => {
+  const params = new URLSearchParams();
+  if (agentId) params.append('agent_id', agentId);
+  if (timeRange) params.append('time_range', timeRange);
+  return fetch(`${API}/observability/metrics?${params}`).then(r => r.json());
+};
+
+// Agent Evaluations API
+export const runEvaluation = (body: {
+  agent_id: string;
+  response: string;
+  context?: string;
+  task_instruction?: string;
+  query?: string;
+  tool_calls?: any[];
+}) =>
+  fetch(`${API}/evaluations/evaluate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(r => r.json());
+

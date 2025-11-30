@@ -10,6 +10,20 @@ from datetime import datetime
 
 from ..state import AssessmentState, HandoffPacket, AgentContext, StateManager
 
+# Import agent identity service (with fallback if not available)
+try:
+    import sys
+    from pathlib import Path
+    # Add api directory to path for imports
+    api_path = Path(__file__).resolve().parents[3] / "api"
+    if str(api_path) not in sys.path:
+        sys.path.insert(0, str(api_path))
+    from shared.agent_identity import AgentIdentityService, get_agent_identity_service
+    AGENT_IDENTITY_AVAILABLE = True
+except ImportError:
+    AGENT_IDENTITY_AVAILABLE = False
+    get_agent_identity_service = None
+
 
 class BaseAgent(ABC):
     """
@@ -26,7 +40,8 @@ class BaseAgent(ABC):
         model_layer=None,
         state_manager: Optional[StateManager] = None,
         rag_retriever=None,
-        tools: Optional[List[str]] = None
+        tools: Optional[List[str]] = None,
+        identity_service: Optional[Any] = None
     ):
         """
         Initialize base agent.
@@ -40,6 +55,7 @@ class BaseAgent(ABC):
             state_manager: StateManager instance
             rag_retriever: RAG retriever for knowledge base queries
             tools: List of tool names available to this agent
+            identity_service: Optional AgentIdentityService instance
         """
         self.agent_id = agent_id
         self.name = name
@@ -49,6 +65,21 @@ class BaseAgent(ABC):
         self.state_manager = state_manager or StateManager()
         self.rag_retriever = rag_retriever
         self.tools = tools or []
+        
+        # Initialize agent identity service
+        if identity_service:
+            self.identity_service = identity_service
+        elif AGENT_IDENTITY_AVAILABLE and get_agent_identity_service:
+            try:
+                self.identity_service = get_agent_identity_service()
+            except Exception as e:
+                print(f"Warning: Could not initialize agent identity service: {e}")
+                self.identity_service = None
+        else:
+            self.identity_service = None
+        
+        # Agent identity (populated during initialization)
+        self.agent_identity = None
     
     @abstractmethod
     async def process_task(
@@ -273,4 +304,67 @@ class BaseAgent(ABC):
             prompt_parts.append(rag_context)
         
         return "\n".join(prompt_parts)
+    
+    def get_agent_token(self, scopes: Optional[List[str]] = None) -> Optional[str]:
+        """
+        Get an access token for this agent using its Entra Agent ID.
+        
+        Args:
+            scopes: Optional list of scopes (defaults to Graph API scope)
+            
+        Returns:
+            Access token string or None if identity service not available
+        """
+        if not self.identity_service:
+            return None
+        
+        try:
+            return self.identity_service.get_agent_token(self.agent_id, scopes)
+        except Exception as e:
+            print(f"Warning: Could not get token for agent {self.agent_id}: {e}")
+            return None
+    
+    def audit_action(self, action: str, resource: str, details: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Audit an action performed by this agent.
+        
+        Args:
+            action: Action performed (e.g., "tool_call", "api_access")
+            resource: Resource accessed
+            details: Optional additional details
+        """
+        if self.identity_service:
+            try:
+                self.identity_service.audit_agent_action(
+                    self.agent_id,
+                    action,
+                    resource,
+                    details
+                )
+            except Exception as e:
+                print(f"Warning: Could not audit action for agent {self.agent_id}: {e}")
+    
+    def initialize_identity(self, blueprint_id: str) -> bool:
+        """
+        Initialize this agent's Entra identity.
+        
+        Args:
+            blueprint_id: Agent blueprint identifier
+            
+        Returns:
+            True if identity initialized successfully, False otherwise
+        """
+        if not self.identity_service:
+            return False
+        
+        try:
+            self.agent_identity = self.identity_service.register_agent(
+                agent_id=self.agent_id,
+                blueprint_id=blueprint_id,
+                display_name=self.name
+            )
+            return True
+        except Exception as e:
+            print(f"Warning: Could not initialize identity for agent {self.agent_id}: {e}")
+            return False
 

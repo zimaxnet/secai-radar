@@ -1,0 +1,129 @@
+# Agent Identity Mappings
+# 
+# Maps SecAI Radar agents to their Entra Agent IDs and blueprints.
+# This configuration is used for agent identity provisioning and management.
+
+# Agent Blueprints
+# Blueprints define base characteristics and permissions for agent types
+blueprints:
+  secai-assessment-agent:
+    name: "SecAI Assessment Agent"
+    description: "Base blueprint for SecAI security assessment agents"
+    permissions:
+      - "Storage.Read"
+      - "Storage.Write"
+      - "Tables.Read"
+      - "Tables.Write"
+      - "KeyVault.Read"
+    default_scopes:
+      - "https://graph.microsoft.com/.default"
+      - "https://storage.azure.com/.default"
+
+# Agent Identity Mappings
+agents:
+  aris-thorne:
+    agent_id: "aris_thorne"
+    blueprint_id: "secai-assessment-agent"
+    display_name: "Dr. Aris Thorne"
+    description: "Knowledge Base Guardian - Framework authority"
+    # Entra Agent ID will be populated during registration
+    entra_agent_id: null
+    app_id: null
+    status: "pending"  # pending, active, disabled, quarantined
+    capabilities:
+      - "query_framework_knowledge"
+      - "map_control_to_framework"
+      - "validate_framework_alignment"
+      - "generate_framework_citation"
+      - "assess_best_practices"
+
+  leo-vance:
+    agent_id: "leo_vance"
+    blueprint_id: "secai-assessment-agent"
+    display_name: "Leo Vance"
+    description: "Identity & Access Analyst - IAM expert"
+    entra_agent_id: null
+    app_id: null
+    status: "pending"
+    capabilities:
+      - "analyze_iam_controls"
+      - "review_rbac_config"
+      - "assess_conditional_access"
+      - "validate_privilege_management"
+      - "check_framework_compliance"
+
+  ravi-patel:
+    agent_id: "ravi_patel"
+    blueprint_id: "secai-assessment-agent"
+    display_name: "Ravi Patel"
+    description: "Infrastructure Architect - Cloud security specialist"
+    entra_agent_id: null
+    app_id: null
+    status: "pending"
+    capabilities:
+      - "scan_infrastructure"
+      - "inventory_resources"
+      - "map_topology"
+      - "validate_caf_alignment"
+      - "assess_infrastructure_risk"
+
+  kenji-sato:
+    agent_id: "kenji_sato"
+    blueprint_id: "secai-assessment-agent"
+    display_name: "Kenji Sato"
+    description: "Findings Analyst - Data correlation expert"
+    entra_agent_id: null
+    app_id: null
+    status: "pending"
+    capabilities:
+      - "correlate_findings"
+      - "filter_false_positives"
+      - "detect_patterns"
+      - "assess_evidence_quality"
+      - "prioritize_findings"
+
+  elena-bridges:
+    agent_id: "elena_bridges"
+    blueprint_id: "secai-assessment-agent"
+    display_name: "Elena Bridges"
+    description: "Business Impact Strategist - Executive communication"
+    entra_agent_id: null
+    app_id: null
+    status: "pending"
+    capabilities:
+      - "quantify_risk"
+      - "assess_business_impact"
+      - "generate_executive_summary"
+      - "calculate_roi"
+      - "translate_to_governance"
+
+  marcus-sterling:
+    agent_id: "marcus_sterling"
+    blueprint_id: "secai-assessment-agent"
+    display_name: "Marcus Sterling"
+    description: "Conflict Resolution & Governance - Decision maker"
+    entra_agent_id: null
+    app_id: null
+    status: "pending"
+    capabilities:
+      - "resolve_conflicts"
+      - "analyze_tradeoffs"
+      - "align_stakeholders"
+      - "allocate_resources"
+      - "ensure_governance_compliance"
+
+  supervisor:
+    agent_id: "supervisor"
+    blueprint_id: "secai-assessment-agent"
+    display_name: "Supervisor"
+    description: "System Orchestrator - Workflow coordinator"
+    entra_agent_id: null
+    app_id: null
+    status: "pending"
+    capabilities:
+      - "manage_workflow"
+      - "dispatch_agents"
+      - "enforce_quality_gates"
+      - "maintain_audit_trail"
+      - "synthesize_outputs"
+

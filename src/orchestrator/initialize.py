@@ -6,10 +6,11 @@ with all dependencies (Model Layer, RAG, State Management).
 """
 
 import os
+import yaml
 from pathlib import Path
 from typing import Optional
 
-from .state import StateManager
+from .state import StateManager, AgentID
 from .cosmos_persistence import CosmosStatePersistence
 from .supervisor import Supervisor
 from .langgraph_config import LangGraphConfig
@@ -27,6 +28,18 @@ try:
     from ..rag.factory import get_rag_retriever
 except ImportError:
     get_rag_retriever = None
+
+# Import agent identity service
+try:
+    import sys
+    api_path = Path(__file__).resolve().parents[2] / "api"
+    if str(api_path) not in sys.path:
+        sys.path.insert(0, str(api_path))
+    from shared.agent_identity import get_agent_identity_service
+    AGENT_IDENTITY_AVAILABLE = True
+except ImportError:
+    AGENT_IDENTITY_AVAILABLE = False
+    get_agent_identity_service = None
 
 
 def initialize_orchestrator(
@@ -96,6 +109,18 @@ def initialize_orchestrator(
     if state_manager is None:
         state_manager = StateManager(cosmos_persistence=cosmos_persistence)
     
+    # Initialize Agent Identity Service and register agents
+    if AGENT_IDENTITY_AVAILABLE and get_agent_identity_service:
+        try:
+            identity_service = get_agent_identity_service()
+            _register_agent_identities(identity_service)
+            print("✅ Agent identities initialized")
+        except Exception as e:
+            print(f"Warning: Could not initialize agent identities: {e}")
+            identity_service = None
+    else:
+        identity_service = None
+    
     # Initialize Supervisor
     supervisor = Supervisor(state_manager, model_layer)
     
@@ -111,6 +136,64 @@ def initialize_orchestrator(
     
     print("✅ Multi-agent orchestration system initialized")
     return graph
+
+
+def _register_agent_identities(identity_service) -> None:
+    """
+    Register all SecAI Radar agents with Entra Agent IDs.
+    
+    Loads agent configuration from agent_identities.yaml and registers each agent.
+    
+    Args:
+        identity_service: AgentIdentityService instance
+    """
+    # Load agent identities configuration
+    config_path = Path(__file__).resolve().parents[2] / "config" / "agent_identities.yaml"
+    
+    if not config_path.exists():
+        print(f"Warning: Agent identities config not found at {config_path}")
+        return
+    
+    try:
+        with open(config_path, 'r') as f:
+            config = yaml.safe_load(f)
+        
+        agents_config = config.get('agents', {})
+        blueprint_id = "secai-assessment-agent"  # Default blueprint
+        
+        # Map AgentID enum values to config keys
+        agent_id_mapping = {
+            AgentID.ARIS_THORNE.value: "aris-thorne",
+            AgentID.LEO_VANCE.value: "leo-vance",
+            AgentID.RAVI_PATEL.value: "ravi-patel",
+            AgentID.KENJI_SATO.value: "kenji-sato",
+            AgentID.ELENA_BRIDGES.value: "elena-bridges",
+            AgentID.MARCUS_STERLING.value: "marcus-sterling",
+            AgentID.SUPERVISOR.value: "supervisor"
+        }
+        
+        # Register each agent
+        for agent_id_enum, config_key in agent_id_mapping.items():
+            agent_config = agents_config.get(config_key)
+            if not agent_config:
+                continue
+            
+            # Check if already registered (status != "pending")
+            if agent_config.get('status') != 'pending':
+                continue
+            
+            try:
+                identity = identity_service.register_agent(
+                    agent_id=agent_id_enum,
+                    blueprint_id=agent_config.get('blueprint_id', blueprint_id),
+                    display_name=agent_config.get('display_name', agent_id_enum)
+                )
+                print(f"  ✓ Registered agent: {agent_id_enum} ({identity.entra_agent_id})")
+            except Exception as e:
+                print(f"  ✗ Failed to register agent {agent_id_enum}: {e}")
+    
+    except Exception as e:
+        print(f"Warning: Could not load agent identities config: {e}")
 
 
 def create_example_usage():
