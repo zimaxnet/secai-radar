@@ -41,6 +41,25 @@ jobs:
           bundler-cache: true
         continue-on-error: true
       
+      - name: Prepare _site directory
+        run: |
+          mkdir -p _site
+          # Always copy wiki files from secai-radar/docs/wiki/ to _site/
+          if [ -d "secai-radar/docs/wiki" ]; then
+            echo "Copying wiki files from secai-radar/docs/wiki/ to _site/"
+            cp secai-radar/docs/wiki/*.md _site/ 2>/dev/null || true
+            if [ -f secai-radar/docs/wiki/CNAME ]; then
+              cp secai-radar/docs/wiki/CNAME _site/CNAME
+            fi
+            echo "Copied $(ls -1 _site/*.md 2>/dev/null | wc -l) markdown files"
+          fi
+          # Also copy root-level markdown files if they exist
+          cp *.md _site/ 2>/dev/null || true
+          if [ -f CNAME ]; then
+            cp CNAME _site/CNAME
+          fi
+          rm -f _site/README.md _site/GITHUB-PAGES-SETUP.md _site/DEPLOYMENT-READY.md 2>/dev/null || true
+      
       - name: Build with Jekyll
         id: jekyll-build
         run: |
@@ -51,27 +70,15 @@ jobs:
               cp CNAME _site/CNAME
             fi
           else
+            echo "No Gemfile found, skipping Jekyll build"
             exit 1
           fi
         continue-on-error: true
       
-      - name: Prepare static site (fallback)
+      - name: Build static HTML (fallback)
         if: steps.jekyll-build.outcome == 'failure'
         run: |
-          mkdir -p _site
-          # Copy wiki files from secai-radar/docs/wiki/ to _site/
-          if [ -d "secai-radar/docs/wiki" ]; then
-            cp secai-radar/docs/wiki/*.md _site/ 2>/dev/null || true
-            if [ -f secai-radar/docs/wiki/CNAME ]; then
-              cp secai-radar/docs/wiki/CNAME _site/CNAME
-            fi
-          fi
-          # Also copy root-level markdown files
-          cp *.md _site/ 2>/dev/null || true
-          if [ -f CNAME ]; then
-            cp CNAME _site/CNAME
-          fi
-          rm -f _site/README.md _site/GITHUB-PAGES-SETUP.md _site/DEPLOYMENT-READY.md 2>/dev/null || true
+          echo "Building static HTML from markdown files"
           pip install --quiet markdown
           python3 scripts/build_wiki.py
           echo "_site directory created successfully"
