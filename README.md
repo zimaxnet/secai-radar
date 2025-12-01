@@ -1,68 +1,211 @@
-## SecAI Radar Demo Deployment Guide
+---
+layout: default
+title: Readme
+---
 
-SecAI Radar delivers a vendor-neutral Azure security assessment that you can walk through with prospects in minutes. This repository bundles everything needed to showcase the full experience—data prep, API, web app, and sanitized demo artifacts—so you can deploy to a customer tenant or run locally without guesswork.
+# SecAI Radar Wiki Documentation
 
-### What’s Inside
+This directory contains comprehensive wiki documentation for SecAI Radar, ready for GitHub Pages or GitHub Wiki.
 
-- `analysis/security_domains/` – scripts that convert sanitized workbook/report inputs into normalized CSVs, collect Azure evidence, and generate demo questionnaires/reports.
-- `secai-radar/api/` – Azure Functions back end that provides assessment, control, tool, gap, and report endpoints.
-- `secai-radar/web/` – React front end packaged for Azure Static Web Apps with an interactive demo journey.
-- `docs/wiki/` – published documentation (see [Assessment Workflow](docs/wiki/Assessment-Workflow.md)) mapping the entire pipeline.
+---
 
-### One-Glance Demo Flow
+## Using This Wiki
 
-1. **Prep sanitized data**  
-   Place sanitized Excel/Word sources + demo excerpts in `analysis/security_domains/sanitized/`.
-2. **Generate domain CSVs**  
-   `python analysis/security_domains/build_domain_csvs.py`
-3. **Collect (or stub) Azure evidence**  
-   `python analysis/security_domains/collect_azure_evidence.py --dry-run` (replace with real commands when ready).
-4. **Produce customer-facing assets**  
-   - Questionnaire: `python analysis/security_domains/questionnaire/generate_questionnaire.py`  
-   - Summary report: `python analysis/security_domains/output/render_report.py`
-5. **Import into the app**  
-   Upload CSVs to blob storage (`assessments/{TenantId}/domains/`) then call `POST /api/tenant/{TenantId}/import`.
-6. **Launch the demo**  
-   Deploy the API (Azure Functions) + web app (Static Web Apps or Vite preview) and browse to `/` to follow the guided experience.
+### Option 1: GitHub Wiki
 
-### Deploying to a Customer Tenant
+1. **Enable GitHub Wiki** for your repository
+2. **Copy these files** to the GitHub Wiki repository
+3. **Edit in GitHub** or push directly to wiki repository
 
-1. **Prerequisites**
-   - Azure subscription with Static Web Apps + Functions permissions
-   - `az` CLI 2.53+ (login with the target tenant)
-   - Node 18+, Python 3.12+, and enough rights to create storage accounts / tables
+**GitHub Wiki Structure**:
+- Files in `docs/wiki/` → GitHub Wiki pages
+- `Home.md` → Wiki homepage
+- Other pages → Linked from homepage
 
-2. **Provision infrastructure**
-   - Use `secai-radar/scripts/create-function-app.sh` to deploy the Functions app (or follow `secai-radar/docs/DEPLOY-NOW.md` for portal-driven setup).
-   - Configure required secrets (Storage connection, OpenAI/Azure AI keys) via `scripts/store-secrets.sh` and the guidance in `secai-radar/docs/KEY-VAULT-SETUP.md`.
+### Option 2: GitHub Pages
 
-3. **Seed assessment data**
-   - Upload generated CSVs to Blob (`assessments/{TenantId}/domains/`).
-   - Run the import endpoint once (`POST /api/tenant/{TenantId}/import`) with `ALL_CONTROLS.csv`.
-   - Optionally seed tool inventory via `POST /api/tenant/{TenantId}/tools`.
+1. **Set up GitHub Pages** for your repository
+2. **Use a static site generator** (Jekyll, MkDocs, etc.)
+3. **Copy these files** to Pages source directory
+4. **Build and deploy** via GitHub Actions
 
-4. **Deploy the web app**
-   - `cd secai-radar/web`
-   - `npm install`
-   - `npm run build`
-   - `az staticwebapp up --name <AppName> --location <region> --resource-group <rg> --source . --app-location . --output-location dist`
+**Recommended**: Use [MkDocs](https://www.mkdocs.org/) or [GitBook](https://www.gitbook.com/) for better navigation.
 
-5. **Smoke-test the demo**
-   - Navigate to the Static Web App URL.
-   - Confirm the homepage “Explore Interactive Demo” CTA routes to `/tenant/<TenantId>/assessment`.
-   - Step through the linked screens in the demo journey to show Assessment → Dashboard → Domain → Control detail → Tools → Gaps → Report.
+---
 
-### Local Development
+## Wiki Pages
 
-- **API**: `cd secai-radar/api && python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && func start`
-- **Web**: `cd secai-radar/web && npm install && npm run dev`
-- **Environment**: set `VITE_DEFAULT_TENANT=<TenantId>` and point Functions to local Azurite or real storage.
+### User Documentation
 
-### Keeping the Demo Fresh
+- **[Home](Home.md)** - Wiki homepage and overview
+- **[Getting Started](Getting-Started.md)** - Quick start guide
+- **[User Guide](User-Guide.md)** - Complete user documentation
+- **[Dashboard Guide](Dashboard-Guide.md)** - Dashboard usage
+- **[Controls Guide](Controls-Guide.md)** - Controls management
+- **[Tools Guide](Tools-Guide.md)** - Tools configuration
+- **[Gaps Guide](Gaps-Guide.md)** - Gap analysis
 
-- Re-run the analysis scripts whenever you update sanitized inputs so the CSVs, questionnaire, and report align.
-- Refresh blob data and re-trigger `/import` before major customer demos.
-- Update `Landing.tsx` or documentation if you add new flows to the app so the guided tour stays accurate.
+### Technical Documentation
 
-Need a deeper dive? Start with `docs/wiki/Assessment-Workflow.md`, then review `secai-radar/docs/DEPLOY-NOW.md` for detailed Azure deployment steps.
+- **[Architecture](Architecture.md)** - System architecture
+- **[API Reference](API-Reference.md)** - API documentation
+- **[Installation](Installation.md)** - Installation guide
+- **[Configuration](Configuration.md)** - Configuration guide
 
+### Help & Support
+
+- **[FAQ](FAQ.md)** - Frequently asked questions
+- **[Troubleshooting](Troubleshooting.md)** - Common issues and solutions
+- **[Glossary](Glossary.md)** - Terms and definitions
+
+### Contributing
+
+- **[Contributing](Contributing.md)** - Contributing guide
+
+---
+
+## Wiki Structure
+
+```
+docs/wiki/
+├── Home.md                    # Homepage
+├── Getting-Started.md          # Quick start
+├── User-Guide.md              # User documentation
+├── Dashboard-Guide.md         # Dashboard usage
+├── Controls-Guide.md          # Controls management
+├── Tools-Guide.md             # Tools configuration
+├── Gaps-Guide.md              # Gap analysis
+├── Architecture.md            # Architecture
+├── API-Reference.md           # API docs
+├── Installation.md            # Installation
+├── Configuration.md           # Configuration
+├── FAQ.md                     # FAQ
+├── Troubleshooting.md         # Troubleshooting
+├── Glossary.md                # Glossary
+├── Contributing.md            # Contributing
+└── README.md                  # This file
+```
+
+---
+
+## Navigation
+
+### Internal Links
+
+All wiki pages use internal links:
+- `[Home](Home.md)` - Links to Home page
+- `[Getting Started](Getting-Started.md)` - Links to Getting Started page
+- `[FAQ](FAQ.md)` - Links to FAQ page
+
+### Cross-References
+
+Pages reference each other:
+- User Guide → Dashboard Guide, Controls Guide, etc.
+- FAQ → Troubleshooting, Installation, etc.
+- Architecture → Data Model, Model Integration
+
+---
+
+## Maintaining the Wiki
+
+### Adding New Pages
+
+1. **Create new `.md` file** in `docs/wiki/`
+2. **Add to Home.md** navigation
+3. **Link from related pages**
+4. **Update README.md** if needed
+
+### Updating Existing Pages
+
+1. **Edit the `.md` file**
+2. **Update links** if page renamed
+3. **Test navigation** works
+4. **Update related pages** if needed
+
+### Best Practices
+
+1. **Keep Updated**: Update wiki as application evolves
+2. **Link Related**: Link related pages together
+3. **Use Examples**: Include examples where helpful
+4. **Be Clear**: Write clearly and concisely
+5. **Test Links**: Verify all links work
+
+---
+
+## Publishing to GitHub Wiki
+
+### Step 1: Enable Wiki
+
+1. Go to repository Settings
+2. Enable "Wikis" feature
+3. Wiki repository will be created
+
+### Step 2: Clone Wiki Repository
+
+```bash
+git clone https://github.com/your-org/secai-radar.wiki.git
+cd secai-radar.wiki
+```
+
+### Step 3: Copy Files
+
+```bash
+# Copy all wiki files
+cp -r ../secai-radar/docs/wiki/* .
+
+# Commit and push
+git add .
+git commit -m "Add wiki documentation"
+git push origin master
+```
+
+### Step 4: Verify
+
+1. Go to repository Wiki tab
+2. Verify all pages appear
+3. Test navigation links
+4. Check formatting
+
+---
+
+## Publishing to GitHub Pages
+
+### Option 1: MkDocs
+
+1. **Install MkDocs**:
+   ```bash
+   pip install mkdocs mkdocs-material
+   ```
+
+2. **Create `mkdocs.yml`**:
+   ```yaml
+   site_name: SecAI Radar Documentation
+   nav:
+     - Home: Home.md
+     - Getting Started: Getting-Started.md
+     - User Guide: User-Guide.md
+     # ... other pages
+   ```
+
+3. **Build and Deploy**:
+   ```bash
+   mkdocs build
+   mkdocs gh-deploy
+   ```
+
+### Option 2: Jekyll
+
+1. **Set up Jekyll** for GitHub Pages
+2. **Copy files** to `docs/` directory
+3. **Configure navigation** in `_config.yml`
+4. **Build and deploy** via GitHub Actions
+
+---
+
+## Contributing
+
+See [Contributing](Contributing.md) for guidelines on contributing to the wiki.
+
+---
+
+**Last Updated**: 2025-01-15

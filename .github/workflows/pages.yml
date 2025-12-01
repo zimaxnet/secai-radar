@@ -1,7 +1,115 @@
+name: Deploy Wiki to GitHub Pages
+
 on:
   push:
     branches:
       - gh-pages
     paths:
-      - 'docs/wiki/**'
+      - '*.md'
+      - 'secai-radar/docs/wiki/**/*.md'
+      - '_config.yml'
+      - 'Gemfile'
       - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Setup Jekyll (optional)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+        continue-on-error: true
+      
+      - name: Copy wiki files to root for Jekyll
+        run: |
+          # Copy wiki files from secai-radar/docs/wiki/ to root so Jekyll can process them
+          if [ -d "secai-radar/docs/wiki" ]; then
+            echo "Copying wiki files from secai-radar/docs/wiki/ to root"
+            cp secai-radar/docs/wiki/*.md . 2>/dev/null || true
+            if [ -f secai-radar/docs/wiki/CNAME ]; then
+              cp secai-radar/docs/wiki/CNAME CNAME
+            fi
+            echo "Copied $(ls -1 *.md 2>/dev/null | wc -l) markdown files to root"
+            ls -1 *.md | head -10
+          fi
+          # Remove unwanted files
+          rm -f README.md GITHUB-PAGES-SETUP.md DEPLOYMENT-READY.md 2>/dev/null || true
+      
+      - name: Build with Jekyll
+        id: jekyll-build
+        run: |
+          if [ -f Gemfile ]; then
+            bundle install || true
+            bundle exec jekyll build --destination _site || exit 1
+            if [ -f CNAME ]; then
+              cp CNAME _site/CNAME
+            fi
+            echo "Jekyll build completed"
+            ls -la _site/ | head -20
+          else
+            echo "No Gemfile found, skipping Jekyll build"
+            exit 1
+          fi
+        continue-on-error: true
+      
+      - name: Build static HTML (fallback)
+        if: steps.jekyll-build.outcome == 'failure'
+        run: |
+          echo "Building static HTML from markdown files (Jekyll failed)"
+          mkdir -p _site
+          # Copy markdown files to _site for processing
+          cp *.md _site/ 2>/dev/null || true
+          if [ -f CNAME ]; then
+            cp CNAME _site/CNAME
+          fi
+          pip install --quiet markdown
+          python3 scripts/build_wiki.py
+          echo "_site directory created successfully"
+          ls -la _site/ | head -20
+
+      - name: Ensure _site exists
+        if: steps.jekyll-build.outcome != 'failure'
+        run: |
+          if [ ! -d "_site" ]; then
+            echo "Error: _site directory does not exist after Jekyll build"
+            exit 1
+          fi
+
+      - name: Normalize static output
+        run: |
+          if [ -f "_site/index/index.html" ]; then
+            cp _site/index/index.html _site/index.html
+          elif [ -f "_site/Home/index.html" ] && [ ! -f "_site/index.html" ]; then
+            cp _site/Home/index.html _site/index.html
+          fi
+          find _site -name "*.md" -delete || true
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
