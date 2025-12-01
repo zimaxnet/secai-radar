@@ -271,11 +271,11 @@ The agent provides:
 
 ## Related Documentation
 
-- [Multi-Agent System](Multi-Agent-System.md) - Agent architecture
-- [Platform Features](Platform-Features.md) - Overall platform features
-- [Controls Guide](Controls-Guide.md) - Control management
-- [Gaps Guide](Gaps-Guide.md) - Gap analysis
-- [User Guide](User-Guide.md) - Complete user documentation
+- [Multi-Agent System](docs/wiki/Multi-Agent-System.md) - Agent architecture
+- [Platform Features](docs/wiki/Platform-Features.md) - Overall platform features
+- [Controls Guide](docs/wiki/Controls-Guide.md) - Control management
+- [Gaps Guide](docs/wiki/Gaps-Guide.md) - Gap analysis
+- [User Guide](docs/wiki/User-Guide.md) - Complete user documentation
 
 ---
 

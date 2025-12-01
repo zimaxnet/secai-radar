@@ -16,7 +16,7 @@ This document serves as an index for all new platform features and their documen
 
 ### Platform Features
 
-**[Platform Features](Platform-Features.md)**
+**[Platform Features](docs/wiki/Platform-Features.md)**
 - Complete overview of SecAI Radar v2.0 unified platform
 - Assessment workflow features
 - Multi-agent AI system integration
@@ -27,7 +27,7 @@ This document serves as an index for all new platform features and their documen
 
 ### Agent Integration
 
-**[Agent Integration](Agent-Integration.md)**
+**[Agent Integration](docs/wiki/Agent-Integration.md)**
 - Elena agent integration into gap analysis
 - Context-aware agent chat on control detail pages
 - Agent workflow integration in assessment phases
@@ -44,7 +44,7 @@ This document serves as an index for all new platform features and their documen
 
 ### Evidence Collection
 
-**[Evidence Collection](Evidence-Collection.md)**
+**[Evidence Collection](docs/wiki/Evidence-Collection.md)**
 - Evidence upload and management workflow
 - Control detail page with evidence collection
 - Evidence organization and storage
@@ -71,7 +71,7 @@ This document serves as an index for all new platform features and their documen
 - AI agents status sidebar
 - Real-time updates
 
-**Documentation:** See [Dashboard Guide](Dashboard-Guide.md)
+**Documentation:** See [Dashboard Guide](docs/wiki/Dashboard-Guide.md)
 
 **Status:** ✅ Documented | ✅ Implemented
 
@@ -85,7 +85,7 @@ This document serves as an index for all new platform features and their documen
 - Evidence collection integrated
 - Agent chat integrated
 
-**Documentation:** See [Controls Guide](Controls-Guide.md)
+**Documentation:** See [Controls Guide](docs/wiki/Controls-Guide.md)
 
 **Status:** ✅ Documented | ✅ Implemented
 
@@ -97,7 +97,7 @@ This document serves as an index for all new platform features and their documen
 - Visual gap display with severity indicators
 - Business-focused recommendations
 
-**Documentation:** See [Gaps Guide](Gaps-Guide.md)
+**Documentation:** See [Gaps Guide](docs/wiki/Gaps-Guide.md)
 
 **Status:** ✅ Documented | ✅ Implemented
 
@@ -167,17 +167,17 @@ This document serves as an index for all new platform features and their documen
 
 ### New Documentation Pages
 
-1. **[Platform Features](Platform-Features.md)** - Complete platform overview
-2. **[Agent Integration](Agent-Integration.md)** - Agent integration details
-3. **[Evidence Collection](Evidence-Collection.md)** - Evidence collection guide
+1. **[Platform Features](docs/wiki/Platform-Features.md)** - Complete platform overview
+2. **[Agent Integration](docs/wiki/Agent-Integration.md)** - Agent integration details
+3. **[Evidence Collection](docs/wiki/Evidence-Collection.md)** - Evidence collection guide
 
 ### Updated Documentation Pages
 
-1. **[Index](index.md)** - Updated with new feature links
-2. **[User Guide](User-Guide.md)** - Should be updated with new workflows
-3. **[Dashboard Guide](Dashboard-Guide.md)** - Should be updated with new features
-4. **[Controls Guide](Controls-Guide.md)** - Should be updated with detail page
-5. **[Gaps Guide](Gaps-Guide.md)** - Should be updated with AI recommendations
+1. **[Index](docs/wiki/index.md)** - Updated with new feature links
+2. **[User Guide](docs/wiki/User-Guide.md)** - Should be updated with new workflows
+3. **[Dashboard Guide](docs/wiki/Dashboard-Guide.md)** - Should be updated with new features
+4. **[Controls Guide](docs/wiki/Controls-Guide.md)** - Should be updated with detail page
+5. **[Gaps Guide](docs/wiki/Gaps-Guide.md)** - Should be updated with AI recommendations
 
 ---
 
@@ -225,21 +225,21 @@ The following existing documentation pages should be updated to reference new fe
 
 ### For Users
 
-- **Getting Started**: Start with [Platform Features](Platform-Features.md)
-- **Using Agents**: See [Agent Integration](Agent-Integration.md)
-- **Collecting Evidence**: See [Evidence Collection](Evidence-Collection.md)
+- **Getting Started**: Start with [Platform Features](docs/wiki/Platform-Features.md)
+- **Using Agents**: See [Agent Integration](docs/wiki/Agent-Integration.md)
+- **Collecting Evidence**: See [Evidence Collection](docs/wiki/Evidence-Collection.md)
 
 ### For Developers
 
-- **Backend APIs**: See [API Reference](API-Reference.md)
-- **Architecture**: See [Architecture](Architecture.md)
-- **Agent System**: See [Multi-Agent System](Multi-Agent-System.md)
+- **Backend APIs**: See [API Reference](docs/wiki/API-Reference.md)
+- **Architecture**: See [Architecture](docs/wiki/Architecture.md)
+- **Agent System**: See [Multi-Agent System](docs/wiki/Multi-Agent-System.md)
 
 ### For Administrators
 
-- **Configuration**: See [Configuration](Configuration.md)
-- **Installation**: See [Installation](Installation.md)
-- **Troubleshooting**: See [Troubleshooting](Troubleshooting.md)
+- **Configuration**: See [Configuration](docs/wiki/Configuration.md)
+- **Installation**: See [Installation](docs/wiki/Installation.md)
+- **Troubleshooting**: See [Troubleshooting](docs/wiki/Troubleshooting.md)
 
 ---
 

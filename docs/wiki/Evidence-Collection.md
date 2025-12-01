@@ -352,10 +352,10 @@ GET /api/tenant/{tenant_id}/control/{control_id}
 
 ## Related Documentation
 
-- [Controls Guide](Controls-Guide.md) - Control management
-- [Platform Features](Platform-Features.md) - Overall platform features
-- [User Guide](User-Guide.md) - Complete user documentation
-- [Agent Integration](Agent-Integration.md) - Agent-assisted workflows
+- [Controls Guide](docs/wiki/Controls-Guide.md) - Control management
+- [Platform Features](docs/wiki/Platform-Features.md) - Overall platform features
+- [User Guide](docs/wiki/User-Guide.md) - Complete user documentation
+- [Agent Integration](docs/wiki/Agent-Integration.md) - Agent-assisted workflows
 
 ---
 
