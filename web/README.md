@@ -6,7 +6,7 @@ The web app delivers the customer-facing demo experience. It ships with a guided
 ## Quick Start
 
 ```bash
-cd secai-radar/web
+cd web
 npm install
 npm run dev
 ```
@@ -49,10 +49,10 @@ az staticwebapp up \
 
 1. Regenerate sanitized artifacts via the scripts in `analysis/security_domains/`.
 2. Upload the updated CSVs to Blob (`assessments/{TenantId}/domains/`).
-3. Call `POST /api/tenant/{TenantId}/import` (see `secai-radar/api/README.md`).
+3. Call `POST /api/tenant/{TenantId}/import` (see `api/README.md`).
 4. Reload the web app to reflect the latest dataset.
 
 ## Authentication & Next Steps
 
 - Static Web Apps authentication can be enabled later via `/signin` (future enhancement).
-- Follow `secai-radar/docs/COMPLETE-SETUP.md` and `docs/wiki/Assessment-Workflow.md` for the full deployment story.
+- Follow `docs/COMPLETE-SETUP.md` and `docs/wiki/Assessment-Workflow.md` for the full deployment story.
