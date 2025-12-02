@@ -33,7 +33,8 @@ function Shell() {
     { to: 'gaps', label: 'Gaps' },
     { to: 'report', label: 'Report' },
     { to: 'agents', label: 'Agents' },
-    { to: 'observability', label: 'Observability' }
+    { to: 'observability', label: 'Observability' },
+    { to: 'https://secairadar.cloud/wiki', label: 'Wiki', external: true }
   ]
 
   return (
@@ -56,17 +57,29 @@ function Shell() {
             {/* Nav */}
             <nav className="hidden md:flex gap-1">
               {navLinks.map(link => {
-                const isActive = location.pathname.includes(`/${link.to}`)
-                return (
-                  <Link
-                    key={link.to}
-                    to={`/tenant/${tenantId}/${link.to}`}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                      isActive
-                        ? 'bg-blue-500/10 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.1)] border border-blue-500/20'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
+                const isActive = !link.external && location.pathname.includes(`/${link.to}`)
+                const linkProps = link.external
+                  ? {
+                      href: link.to,
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                      className: `px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 text-slate-400 hover:text-white hover:bg-white/5`
+                    }
+                  : {
+                      to: `/tenant/${tenantId}/${link.to}`,
+                      className: `px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                        isActive
+                          ? 'bg-blue-500/10 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.1)] border border-blue-500/20'
+                          : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      }`
+                    }
+                
+                return link.external ? (
+                  <a key={link.to} {...linkProps}>
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link key={link.to} {...linkProps}>
                     {link.label}
                   </Link>
                 )
