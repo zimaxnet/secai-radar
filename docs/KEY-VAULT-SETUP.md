@@ -1,4 +1,4 @@
-# Azure Key Vault Setup Guide
+# Azure Key Vault Setup
 
 ## Overview
 
@@ -46,15 +46,20 @@ az role assignment create \
 
 #### Store Azure OpenAI API Key
 
+Use the secure input script:
+
 ```bash
-# Set the API key securely (you'll be prompted to enter it)
+KEY_VAULT_NAME=secai-radar-kv ./scripts/store-secrets.sh
+```
+
+Or set directly:
+
+```bash
 az keyvault secret set \
   --vault-name "$KV_NAME" \
   --name "azure-openai-api-key" \
   --value "$(read -s -p 'Enter Azure OpenAI API Key: ' key && echo $key)"
 ```
-
-Or use the secure input script (see below).
 
 ### 4. Configure Function App
 
@@ -73,37 +78,6 @@ az functionapp config appsettings set \
 az functionapp identity assign \
   --name "$FUNCTION_APP_NAME" \
   --resource-group "$RG"
-```
-
-## Secure Credential Input Script
-
-Create a script to securely input credentials via terminal:
-
-```bash
-#!/bin/bash
-# scripts/store-secrets.sh
-
-KV_NAME=secai-radar-kv  # Replace with your Key Vault name
-
-echo "SecAI Radar - Secure Secret Storage"
-echo "===================================="
-echo ""
-
-# Azure OpenAI API Key
-read -s -p "Enter Azure OpenAI API Key (hidden input): " OPENAI_KEY
-echo ""
-if [ -n "$OPENAI_KEY" ]; then
-  az keyvault secret set \
-    --vault-name "$KV_NAME" \
-    --name "azure-openai-api-key" \
-    --value "$OPENAI_KEY" > /dev/null
-  echo "✅ Azure OpenAI API Key stored securely"
-else
-  echo "⚠️  Skipped Azure OpenAI API Key"
-fi
-
-echo ""
-echo "✅ Secrets stored in Azure Key Vault: $KV_NAME"
 ```
 
 ## Secrets Stored in Key Vault
@@ -170,8 +144,8 @@ if kv:
 - Or set environment variables for local testing
 - Key Vault will be used automatically in Azure
 
-## Azure Portal Links
+## Related Documentation
 
-- **Key Vault**: https://portal.azure.com/#@zimax.net/resource/subscriptions/23f4e2c5-0667-4514-8e2e-f02ca7880c95/resourceGroups/secai-radar-rg/providers/Microsoft.KeyVault/vaults/
-- **Function App Identity**: https://portal.azure.com/#@zimax.net/resource/subscriptions/23f4e2c5-0667-4514-8e2e-f02ca7880c95/resourceGroups/secai-radar-rg/providers/Microsoft.Web/sites/secai-radar-api/identity
+- [Tool Research and Mapping](/wiki/Tool-Research-and-Mapping)
+- [AI Integration](/wiki/AI-Integration)
 

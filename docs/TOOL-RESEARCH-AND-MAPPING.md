@@ -8,25 +8,32 @@ SecAI Radar provides the ability to:
 3. **Dynamically map** all 340 controls across 12 security domains to the tools
 4. **Generate coverage analysis** showing which tools address which controls
 
-## Architecture
+## How It Works
 
-### Tool Research Service
+### 1. Tool Research Phase
 
-**Location**: `api/shared/tool_research.py`
+For each tool:
+- **AI-powered web search**: Uses Azure OpenAI with web search to find current information
+- **Capability extraction**: Identifies security capabilities from research
+- **Strength scoring**: Rates how well the tool performs each capability (0.0-1.0)
+- **Maturity scoring**: Rates how established/proven the capability is (0.0-1.0)
+- **Source tracking**: Records URLs used for research
 
-**Capabilities**:
-- Web search integration for current tool information
-- AI-powered capability extraction
-- Strength and maturity scoring
-- Source tracking for research results
+### 2. Control Mapping Phase
 
-### Dynamic Mapping
+For each of the 340 controls:
+- **Load requirements**: Get required capabilities for the control from seed data
+- **Match capabilities**: Find which tools provide required capabilities
+- **Calculate coverage**: Compute how well each tool covers the control
+- **Identify gaps**: Find controls with no or insufficient tool coverage
 
-The system automatically:
-1. Researches each tool's capabilities
-2. Maps capabilities to the 340 controls
-3. Calculates coverage scores
-4. Identifies gaps where tools don't cover controls
+### 3. Coverage Analysis
+
+The system provides:
+- **Per-control coverage**: Which tools cover each control and how well
+- **Per-tool coverage**: Which controls each tool addresses
+- **Gap identification**: Controls with no coverage
+- **Recommendations**: Which tools to add or tune
 
 ## Usage
 
@@ -60,7 +67,7 @@ GET /api/tool-research?toolName=Palo%20Alto%20Firewall&vendor=Palo%20Alto%20Netw
 }
 ```
 
-### Research Multiple Tools and Map to Controls
+### Research and Map Multiple Tools
 
 ```bash
 POST /api/tool-research
@@ -73,7 +80,7 @@ Content-Type: application/json
     {"name": "Google SecOps", "vendor": "Google"},
     {"name": "Wiz", "vendor": "Wiz"}
   ],
-  "tenantId": "NICO"  # Optional, to save results
+  "tenantId": "CONTOSO"
 }
 ```
 
@@ -109,49 +116,22 @@ Content-Type: application/json
 }
 ```
 
-## How It Works
-
-### 1. Tool Research Phase
-
-For each tool:
-- **AI-powered web search**: Uses Azure OpenAI with web search to find current information
-- **Capability extraction**: Identifies security capabilities from research
-- **Strength scoring**: Rates how well the tool performs each capability (0.0-1.0)
-- **Maturity scoring**: Rates how established/proven the capability is (0.0-1.0)
-- **Source tracking**: Records URLs used for research
-
-### 2. Control Mapping Phase
-
-For each of the 340 controls:
-- **Load requirements**: Get required capabilities for the control
-- **Match capabilities**: Find which tools provide required capabilities
-- **Calculate coverage**: Compute how well each tool covers the control
-- **Identify gaps**: Find controls with no or insufficient tool coverage
-
-### 3. Coverage Analysis
-
-The system provides:
-- **Per-control coverage**: Which tools cover each control and how well
-- **Per-tool coverage**: Which controls each tool addresses
-- **Gap identification**: Controls with no coverage
-- **Recommendations**: Which tools to add or tune
-
 ## 340 Controls Across 12 Domains
 
 The system maps to all controls across these domains:
 
-1. **Network Security (NET)**
-2. **Identity & Access (ID)**
-3. **Privileged Access (PA)**
-4. **Data Protection (DATA)**
-5. **Asset Management (ASSET)**
-6. **Logging & Monitoring (LOG)**
-7. **Incident Response (IR)**
-8. **Posture Management (POST)**
-9. **Endpoint Security (END)**
-10. **Backup & Recovery (BAK)**
-11. **Development Security (DEV)**
-12. **Governance (GOV)**
+1. **NET** - Network Security
+2. **ID** - Identity & Access
+3. **PA** - Privileged Access
+4. **DATA** - Data Protection
+5. **ASSET** - Asset Management
+6. **LOG** - Logging & Monitoring
+7. **IR** - Incident Response
+8. **POST** - Posture Management
+9. **END** - Endpoint Security
+10. **BAK** - Backup & Recovery
+11. **DEV** - Development Security
+12. **GOV** - Governance
 
 Each control has:
 - Required capabilities (with weights)
@@ -172,7 +152,7 @@ Uses Azure OpenAI with web search capabilities:
 - Direct web search API integration (Bing, Google Custom Search)
 - Caching of research results
 - Scheduled re-research for tool updates
-- Multi-source validation
+- Notification of capability changes
 
 ## AI-Powered Research
 
@@ -199,28 +179,10 @@ The researched tools can be:
 4. **Tune Config Scores**: Adjust ConfigScore based on actual implementation
 5. **Track Sources**: Keep research sources for audit and verification
 
-## API Endpoints
+## Related Documentation
 
-### Research Tool
-```
-GET /api/tool-research?toolName={name}&vendor={vendor}
-```
-
-### Research and Map Multiple Tools
-```
-POST /api/tool-research
-Body: {
-  "tools": [...],
-  "tenantId": "optional"
-}
-```
-
-## Next Steps
-
-1. ✅ **Research Service** - Implemented
-2. ✅ **Mapping Logic** - Implemented
-3. ⏳ **Web Search API** - Needs configuration (Bing/Google)
-4. ⏳ **Caching Layer** - Cache research results
-5. ⏳ **UI Integration** - Add tool research UI
-6. ⏳ **Scheduled Updates** - Auto-refresh tool capabilities
+- [Key Vault Setup](/wiki/Key-Vault-Setup)
+- [AI Integration](/wiki/AI-Integration)
+- [Tools Guide](/wiki/Tools-Guide)
+- [API Reference](/wiki/API-Reference)
 
