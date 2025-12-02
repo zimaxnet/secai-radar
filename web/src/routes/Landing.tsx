@@ -16,7 +16,7 @@ export default function Landing() {
           <a href="#" className="hover:text-blue-400 transition-colors">Home</a>
           <a href="#features" className="hover:text-blue-400 transition-colors">Features</a>
           <a href="#how-it-works" className="hover:text-blue-400 transition-colors">How It Works</a>
-          <a href="https://secairadar.cloud/wiki" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">Wiki</a>
+          <a href="https://wiki.secairadar.cloud" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">Wiki</a>
           <a href="#" className="hover:text-blue-400 transition-colors">Pricing</a>
           <a href="#" className="hover:text-blue-400 transition-colors">Contact</a>
         </div>

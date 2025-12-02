@@ -34,7 +34,7 @@ function Shell() {
     { to: 'report', label: 'Report' },
     { to: 'agents', label: 'Agents' },
     { to: 'observability', label: 'Observability' },
-    { to: 'https://secairadar.cloud/wiki', label: 'Wiki', external: true }
+    { to: 'https://wiki.secairadar.cloud', label: 'Wiki', external: true }
   ]
 
   return (
