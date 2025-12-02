@@ -335,6 +335,145 @@ Respond with JSON:
             return parsed, usage
         return parsed
     
+    def craft_visualization_prompt(
+        self,
+        user_intent: str,
+        context_type: str = "assessment",
+        assessment_data: Optional[Dict] = None,
+        style: str = "diagram"
+    ) -> Dict[str, str]:
+        """
+        Use Elena Bridges (Business Impact Strategist) agent to craft
+        a contextually-aware visualization prompt.
+        
+        Elena excels at translating technical data into executive-ready
+        visual communications.
+        
+        Args:
+            user_intent: What the user wants to visualize
+            context_type: Type of context (assessment, gaps, controls, tools)
+            assessment_data: Optional assessment data for context
+            style: Visualization style (diagram, infographic, chart, architecture)
+            
+        Returns:
+            Dict with crafted prompt and metadata
+        """
+        # Elena Bridges - Business Impact Strategist system prompt
+        elena_system_prompt = """You are Elena Bridges, the Business Impact Strategist for SecAI Radar.
+You specialize in translating technical security findings into clear, executive-ready visualizations.
+
+Your role is to craft the perfect visualization prompt that will generate:
+- Professional, corporate-ready visuals
+- Clear business context and impact messaging
+- Logical information hierarchy
+- Appropriate visual metaphors for security concepts
+
+When crafting visualization prompts, you:
+1. Understand the user's intent and the underlying data
+2. Translate technical concepts into visual elements
+3. Emphasize business impact and risk context
+4. Ensure the visualization tells a clear story
+5. Include specific layout, color, and style guidance
+
+Output a detailed, actionable prompt for an AI image generator that will create
+exactly what the executive stakeholders need to understand the security posture."""
+
+        # Build context summary from assessment data
+        context_summary = ""
+        if assessment_data:
+            if context_type == "assessment":
+                summary = assessment_data.get("summary", {})
+                by_domain = summary.get("byDomain", [])
+                total_controls = summary.get("totalControls", 0)
+                total_gaps = summary.get("totalGaps", 0)
+                critical_gaps = summary.get("criticalGaps", 0)
+                compliance_rate = ((total_controls - total_gaps) / total_controls * 100) if total_controls > 0 else 0
+                
+                domain_details = "\n".join([
+                    f"  - {d.get('domain', 'Unknown')}: {d.get('complete', 0)}/{d.get('total', 0)} complete ({d.get('complete', 0) / d.get('total', 1) * 100:.0f}%)"
+                    for d in by_domain
+                ]) if by_domain else "  No domain data available"
+                
+                context_summary = f"""Assessment Context:
+- Total Controls: {total_controls}
+- Controls with Gaps: {total_gaps}
+- Critical Gaps: {critical_gaps}
+- Overall Compliance Rate: {compliance_rate:.0f}%
+
+Domain Breakdown:
+{domain_details}"""
+
+            elif context_type == "gaps":
+                gaps = assessment_data.get("gaps", [])
+                hard_gap_count = sum(len(g.get("HardGaps", [])) for g in gaps)
+                soft_gap_count = sum(len(g.get("SoftGaps", [])) for g in gaps)
+                
+                context_summary = f"""Gap Analysis Context:
+- Total Controls with Gaps: {len(gaps)}
+- Hard Gaps (missing capabilities): {hard_gap_count}
+- Soft Gaps (configuration issues): {soft_gap_count}
+
+Top affected controls: {', '.join([g.get('ControlID', 'Unknown')[:20] for g in gaps[:5]])}"""
+
+            elif context_type == "tools":
+                tools = assessment_data.get("tools", [])
+                coverage = assessment_data.get("coverage", {})
+                
+                context_summary = f"""Tool Inventory Context:
+- Total Tools Configured: {len(tools)}
+- Overall Coverage: {coverage.get('overall', 0) * 100:.0f}%
+
+Enabled Tools: {', '.join([t.get('name', t.get('id', 'Unknown'))[:20] for t in tools[:8]])}"""
+
+        # Style-specific guidance
+        style_guides = {
+            "diagram": "Create a clear technical diagram with components, connections, and labels",
+            "infographic": "Create an executive infographic with key metrics, icons, and visual hierarchy",
+            "chart": "Create a data visualization chart suitable for board presentations",
+            "architecture": "Create a system architecture diagram showing security layers and data flow"
+        }
+        
+        user_prompt = f"""User wants to visualize: "{user_intent}"
+
+Visualization Style Requested: {style} - {style_guides.get(style, style_guides['diagram'])}
+
+{context_summary if context_summary else "No additional context provided."}
+
+Craft a detailed prompt for an AI image generator (like Gemini) that will create
+this visualization. Include:
+1. Specific visual elements to include
+2. Layout and composition guidance
+3. Color scheme recommendations (professional, corporate-appropriate)
+4. Text labels and annotations needed
+5. Visual metaphors that will resonate with business stakeholders
+
+Output ONLY the visualization prompt, ready to send to the image generator.
+Do not include any preamble or explanation - just the crafted prompt."""
+
+        messages = [
+            {"role": "system", "content": elena_system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+        
+        response = self.chat_completion(
+            messages=messages,
+            stream=False,
+            temperature=0.8,  # Allow creativity
+            max_tokens=1024
+        )
+        
+        crafted_prompt = response.choices[0].message.content
+        
+        # Return structured response
+        return {
+            "crafted_prompt": crafted_prompt,
+            "agent": "elena_bridges",
+            "agent_role": "Business Impact Strategist",
+            "style": style,
+            "context_type": context_type,
+            "original_intent": user_intent
+        }
+    
     def close(self):
         """Close the client connection"""
         if hasattr(self.client, 'close'):

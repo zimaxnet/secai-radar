@@ -21,10 +21,10 @@ export default function ControlDetail({ tenantId }: Props) {
     let mounted = true
     setLoading(true)
 
-    getControl(tenantId, controlId).then(c => {
+    getControl(tenantId, controlId).then((c: any) => {
       if (!mounted) return
       setControl(c)
-      if (c?.Notes) setObservations(c.Notes)
+      if (c?.Notes || c?.Observations) setObservations(c.Notes || c.Observations || '')
     })
 
     getGaps(tenantId).then(d => {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { getAgents, updateAgentStatus, quarantineAgent, unquarantineAgent } from '../api'
+import { Link } from 'react-router-dom'
+import { getAgents, quarantineAgent, unquarantineAgent } from '../api'
 import GlassCard from '../components/ui/GlassCard'
 import PageHeader from '../components/ui/PageHeader'
 
@@ -8,7 +8,7 @@ interface Props { tenantId: string }
 
 interface Agent {
   agent_id: string
-  entra_agent_id: string | null
+  entra_agent_id?: string | null
   name: string
   role: string
   status: string
@@ -16,7 +16,7 @@ interface Agent {
   capabilities: string[]
   collections: string[]
   last_active_at: string | null
-  created_at: string
+  created_at?: string
 }
 
 export default function AgentRegistry({ tenantId }: Props) {
@@ -40,15 +40,6 @@ export default function AgentRegistry({ tenantId }: Props) {
       console.error('Failed to load agents:', err)
       setLoading(false)
     })
-  }
-
-  const handleStatusChange = async (agentId: string, newStatus: string) => {
-    try {
-      await updateAgentStatus(agentId, newStatus)
-      loadAgents()
-    } catch (err) {
-      console.error('Failed to update status:', err)
-    }
   }
 
   const handleQuarantine = async (agentId: string, quarantine: boolean) => {

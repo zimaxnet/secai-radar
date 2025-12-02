@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { getAgentObservability, getAgents } from '../api'
 import GlassCard from '../components/ui/GlassCard'
 import PageHeader from '../components/ui/PageHeader'
@@ -7,7 +7,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 interface Props { tenantId: string }
 
-export default function Observability({ tenantId }: Props) {
+export default function Observability({ tenantId: _tenantId }: Props) {
+  // tenantId available for future use
+  void _tenantId
   const [searchParams] = useSearchParams()
   const agentFilter = searchParams.get('agent')
   const [agents, setAgents] = useState<any[]>([])

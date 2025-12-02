@@ -12,10 +12,70 @@
     "minStrength": 0.6
   },
   {
-    "controlId": "SEC-LOG-0001",
-    "capabilityId": "siem",
+    "controlId": "SEC-NET-0002",
+    "capabilityId": "ztna",
+    "weight": 0.5,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-NET-0002",
+    "capabilityId": "casb",
+    "weight": 0.5,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-NET-0003",
+    "capabilityId": "ns-firewall",
+    "weight": 0.7,
+    "minStrength": 0.7
+  },
+  {
+    "controlId": "SEC-NET-0003",
+    "capabilityId": "ids-ips",
+    "weight": 0.3,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-NET-0004",
+    "capabilityId": "ids-ips",
     "weight": 1.0,
     "minStrength": 0.7
+  },
+  {
+    "controlId": "SEC-NET-0005",
+    "capabilityId": "ddos",
+    "weight": 1.0,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-NET-0006",
+    "capabilityId": "waf",
+    "weight": 1.0,
+    "minStrength": 0.7
+  },
+  {
+    "controlId": "SEC-NET-0008",
+    "capabilityId": "ns-firewall",
+    "weight": 0.5,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-NET-0008",
+    "capabilityId": "url-filtering",
+    "weight": 0.5,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-NET-0009",
+    "capabilityId": "ztna",
+    "weight": 1.0,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-ID-0001",
+    "capabilityId": "identity-protection",
+    "weight": 1.0,
+    "minStrength": 0.6
   },
   {
     "controlId": "SEC-ID-0002",
@@ -24,8 +84,194 @@
     "minStrength": 0.6
   },
   {
+    "controlId": "SEC-ID-0005",
+    "capabilityId": "identity-protection",
+    "weight": 0.7,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-ID-0005",
+    "capabilityId": "casb",
+    "weight": 0.3,
+    "minStrength": 0.4
+  },
+  {
+    "controlId": "SEC-ID-0006",
+    "capabilityId": "identity-protection",
+    "weight": 1.0,
+    "minStrength": 0.7
+  },
+  {
+    "controlId": "SEC-ID-0007",
+    "capabilityId": "ztna",
+    "weight": 0.5,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-ID-0007",
+    "capabilityId": "identity-protection",
+    "weight": 0.5,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-LOG-0001",
+    "capabilityId": "siem",
+    "weight": 0.7,
+    "minStrength": 0.7
+  },
+  {
+    "controlId": "SEC-LOG-0001",
+    "capabilityId": "ti",
+    "weight": 0.3,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-LOG-0002",
+    "capabilityId": "siem",
+    "weight": 0.6,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-LOG-0002",
+    "capabilityId": "log-collect",
+    "weight": 0.4,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-LOG-0003",
+    "capabilityId": "siem",
+    "weight": 0.5,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-LOG-0003",
+    "capabilityId": "observability-pipeline",
+    "weight": 0.5,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-IR-0001",
+    "capabilityId": "soar",
+    "weight": 0.5,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-IR-0001",
+    "capabilityId": "ir",
+    "weight": 0.5,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-IR-0002",
+    "capabilityId": "soar",
+    "weight": 0.7,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-IR-0002",
+    "capabilityId": "siem",
+    "weight": 0.3,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-POST-0001",
+    "capabilityId": "cspm",
+    "weight": 1.0,
+    "minStrength": 0.7
+  },
+  {
+    "controlId": "SEC-POST-0002",
+    "capabilityId": "vuln-mgmt",
+    "weight": 1.0,
+    "minStrength": 0.6
+  },
+  {
     "controlId": "SEC-POST-0003",
     "capabilityId": "vuln-mgmt",
+    "weight": 1.0,
+    "minStrength": 0.7
+  },
+  {
+    "controlId": "SEC-END-0001",
+    "capabilityId": "edr",
+    "weight": 1.0,
+    "minStrength": 0.8
+  },
+  {
+    "controlId": "SEC-END-0002",
+    "capabilityId": "edr",
+    "weight": 0.7,
+    "minStrength": 0.7
+  },
+  {
+    "controlId": "SEC-END-0002",
+    "capabilityId": "fim",
+    "weight": 0.3,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-DATA-0001",
+    "capabilityId": "dlp",
+    "weight": 0.6,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-DATA-0001",
+    "capabilityId": "casb",
+    "weight": 0.4,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-DEV-0001",
+    "capabilityId": "cspm",
+    "weight": 0.5,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-DEV-0001",
+    "capabilityId": "cnapp",
+    "weight": 0.5,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-DEV-0002",
+    "capabilityId": "sast",
+    "weight": 1.0,
+    "minStrength": 0.7
+  },
+  {
+    "controlId": "SEC-DEV-0003",
+    "capabilityId": "dast",
+    "weight": 1.0,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-PA-0001",
+    "capabilityId": "identity-protection",
+    "weight": 1.0,
+    "minStrength": 0.7
+  },
+  {
+    "controlId": "SEC-PA-0002",
+    "capabilityId": "identity-protection",
+    "weight": 1.0,
+    "minStrength": 0.6
+  },
+  {
+    "controlId": "SEC-ASSET-0001",
+    "capabilityId": "cspm",
+    "weight": 0.6,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-ASSET-0001",
+    "capabilityId": "cnapp",
+    "weight": 0.4,
+    "minStrength": 0.5
+  },
+  {
+    "controlId": "SEC-BAK-0001",
+    "capabilityId": "backup",
     "weight": 1.0,
     "minStrength": 0.7
   }

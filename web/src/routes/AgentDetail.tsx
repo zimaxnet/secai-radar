@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getAgent, getAgentObservability, runEvaluation } from '../api'
+import { getAgent, getAgentObservability } from '../api'
 import GlassCard from '../components/ui/GlassCard'
 import PageHeader from '../components/ui/PageHeader'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
@@ -17,9 +17,14 @@ interface Agent {
   capabilities: string[]
   collections: string[]
   last_active_at: string | null
-  created_at: string
-  updated_at: string
-  metadata: Record<string, any>
+  created_at?: string
+  updated_at?: string
+  metadata?: Record<string, any>
+  metrics?: {
+    tasksCompleted?: number
+    avgResponseTime?: string
+    successRate?: number
+  }
 }
 
 export default function AgentDetail({ tenantId }: Props) {
@@ -27,7 +32,7 @@ export default function AgentDetail({ tenantId }: Props) {
   const [agent, setAgent] = useState<Agent | null>(null)
   const [loading, setLoading] = useState(true)
   const [metrics, setMetrics] = useState<any>(null)
-  const [evaluationScores, setEvaluationScores] = useState<any>(null)
+  const [evaluationScores] = useState<any>(null)
 
   useEffect(() => {
     if (!agentId) return
@@ -145,13 +150,13 @@ export default function AgentDetail({ tenantId }: Props) {
             <div>
               <div className="text-xs text-slate-500 mb-1">Created</div>
               <div className="text-sm text-white">
-                {new Date(agent.created_at).toLocaleString()}
+                {agent.created_at ? new Date(agent.created_at).toLocaleString() : 'N/A'}
               </div>
             </div>
             <div>
               <div className="text-xs text-slate-500 mb-1">Last Updated</div>
               <div className="text-sm text-white">
-                {new Date(agent.updated_at).toLocaleString()}
+                {agent.updated_at ? new Date(agent.updated_at).toLocaleString() : 'N/A'}
               </div>
             </div>
             <div>

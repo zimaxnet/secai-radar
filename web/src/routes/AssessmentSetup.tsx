@@ -18,10 +18,18 @@ export default function AssessmentSetup({ tenantId }: Props) {
   const navigate = useNavigate()
 
   useEffect(() => {
-    getDomains().then(d => {
-      setDomains(d || [])
+    getDomains().then(data => {
+      // Handle both array and object formats
+      let domainList: any[] = []
+      if (Array.isArray(data)) {
+        domainList = data
+      } else if (data?.domains && typeof data.domains === 'object') {
+        // Convert object format { NET: "Network Security", ... } to array
+        domainList = Object.entries(data.domains).map(([code, name]) => ({ code, name }))
+      }
+      setDomains(domainList)
       // Pre-select all domains by default
-      setSelectedDomains(new Set(d.map((domain: any) => domain.code)))
+      setSelectedDomains(new Set(domainList.map((domain: any) => domain.code)))
     })
   }, [])
 

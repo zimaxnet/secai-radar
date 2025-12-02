@@ -9,6 +9,7 @@ interface Props { tenantId: string }
 
 interface Agent {
   agent_id: string
+  entra_agent_id?: string
   name: string
   role: string
   status: string

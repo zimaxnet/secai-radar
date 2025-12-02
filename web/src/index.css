@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   body {
@@ -98,5 +96,26 @@
   /* Loading spinner */
   .spinner {
     @apply inline-block w-5 h-5 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin;
+  }
+  
+  /* Glass effect text glow */
+  .text-glow {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Custom animations */
+  .animate-in {
+    animation: animate-in 0.3s ease-out;
+  }
+  
+  @keyframes animate-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
