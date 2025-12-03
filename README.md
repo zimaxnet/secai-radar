@@ -7,6 +7,10 @@ title: Readme
 
 This directory contains comprehensive wiki documentation for SecAI Radar, ready for GitHub Pages or GitHub Wiki.
 
+## New Features
+- **Foundry Integration**: Configured with Azure Key Vault for secure secret management.
+- **Visualization Prompt**: "Elena Bridges" agent for crafting executive-ready visualization prompts.
+
 ---
 
 ## Using This Wiki

@@ -42,10 +42,18 @@ export default function Landing() {
           <div className="bg-white rounded-lg shadow-lg p-8 mb-8" data-tour="how-it-works">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">What is the SecAI Framework?</h2>
             <p className="text-lg text-gray-700 mb-6">
-              The SecAI Framework provides a <strong>vendor-neutral, capability-driven approach</strong> to security assessments. 
-              Instead of focusing on specific tools (like Sentinel), we map security controls to <strong>capability requirements</strong> 
+              The SecAI Framework provides a <strong>vendor-neutral, capability-driven approach</strong> to security assessments.
+              Instead of focusing on specific tools (like Sentinel), we map security controls to <strong>capability requirements</strong>
               and measure how well your actual security tools cover those capabilities.
             </p>
+            <div className="flex justify-center space-x-4 py-4 text-blue-600">
+              <a href="#" className="hover:text-blue-400 transition-colors">Home</a>
+              <a href="#features" className="hover:text-blue-400 transition-colors">Features</a>
+              <a href="#how-it-works" className="hover:text-blue-400 transition-colors">How It Works</a>
+              <a href="https://wiki.secairadar.cloud" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">Wiki</a>
+              <a href="#" className="hover:text-blue-400 transition-colors">Pricing</a>
+              <a href="#" className="hover:text-blue-400 transition-colors">Contact</a>
+            </div>
             <div className="grid md:grid-cols-3 gap-6 mt-8">
               <div className="p-4 bg-blue-50 rounded-lg">
                 <div className="text-2xl mb-2">🎯</div>
@@ -82,7 +90,7 @@ export default function Landing() {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Configure Your Environment</h3>
                   <p className="text-gray-700">
-                    Identify which security tools your organization uses and their configuration quality. 
+                    Identify which security tools your organization uses and their configuration quality.
                     This creates your tool inventory.
                   </p>
                 </div>
@@ -94,7 +102,7 @@ export default function Landing() {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Assess Security Domains</h3>
                   <p className="text-gray-700">
-                    Work through 12 security domains (Network, Identity, Data Protection, etc.). 
+                    Work through 12 security domains (Network, Identity, Data Protection, etc.).
                     For each control, document evidence, enter observations, and review coverage.
                   </p>
                 </div>
@@ -106,7 +114,7 @@ export default function Landing() {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Identify Gaps</h3>
                   <p className="text-gray-700">
-                    The system automatically calculates coverage scores and identifies gaps — 
+                    The system automatically calculates coverage scores and identifies gaps —
                     both hard gaps (missing capabilities) and soft gaps (configuration issues).
                   </p>
                 </div>
@@ -118,7 +126,7 @@ export default function Landing() {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Get Recommendations</h3>
                   <p className="text-gray-700">
-                    Receive AI-powered recommendations for addressing gaps. 
+                    Receive AI-powered recommendations for addressing gaps.
                     Prioritize tuning existing tools before suggesting new investments.
                   </p>
                 </div>
@@ -130,7 +138,7 @@ export default function Landing() {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Generate Report</h3>
                   <p className="text-gray-700">
-                    Create comprehensive assessment reports with executive summaries, 
+                    Create comprehensive assessment reports with executive summaries,
                     gap analysis, and actionable remediation plans.
                   </p>
                 </div>
@@ -142,7 +150,7 @@ export default function Landing() {
           <div className="bg-white rounded-lg shadow-lg p-8 mt-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">12 Security Domains</h2>
             <p className="text-gray-700 mb-6">
-              SecAI Radar assesses security across 12 comprehensive domains, each mapped to industry frameworks 
+              SecAI Radar assesses security across 12 comprehensive domains, each mapped to industry frameworks
               (CIS Controls, NIST CSF, Azure Security Benchmark).
             </p>
             <div className="grid md:grid-cols-3 gap-4">
@@ -236,7 +244,7 @@ export default function Landing() {
           <div className="bg-blue-600 text-white rounded-lg p-8">
             <h2 className="text-2xl font-bold mb-4">Ready to Start Your Assessment?</h2>
             <p className="text-blue-100 mb-6">
-              Begin your vendor-neutral security assessment using the SecAI Framework. 
+              Begin your vendor-neutral security assessment using the SecAI Framework.
               Get started in minutes, complete at your own pace.
             </p>
             <Link
