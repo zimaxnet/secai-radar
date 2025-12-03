@@ -6,6 +6,8 @@ import azure.functions as func
 import httpx
 
 
+from shared.key_vault import get_secret_from_key_vault_or_env
+
 API_VERSION = os_env.getenv("AZURE_OPENAI_REALTIME_API_VERSION", "2024-10-01-preview")
 
 
@@ -38,8 +40,8 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
             headers=_cors_headers(),
         )
 
-    endpoint = os_env.getenv("AZURE_OPENAI_REALTIME_ENDPOINT")
-    api_key = os_env.getenv("AZURE_OPENAI_REALTIME_KEY")
+    endpoint = get_secret_from_key_vault_or_env("azure-openai-realtime-endpoint", "AZURE_OPENAI_REALTIME_ENDPOINT")
+    api_key = get_secret_from_key_vault_or_env("azure-openai-realtime-key", "AZURE_OPENAI_REALTIME_KEY")
     deployment = payload.get("deployment") or os_env.getenv("AZURE_OPENAI_REALTIME_DEPLOYMENT", "gpt-realtime")
 
     if not endpoint or not api_key:
