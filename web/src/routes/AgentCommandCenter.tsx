@@ -28,7 +28,7 @@ export default function AgentCommandCenter({ tenantId }: Props) {
   useEffect(() => {
     let mounted = true
     setLoading(true)
-    
+
     Promise.all([
       getAgents(),
       getAgentObservability(undefined, selectedTimeRange)
@@ -39,7 +39,7 @@ export default function AgentCommandCenter({ tenantId }: Props) {
     }).finally(() => {
       if (mounted) setLoading(false)
     })
-    
+
     // Poll for updates every 30 seconds
     const interval = setInterval(() => {
       if (mounted) {
@@ -48,7 +48,7 @@ export default function AgentCommandCenter({ tenantId }: Props) {
         })
       }
     }, 30000)
-    
+
     return () => {
       mounted = false
       clearInterval(interval)
@@ -73,8 +73,8 @@ export default function AgentCommandCenter({ tenantId }: Props) {
 
   return (
     <div className="space-y-8">
-      <PageHeader 
-        title="Agent Command Center" 
+      <PageHeader
+        title="Agent Command Center"
         subtitle="Real-time agent governance, monitoring, and control."
       />
 
@@ -177,12 +177,11 @@ export default function AgentCommandCenter({ tenantId }: Props) {
                 recentActivity.map((agent) => (
                   <div key={agent.agent_id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className={`h-2 w-2 rounded-full ${
-                        agent.status === 'active' ? 'bg-green-400' :
-                        agent.status === 'idle' ? 'bg-yellow-400' :
-                        agent.status === 'quarantined' ? 'bg-red-400' :
-                        'bg-slate-500'
-                      }`} />
+                      <div className={`h-2 w-2 rounded-full ${agent.status === 'active' ? 'bg-green-400' :
+                          agent.status === 'idle' ? 'bg-yellow-400' :
+                            agent.status === 'quarantined' ? 'bg-red-400' :
+                              'bg-slate-500'
+                        }`} />
                       <div>
                         <div className="font-medium text-white">{agent.name}</div>
                         <div className="text-xs text-slate-400">{agent.role}</div>
@@ -206,6 +205,12 @@ export default function AgentCommandCenter({ tenantId }: Props) {
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
               View Full Registry →
+            </Link>
+            <Link
+              to={`/tenant/${tenantId}/voice`}
+              className="ml-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2"
+            >
+              <span>🎙️</span> Voice Interface
             </Link>
           </div>
         </>

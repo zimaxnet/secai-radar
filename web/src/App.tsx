@@ -19,6 +19,7 @@ const AgentCommandCenter = lazy(() => import('./routes/AgentCommandCenter'))
 const AgentRegistry = lazy(() => import('./routes/AgentRegistry'))
 const AgentDetail = lazy(() => import('./routes/AgentDetail'))
 const Observability = lazy(() => import('./routes/Observability'))
+const VoiceAgentInterface = lazy(() => import('./routes/VoiceAgentInterface'))
 
 function Shell() {
   const { id } = useParams()
@@ -33,6 +34,7 @@ function Shell() {
     { to: 'gaps', label: 'Gaps' },
     { to: 'report', label: 'Report' },
     { to: 'agents', label: 'Agents' },
+    { to: 'voice', label: 'Voice' },
     { to: 'observability', label: 'Observability' },
     { to: 'https://wiki.secairadar.cloud', label: 'Wiki', external: true }
   ]
@@ -77,8 +79,8 @@ function Shell() {
                     key={link.to}
                     to={`/tenant/${tenantId}/${link.to}`}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${isActive
-                        ? 'bg-blue-500/10 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.1)] border border-blue-500/20'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      ? 'bg-blue-500/10 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.1)] border border-blue-500/20'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
                       }`}
                   >
                     {link.label}
@@ -119,6 +121,8 @@ function Shell() {
             <Route path="agents" element={<AgentCommandCenter tenantId={tenantId} />} />
             <Route path="agents/registry" element={<AgentRegistry tenantId={tenantId} />} />
             <Route path="agent/:agentId" element={<AgentDetail tenantId={tenantId} />} />
+            <Route path="agent/:agentId" element={<AgentDetail tenantId={tenantId} />} />
+            <Route path="voice" element={<VoiceAgentInterface />} />
             <Route path="observability" element={<Observability tenantId={tenantId} />} />
             <Route path="domain/:domainCode" element={<Domain tenantId={tenantId} />} />
             <Route path="control/:controlId" element={<ControlDetail tenantId={tenantId} />} />
