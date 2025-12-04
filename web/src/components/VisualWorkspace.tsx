@@ -8,7 +8,7 @@ interface VisualWorkspaceProps {
     onClose: () => void;
 }
 
-const VisualWorkspace = ({ isGenerating, currentVisual, jsonParams, onClose }: VisualWorkspaceProps) => {
+const VisualWorkspace = ({ isGenerating, currentVisual, jsonParams, onClose }: VisualWorkspaceProps): JSX.Element | null => {
     const [showJson, setShowJson] = useState(false);
     const [progress, setProgress] = useState(0);
 
