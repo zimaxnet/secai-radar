@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, Code, Maximize2, X } from 'lucide-react';
+import { Loader2, Code, X } from 'lucide-react';
 
 interface VisualWorkspaceProps {
     isGenerating: boolean;
@@ -56,6 +56,7 @@ const VisualWorkspace: React.FC<VisualWorkspaceProps> = ({ isGenerating, current
                         <button
                             onClick={onClose}
                             className="p-2 rounded hover:bg-red-500/20 hover:text-red-400 text-slate-400 transition-colors"
+                            aria-label="Close"
                         >
                             <X className="h-4 w-4" />
                         </button>
