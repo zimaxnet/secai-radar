@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, Activity, Shield, Server, Users, BarChart, Brain, MessageSquare, Power, Volume2 } from 'lucide-react';
+import { Mic, Activity, Shield, Server, Users, BarChart, Brain, MessageSquare, Power, Volume2, Image as ImageIcon } from 'lucide-react';
+import VisualWorkspace from './VisualWorkspace';
 
 interface Agent {
   id: string;
@@ -21,6 +22,12 @@ const SecAIRadarLayout: React.FC = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState<string>('');
   const [conversation, setConversation] = useState<Array<{ agent: string; message: string; timestamp: Date }>>([]);
+
+  // Visual Generation State
+  const [showVisualWorkspace, setShowVisualWorkspace] = useState(false);
+  const [isGeneratingVisual, setIsGeneratingVisual] = useState(false);
+  const [currentVisual, setCurrentVisual] = useState<string | null>(null);
+  const [visualParams, setVisualParams] = useState<any>(null);
 
   const audioRef = useRef<HTMLAudioElement>(new Audio());
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -254,8 +261,68 @@ const SecAIRadarLayout: React.FC = () => {
     }
   }, [isConnected, isSpeaking]);
 
+  // Mock Trigger for Visual Generation
+  const handleGenerateVisual = () => {
+    if (!activeAgentData) return;
+
+    let visualFile = '';
+    let params = {};
+
+    switch (activeAgentData.id) {
+      case 'Thorne':
+        visualFile = '/assets/generated/architecture_diagram_v1.svg';
+        params = {
+          type: "diagram",
+          style: "blueprint",
+          elements: ["hub", "spoke", "firewall"],
+          narrative: "Drafting the Hub & Spoke network topology based on Azure CAF standards..."
+        };
+        break;
+      case 'Vance':
+        visualFile = '/assets/generated/threat_model_graph.svg';
+        params = {
+          type: "graph",
+          style: "threat_model",
+          elements: ["attacker", "firewall", "app_server", "db"],
+          narrative: "Mapping potential attack vectors and data flow boundaries..."
+        };
+        break;
+      case 'Sato':
+        visualFile = '/assets/generated/migration_timeline.svg';
+        params = {
+          type: "chart",
+          style: "gantt",
+          phases: ["Assessment", "Migration", "Optimization"],
+          narrative: "Visualizing the migration phases and critical path dependencies..."
+        };
+        break;
+      default:
+        return; // No visual for others in this demo
+    }
+
+    setShowVisualWorkspace(true);
+    setIsGeneratingVisual(true);
+    setVisualParams(params);
+
+    // Simulate generation delay
+    setTimeout(() => {
+      setIsGeneratingVisual(false);
+      setCurrentVisual(visualFile);
+    }, 3000);
+  };
+
   return (
-    <div className="flex h-screen bg-slate-900 text-slate-100 font-sans overflow-hidden">
+    <div className="flex h-screen bg-slate-900 text-slate-100 font-sans overflow-hidden relative">
+
+      {/* Visual Workspace Overlay */}
+      {showVisualWorkspace && (
+        <VisualWorkspace
+          isGenerating={isGeneratingVisual}
+          currentVisual={currentVisual}
+          jsonParams={visualParams}
+          onClose={() => setShowVisualWorkspace(false)}
+        />
+      )}
 
       {/* LEFT: Main Workflow / Assessment Area (65%) */}
       <main className="flex-1 flex flex-col border-r border-slate-700">
@@ -385,11 +452,29 @@ const SecAIRadarLayout: React.FC = () => {
               ))}
             </div>
           </div>
+        </div>
 
-          {/* Active Agent Indicator */}
-          <div className="absolute bottom-2 left-4 flex items-center gap-2 text-xs text-slate-500">
-            <span>Voice: <span className="text-blue-400 font-mono">{activeAgentData?.voice.toUpperCase()}</span></span>
-          </div>
+        {/* Visual Trigger Button (Demo) */}
+        <div className="absolute right-8 top-1/2 -translate-y-1/2">
+          <button
+            onClick={handleGenerateVisual}
+            disabled={!['Thorne', 'Vance', 'Sato'].includes(activeAgent || '')}
+            className={`
+                flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all
+                ${['Thorne', 'Vance', 'Sato'].includes(activeAgent || '')
+                ? 'bg-slate-700 hover:bg-slate-600 text-white shadow-lg'
+                : 'bg-slate-800/50 text-slate-600 cursor-not-allowed'}
+              `}
+            title="Ask agent to generate a visual"
+          >
+            <ImageIcon className="h-4 w-4" />
+            <span>Generate Visual</span>
+          </button>
+        </div>
+
+        {/* Active Agent Indicator */}
+        <div className="absolute bottom-2 left-4 flex items-center gap-2 text-xs text-slate-500">
+          <span>Voice: <span className="text-blue-400 font-mono">{activeAgentData?.voice.toUpperCase()}</span></span>
         </div>
       </main>
 
