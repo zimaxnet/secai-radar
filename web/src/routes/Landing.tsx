@@ -12,7 +12,7 @@ export default function Landing() {
   const navigate = useNavigate()
 
   const handleLogin = () => {
-    instance.loginPopup(loginRequest).catch(e => {
+    instance.loginRedirect(loginRequest).catch(e => {
       console.error(e);
     });
   }

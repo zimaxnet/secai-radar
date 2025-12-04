@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, FC } from 'react';
 import { Loader2, Code, X } from 'lucide-react';
 
 interface VisualWorkspaceProps {
@@ -8,7 +8,7 @@ interface VisualWorkspaceProps {
     onClose: () => void;
 }
 
-const VisualWorkspace: React.FC<VisualWorkspaceProps> = ({ isGenerating, currentVisual, jsonParams, onClose }) => {
+const VisualWorkspace: FC<VisualWorkspaceProps> = ({ isGenerating, currentVisual, jsonParams, onClose }) => {
     const [showJson, setShowJson] = useState(false);
     const [progress, setProgress] = useState(0);
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import { ElementType, ReactNode } from 'react';
 
 import { Github, Linkedin } from 'lucide-react';
 
@@ -80,7 +80,7 @@ export default function Footer() {
     );
 }
 
-function SocialLink({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
+function SocialLink({ href, icon: Icon, label }: { href: string; icon: ElementType; label: string }) {
     return (
         <a
             href={href}
@@ -92,7 +92,7 @@ function SocialLink({ href, icon: Icon, label }: { href: string; icon: React.Ele
     );
 }
 
-function FooterLink({ href, children, external }: { href: string; children: React.ReactNode; external?: boolean }) {
+function FooterLink({ href, children, external }: { href: string; children: ReactNode; external?: boolean }) {
     return (
         <li>
             <a
