@@ -1,4 +1,4 @@
-import { useEffect, useState, FC } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2, Code, X } from 'lucide-react';
 
 interface VisualWorkspaceProps {
@@ -8,7 +8,7 @@ interface VisualWorkspaceProps {
     onClose: () => void;
 }
 
-const VisualWorkspace: FC<VisualWorkspaceProps> = ({ isGenerating, currentVisual, jsonParams, onClose }) => {
+const VisualWorkspace = ({ isGenerating, currentVisual, jsonParams, onClose }: VisualWorkspaceProps) => {
     const [showJson, setShowJson] = useState(false);
     const [progress, setProgress] = useState(0);
 
@@ -81,12 +81,11 @@ const VisualWorkspace: FC<VisualWorkspaceProps> = ({ isGenerating, currentVisual
                                 </p>
 
                                 {/* Progress Bar */}
-                                <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-blue-500 transition-all duration-100 ease-linear"
-                                        style={{ width: `${progress}%` }}
-                                    />
-                                </div>
+                                <progress
+                                    value={progress}
+                                    max="100"
+                                    className="w-full h-1 [&::-webkit-progress-bar]:bg-slate-800 [&::-webkit-progress-value]:bg-blue-500 [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-100 [&::-webkit-progress-value]:ease-linear rounded-full overflow-hidden"
+                                />
                                 <div className="mt-2 font-mono text-xs text-blue-400">{progress}%</div>
                             </div>
                         ) : (
