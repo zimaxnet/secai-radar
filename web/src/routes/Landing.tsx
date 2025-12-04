@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 import { loginRequest } from "../authConfig";
 import GlassCard from '../components/ui/GlassCard'
+import Footer from '../components/Footer'
 
 const demoTenantId = (import.meta.env.VITE_DEFAULT_TENANT as string) || 'CONTOSO'
 
@@ -219,7 +220,8 @@ export default function Landing() {
           ))}
         </div>
       </div>
+
+      <Footer />
     </div>
   )
 }
-
