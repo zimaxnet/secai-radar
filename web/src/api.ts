@@ -48,7 +48,7 @@ async function fetchWithFallback<T>(
   if (_demoMode) {
     return fallbackFn();
   }
-  
+
   try {
     const response = await fetch(url, options);
     if (!response.ok) {
@@ -56,7 +56,7 @@ async function fetchWithFallback<T>(
       _demoMode = true;
       return fallbackFn();
     }
-    
+
     const data = await safeJsonParse(response);
     if (data === null) {
       return fallbackFn();
@@ -96,13 +96,13 @@ export const getSummary = (tenant = TENANT) => fetchWithFallback(
 // Controls
 export const getControls = (tenant = TENANT, p: { domain?: string; status?: string; q?: string } = {}) => {
   const qs = new URLSearchParams(p as Record<string, string>).toString();
-  
+
   return fetchWithFallback(
     `${API}/tenant/${tenant}/controls${qs ? `?${qs}` : ""}`,
     undefined,
     () => {
       let items = [...DEMO_CONTROLS];
-      
+
       if (p.domain) {
         items = items.filter(c => c.DomainCode === p.domain);
       }
@@ -111,12 +111,12 @@ export const getControls = (tenant = TENANT, p: { domain?: string; status?: stri
       }
       if (p.q) {
         const query = p.q.toLowerCase();
-        items = items.filter(c => 
+        items = items.filter(c =>
           c.ControlID.toLowerCase().includes(query) ||
           c.ControlTitle.toLowerCase().includes(query)
         );
       }
-      
+
       return { items, total: items.length };
     }
   );
@@ -279,7 +279,7 @@ export const uploadEvidence = (tenant = TENANT, controlId: string, file: File, d
       }, 1000);
       return;
     }
-    
+
     const reader = new FileReader();
     reader.onload = () => {
       const base64 = (reader.result as string).split(',')[1];
@@ -405,7 +405,7 @@ export const getAgentObservability = (agentId?: string, timeRange?: string) => {
   const params = new URLSearchParams();
   if (agentId) params.append('agent_id', agentId);
   if (timeRange) params.append('time_range', timeRange);
-  
+
   return fetchWithFallback(
     `${API}/observability/metrics?${params}`,
     undefined,
@@ -481,10 +481,10 @@ export const craftVisualizationPrompt = async (
       chart: 'Create a clean data visualization chart suitable for executive presentations.',
       architecture: 'Create a system architecture diagram showing components, connections, and data flow.'
     };
-    
+
     const style = options?.style || 'diagram';
     const contextData = options?.assessmentData;
-    
+
     // Build context-aware prompt
     let contextEnhancement = '';
     if (contextData) {
@@ -492,14 +492,14 @@ export const craftVisualizationPrompt = async (
       const totalControls = summary.totalControls || 0;
       const totalGaps = summary.totalGaps || 0;
       const complianceRate = totalControls > 0 ? ((totalControls - totalGaps) / totalControls * 100).toFixed(0) : 0;
-      
+
       contextEnhancement = `\n\nKey Metrics to Include:
 - Compliance Rate: ${complianceRate}%
 - Total Controls: ${totalControls}
 - Controls with Gaps: ${totalGaps}
 - Critical Gaps: ${summary.criticalGaps || 0}`;
     }
-    
+
     const craftedPrompt = `${styleGuides[style]}
 
 Executive Visualization Request: ${intent}
@@ -533,12 +533,12 @@ Create a professional, corporate-ready visualization that:
         assessmentData: options?.assessmentData
       })
     });
-    
+
     if (!response.ok) {
       console.warn('Agent prompt crafting failed, using fallback');
       return null;
     }
-    
+
     return await response.json();
   } catch (error) {
     console.warn('Error calling visualization prompt agent:', error);
@@ -555,7 +555,7 @@ export const generateVisualization = async (
   }
 ) => {
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
-  
+
   if (!apiKey) {
     console.warn('VITE_GOOGLE_API_KEY not configured for Nano Banana Pro');
     return {
@@ -564,9 +564,9 @@ export const generateVisualization = async (
       promptUsed: prompt
     };
   }
-  
+
   const enhancedPrompt = buildVisualizationPrompt(prompt, options);
-  
+
   try {
     // Gemini 2.0 Flash image generation endpoint
     const response = await fetch(
@@ -585,19 +585,19 @@ export const generateVisualization = async (
         })
       }
     );
-    
+
     if (!response.ok) {
       const error = await response.text();
       throw new Error(`Gemini API error: ${error}`);
     }
-    
+
     const data = await response.json();
-    
+
     // Extract image from response
     const imagePart = data.candidates?.[0]?.content?.parts?.find(
       (p: any) => p.inlineData?.mimeType?.startsWith('image/')
     );
-    
+
     if (imagePart?.inlineData) {
       return {
         success: true,
@@ -606,7 +606,7 @@ export const generateVisualization = async (
         promptUsed: enhancedPrompt
       };
     }
-    
+
     // If no image, return text description
     const textPart = data.candidates?.[0]?.content?.parts?.find((p: any) => p.text);
     return {
@@ -614,7 +614,7 @@ export const generateVisualization = async (
       textResponse: textPart?.text || 'No image generated',
       promptUsed: enhancedPrompt
     };
-    
+
   } catch (error: any) {
     console.error('Nano Banana Pro generation failed:', error);
     return {
@@ -636,10 +636,10 @@ function buildVisualizationPrompt(
     chart: 'Create a clean data visualization chart suitable for executive presentations. Use professional colors, clear labels, and appropriate chart type for the data.',
     architecture: 'Create a system architecture diagram showing components, connections, and data flow. Use standard architecture diagram conventions with clear labeling and a logical layout.'
   };
-  
+
   const style = options?.style || 'diagram';
   const styleGuide = styleGuides[style] || styleGuides.diagram;
-  
+
   return `${styleGuide}
 
 Intent: ${basePrompt}
@@ -658,3 +658,48 @@ Generate the visualization now.`;
 
 // Export visualization prompt builder for external use
 export const buildNanoBananaPrompt = buildVisualizationPrompt;
+
+// --- WebAuthn API ---
+
+export const getRegistrationOptions = async (username: string, displayName: string) => {
+  const response = await fetch(`${API}/auth/register/options`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, displayName })
+  });
+  if (!response.ok) throw new Error('Failed to get registration options');
+  return response.json();
+};
+
+export const verifyRegistration = async (username: string, attResp: any) => {
+  const response = await fetch(`${API}/auth/register/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, response: attResp })
+  });
+  if (!response.ok) throw new Error('Registration verification failed');
+  return response.json();
+};
+
+export const getLoginOptions = async (username: string) => {
+  const response = await fetch(`${API}/auth/login/options`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username })
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || 'Failed to get login options');
+  }
+  return response.json();
+};
+
+export const verifyLogin = async (username: string, asseResp: any) => {
+  const response = await fetch(`${API}/auth/login/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, response: asseResp })
+  });
+  if (!response.ok) throw new Error('Login verification failed');
+  return response.json();
+};

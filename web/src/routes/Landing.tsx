@@ -1,9 +1,27 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
+import { loginRequest } from "../authConfig";
 import GlassCard from '../components/ui/GlassCard'
 
 const demoTenantId = (import.meta.env.VITE_DEFAULT_TENANT as string) || 'CONTOSO'
 
 export default function Landing() {
+  const { instance } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
+  const navigate = useNavigate()
+
+  const handleLogin = () => {
+    instance.loginPopup(loginRequest).catch(e => {
+      console.error(e);
+    });
+  }
+
+  const handleLogout = () => {
+    instance.logoutPopup().catch(e => {
+      console.error(e);
+    });
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 font-sans text-white">
       {/* Navigation */}
@@ -20,9 +38,26 @@ export default function Landing() {
           <a href="#" className="hover:text-blue-400 transition-colors">Pricing</a>
           <a href="#" className="hover:text-blue-400 transition-colors">Contact</a>
         </div>
-        <button className="px-5 py-2 bg-gradient-to-r from-blue-600 to-cyan-400 text-white text-sm font-semibold rounded-full hover:from-blue-700 hover:to-cyan-500 transition-all shadow-lg shadow-blue-500/30">
-          Login
-        </button>
+        {isAuthenticated ? (
+          <div className="flex gap-4">
+            <Link to={`/tenant/${demoTenantId}/dashboard`} className="px-5 py-2 bg-slate-700 text-white text-sm font-semibold rounded-full hover:bg-slate-600 transition-all">
+              Dashboard
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="px-5 py-2 bg-red-500/20 text-red-400 text-sm font-semibold rounded-full hover:bg-red-500/30 transition-all"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleLogin}
+            className="px-5 py-2 bg-gradient-to-r from-blue-600 to-cyan-400 text-white text-sm font-semibold rounded-full hover:from-blue-700 hover:to-cyan-500 transition-all shadow-lg shadow-blue-500/30"
+          >
+            Login
+          </button>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -41,12 +76,12 @@ export default function Landing() {
           >
             Explore Interactive Demo
           </Link>
-          <Link
-            to="/assessments"
+          <button
+            onClick={isAuthenticated ? () => navigate(`/tenant/${demoTenantId}/assessment`) : handleLogin}
             className="px-8 py-3 bg-slate-800/60 backdrop-blur-xl text-blue-400 border border-white/10 rounded-full font-semibold hover:bg-slate-800/80 hover:border-blue-500/30 transition-all shadow-lg"
           >
             Start New Assessment
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -89,7 +124,7 @@ export default function Landing() {
         <div className="relative max-w-6xl mx-auto">
           {/* Connecting Line */}
           <div className="hidden md:block absolute top-6 left-0 w-full h-0.5 bg-gradient-to-r from-blue-600/50 via-cyan-400/50 to-blue-600/50 -z-10"></div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8 text-center">
             {[
               { step: 1, title: 'Configure', desc: 'Set up your environment and define scope.' },
@@ -162,7 +197,7 @@ export default function Landing() {
               to: `/tenant/${demoTenantId}/gaps`,
               gradient: 'from-red-600/20 to-orange-500/20'
             },
-             {
+            {
               title: 'Executive Report',
               desc: 'Generate summary and remediation plans.',
               to: `/tenant/${demoTenantId}/report`,
