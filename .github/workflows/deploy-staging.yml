@@ -1,5 +1,16 @@
 # Builds containers via az acr build (runs on Azure ACR; CPU only, no GPU).
-# Required secrets: AZURE_CREDENTIALS, ACR_NAME (e.g. secairadardevacr), AZURE_STATIC_WEB_APPS_API_TOKEN
+# Deploys public-api (and optionally registry-api) to Azure Container Apps.
+#
+# Required secrets:
+#   AZURE_CREDENTIALS       - Service principal for Azure (subscription/resource group)
+#   ACR_NAME                - ACR login name (e.g. secairadardevacr)
+#   AZURE_STATIC_WEB_APPS_API_TOKEN
+#   DATABASE_URL            - PostgreSQL connection string for public-api (for create/secret update)
+#
+# Optional secrets:
+#   VITE_API_BASE          - Frontend API base URL (e.g. https://<public-api-fqdn>/api)
+#   CONTAINER_APPS_ENV     - Container Apps environment name (default: secai-radar-dev-env)
+#
 name: Deploy to Staging
 
 on:
@@ -56,7 +67,94 @@ jobs:
         run: |
           az acr build --registry ${{ secrets.ACR_NAME }} --image secai-radar-registry-api:latest apps/registry-api
       
-      - name: Deploy to Container Apps
+      # Deploy public-api to Azure Container Apps (create on first run, update image on later runs)
+      - name: Deploy public-api to Container Apps
+        env:
+          ACR_NAME: ${{ secrets.ACR_NAME }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CONTAINER_APPS_ENV: ${{ vars.CONTAINER_APPS_ENV }}
         run: |
-          echo "Container Apps deployment would happen here"
-          echo "Using Azure CLI or Bicep deployment"
+          set -e
+          APP_NAME="secai-radar-public-api"
+          IMAGE="${ACR_NAME}.azurecr.io/secai-radar-public-api:latest"
+          ENV_NAME="${CONTAINER_APPS_ENV:-secai-radar-dev-env}"
+
+          if az containerapp show --name "$APP_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --output none 2>/dev/null; then
+            echo "Updating existing Container App: $APP_NAME"
+            az containerapp update \
+              --name "$APP_NAME" \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
+              --image "$IMAGE" \
+              --output none
+            if [ -n "$DATABASE_URL" ]; then
+              echo "Updating DATABASE_URL secret"
+              az containerapp secret set \
+                --name "$APP_NAME" \
+                --resource-group "$AZURE_RESOURCE_GROUP" \
+                --secrets "database-url=$DATABASE_URL" \
+                --output none
+              az containerapp update \
+                --name "$APP_NAME" \
+                --resource-group "$AZURE_RESOURCE_GROUP" \
+                --set-env-vars "DATABASE_URL=secretref:database-url" \
+                --output none
+            fi
+          else
+            if [ -z "$DATABASE_URL" ]; then
+              echo "::error::DATABASE_URL secret is required to create public-api Container App. Add it in repository Secrets."
+              exit 1
+            fi
+            echo "Creating Container App: $APP_NAME"
+            ACR_USER=$(az acr credential show --name "$ACR_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query "username" -o tsv)
+            ACR_PASS=$(az acr credential show --name "$ACR_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query "passwords[0].value" -o tsv)
+            az containerapp create \
+              --name "$APP_NAME" \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
+              --environment "$ENV_NAME" \
+              --image "$IMAGE" \
+              --target-port 8000 \
+              --ingress external \
+              --registry-server "${ACR_NAME}.azurecr.io" \
+              --registry-username "$ACR_USER" \
+              --registry-password "$ACR_PASS" \
+              --secrets "database-url=$DATABASE_URL" \
+              --env-vars "DATABASE_URL=secretref:database-url" \
+              --output none
+          fi
+          echo "Public API FQDN: $(az containerapp show --name $APP_NAME -g $AZURE_RESOURCE_GROUP --query 'properties.configuration.ingress.fqdn' -o tsv)"
+      
+      # Deploy registry-api to Container Apps (create on first run, update image on later runs)
+      - name: Deploy registry-api to Container Apps
+        env:
+          ACR_NAME: ${{ secrets.ACR_NAME }}
+          CONTAINER_APPS_ENV: ${{ vars.CONTAINER_APPS_ENV }}
+        run: |
+          set -e
+          APP_NAME="secai-radar-registry-api"
+          IMAGE="${ACR_NAME}.azurecr.io/secai-radar-registry-api:latest"
+          ENV_NAME="${CONTAINER_APPS_ENV:-secai-radar-dev-env}"
+
+          if az containerapp show --name "$APP_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --output none 2>/dev/null; then
+            echo "Updating existing Container App: $APP_NAME"
+            az containerapp update \
+              --name "$APP_NAME" \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
+              --image "$IMAGE" \
+              --output none
+          else
+            echo "Creating Container App: $APP_NAME"
+            ACR_USER=$(az acr credential show --name "$ACR_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query "username" -o tsv)
+            ACR_PASS=$(az acr credential show --name "$ACR_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query "passwords[0].value" -o tsv)
+            az containerapp create \
+              --name "$APP_NAME" \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
+              --environment "$ENV_NAME" \
+              --image "$IMAGE" \
+              --target-port 8001 \
+              --ingress external \
+              --registry-server "${ACR_NAME}.azurecr.io" \
+              --registry-username "$ACR_USER" \
+              --registry-password "$ACR_PASS" \
+              --output none
+          fi
+          echo "Registry API FQDN: $(az containerapp show --name $APP_NAME -g $AZURE_RESOURCE_GROUP --query 'properties.configuration.ingress.fqdn' -o tsv)"

@@ -173,6 +173,7 @@ export interface JSONFeedItem {
 export interface JSONFeed {
   version: string
   title: string
+  description?: string
   home_page_url: string
   feed_url: string
   items: JSONFeedItem[]

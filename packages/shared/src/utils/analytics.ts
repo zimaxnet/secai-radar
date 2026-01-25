@@ -61,7 +61,7 @@ export function trackEvent(event: AnalyticsEvent, properties?: Record<string, an
 
   // Custom analytics endpoint (if configured)
   const analyticsEndpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT
-  if (analyticsEndpoint) {
+  if (typeof analyticsEndpoint === 'string') {
     fetch(analyticsEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

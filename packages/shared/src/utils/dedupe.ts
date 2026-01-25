@@ -83,17 +83,18 @@ export function dedupeServers(
 
     // Heuristic 3: Fuzzy match on normalized names + same provider domain
     if (confidence < 0.9 && candidate.name && candidate.providerDomain) {
-      const normalizedCandidateName = normalizeName(candidate.name)
+      const candName = candidate.name
+      const normalizedCandidateName = normalizeName(candName)
       const match = existingServers.find(s => {
-        if (!s.name || !s.providerDomain) return false
+        const name = s.name
+        if (!name || !s.providerDomain) return false
         if (s.providerDomain !== candidate.providerDomain) return false
-        
-        const similarity = calculateNameSimilarity(candidate.name, s.name)
+        const similarity = calculateNameSimilarity(candName, name)
         return similarity >= 0.85 // High similarity threshold
       })
       
-      if (match && !processed.has(match.id)) {
-        const similarity = calculateNameSimilarity(candidate.name, match.name!)
+      if (match && !processed.has(match.id) && match.name != null) {
+        const similarity = calculateNameSimilarity(candName, match.name)
         matches.push(match.id)
         confidence = similarity * 0.9 // Slightly lower than exact match
         reason = `Fuzzy name match (${Math.round(similarity * 100)}%) + same provider domain`
