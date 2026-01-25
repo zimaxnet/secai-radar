@@ -1,8 +1,8 @@
+# SWA-only deploy. Trigger manually to avoid racing with Deploy to Staging.
+# On push to main, only "Deploy to Staging" deploys SWA (single path for verified MCP).
 name: Build and Deploy SecAI Radar (SWA)
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
