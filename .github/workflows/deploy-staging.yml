@@ -101,8 +101,8 @@ jobs:
             fi
           else
             if [ -z "$DATABASE_URL" ]; then
-              echo "::error::DATABASE_URL secret is required to create public-api Container App. Add it in repository Secrets."
-              exit 1
+              echo "::warning::DATABASE_URL secret is not set. Skipping public-api Container App create. Add Settings → Secrets → DATABASE_URL and re-run to create it."
+              exit 0
             fi
             echo "Creating Container App: $APP_NAME"
             ACR_USER=$(az acr credential show --name "$ACR_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --query "username" -o tsv)
