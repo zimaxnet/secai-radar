@@ -1,7 +1,8 @@
 {
   "routes": [
     { "route": "/", "serve": "/index.html" },
-    { "route": "/tenant/*", "allowedRoles": ["anonymous", "authenticated"] }
+    { "route": "/tenant/*", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/mcp/*", "allowedRoles": ["anonymous", "authenticated"] }
   ],
   "navigationFallback": { 
     "rewrite": "/index.html",

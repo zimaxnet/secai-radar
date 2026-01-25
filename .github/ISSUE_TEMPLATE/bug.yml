@@ -1,0 +1,108 @@
+name: "Bug"
+description: "Something is broken or incorrect (runtime, UI, data, scoring, pipeline)."
+title: "[BUG] <short title>"
+labels: []
+body:
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - S0 (site down / data breach risk)
+        - S1 (core feature broken)
+        - S2 (major annoyance)
+        - S3 (minor)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What area is affected?
+      options:
+        - category:frontend
+        - category:backend
+        - category:data
+        - category:pipeline
+        - category:security
+        - category:devops
+        - category:ux
+    validations:
+      required: true
+
+  - type: dropdown
+    id: service
+    attributes:
+      label: Service
+      description: Which service is affected?
+      options:
+        - apps/public-web
+        - apps/public-api
+        - apps/registry-api
+        - apps/private-web
+        - apps/workers/scout
+        - apps/workers/curator
+        - apps/workers/evidence-miner
+        - apps/workers/scorer
+        - apps/workers/drift-sentinel
+        - apps/workers/publisher
+        - apps/workers/sage-meridian
+        - apps/workers/graph-builder
+        - packages/shared
+        - packages/scoring
+        - infrastructure
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      placeholder: "Rankings page returns 500 when filtering by provider."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: "Should return 200 and filtered rankings list."
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots / request IDs
+      description: Paste relevant logs or request IDs.
+    validations:
+      required: false
+
+  - type: textarea
+    id: fix
+    attributes:
+      label: Proposed fix (if known)
+    validations:
+      required: false
+
+  - type: textarea
+    id: related
+    attributes:
+      label: Related Issues / Backlog Tickets
+      description: Link to related issues or backlog tickets (e.g., T-001, #123)
+      placeholder: "- Related to T-XXX\n- See #123"
+    validations:
+      required: false

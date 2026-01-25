@@ -1,0 +1,72 @@
+name: "Spike / Research"
+description: "Time-boxed research to de-risk architecture, scoring, security, or marketplace requirements."
+title: "[SPIKE][Phase ?] <short title>"
+labels: []
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What area is this research for?
+      options:
+        - category:frontend
+        - category:backend
+        - category:data
+        - category:pipeline
+        - category:security
+        - category:devops
+        - category:ux
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      description: Align to SecAI Radar build phases
+      options:
+        - phase:0 (Phase 0: Foundation)
+        - phase:1 (Phase 1: Public MVP)
+        - phase:2 (Phase 2: Automation)
+        - phase:3 (Phase 3: Private Registry)
+        - phase:4 (Phase 4: Graph + Hardening)
+        - phase:post-mvp (Post-MVP)
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Research question
+      placeholder: "What is the cleanest way to implement atomic publish in Postgres without downtime?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: timebox
+    attributes:
+      label: Timebox
+      placeholder: "4 hours / 1 day / 2 days"
+    validations:
+      required: true
+
+  - type: textarea
+    id: deliverables
+    attributes:
+      label: Deliverables
+      value: |
+        - Decision / recommendation
+        - Pros/cons
+        - Implementation sketch
+        - Follow-up tickets
+    validations:
+      required: true
+
+  - type: textarea
+    id: backlog
+    attributes:
+      label: Backlog Ticket Reference
+      description: If this corresponds to a backlog ticket, reference it here (e.g., T-001)
+      placeholder: "T-XXX"
+    validations:
+      required: false

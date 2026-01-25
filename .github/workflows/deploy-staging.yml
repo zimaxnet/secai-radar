@@ -1,0 +1,58 @@
+name: Deploy to Staging
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+env:
+  AZURE_RESOURCE_GROUP: secai-radar-rg
+  AZURE_LOCATION: centralus
+
+jobs:
+  deploy:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build public-web
+        run: npm run build:public-web
+      
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "apps/public-web"
+          output_location: "dist"
+          skip_app_build: true
+      
+      - name: Build and push container images
+        run: |
+          # Build and push public-api
+          az acr build --registry ${{ secrets.ACR_NAME }} --image secai-radar-public-api:latest apps/public-api/ || true
+          
+          # Build and push registry-api
+          az acr build --registry ${{ secrets.ACR_NAME }} --image secai-radar-registry-api:latest apps/registry-api/ || true
+      
+      - name: Deploy to Container Apps
+        run: |
+          echo "Container Apps deployment would happen here"
+          echo "Using Azure CLI or Bicep deployment"

@@ -1,0 +1,235 @@
+name: "Feature / Endpoint / Service"
+description: "Implement or enhance an endpoint, page, service, worker, or shared package."
+title: "[P?][Phase ?] <short title>"
+labels: []
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What type of work is this?
+      options:
+        - category:frontend
+        - category:backend
+        - category:data
+        - category:pipeline
+        - category:security
+        - category:devops
+        - category:ux
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: P0 = Critical (must have for MVP), P1 = High, P2 = Nice to have
+      options:
+        - priority:p0
+        - priority:p1
+        - priority:p2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      description: Align to SecAI Radar build phases
+      options:
+        - phase:0 (Phase 0: Foundation)
+        - phase:1 (Phase 1: Public MVP)
+        - phase:2 (Phase 2: Automation)
+        - phase:3 (Phase 3: Private Registry)
+        - phase:4 (Phase 4: Graph + Hardening)
+        - phase:post-mvp (Post-MVP)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: service
+    attributes:
+      label: Primary service
+      description: Which service is primarily responsible?
+      options:
+        - apps/public-web (secairadar.cloud)
+        - apps/public-api (secairadar.cloud)
+        - apps/registry-api (secairadar.cloud)
+        - apps/private-web (app.secairadar.cloud)
+        - apps/workers/scout
+        - apps/workers/curator
+        - apps/workers/evidence-miner
+        - apps/workers/scorer
+        - apps/workers/drift-sentinel
+        - apps/workers/publisher
+        - apps/workers/sage-meridian
+        - apps/workers/graph-builder
+        - packages/shared
+        - packages/scoring
+        - infrastructure
+        - other / TBD
+    validations:
+      required: true
+
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Domain surface
+      description: Where will this be exposed?
+      options:
+        - secairadar.cloud (public web)
+        - secairadar.cloud (public api)
+        - app.secairadar.cloud (private web)
+        - secairadar.cloud (private api)
+        - internal (workers/pipeline only)
+        - repo-only (package/library)
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What are we adding/changing? One paragraph.
+      placeholder: "Implement GET /api/v1/public/mcp/rankings with pagination, filters, caching, and envelope contract."
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal / Outcome
+      description: What user or system outcome does this enable?
+      placeholder: "Rankings page loads real data with ETag caching and shows freshness based on run status."
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: In scope
+      description: Bullet list of what this issue must include.
+      value: |
+        -
+        -
+        -
+    validations:
+      required: true
+
+  - type: textarea
+    id: outscope
+    attributes:
+      label: Out of scope
+      description: Explicitly list what is NOT included (prevents scope creep).
+      value: |
+        -
+        -
+    validations:
+      required: false
+
+  - type: textarea
+    id: interfaces
+    attributes:
+      label: Interfaces (routes, endpoints, events)
+      description: List the public/private routes, API endpoints, cron/jobs, or UI components impacted.
+      value: |
+        **Web routes**
+        -
+
+        **API endpoints**
+        -
+
+        **Jobs/cron**
+        -
+
+        **Analytics/events**
+        -
+    validations:
+      required: true
+
+  - type: textarea
+    id: data
+    attributes:
+      label: Data model impact
+      description: Tables/fields/schema changes required (or “none”).
+      value: |
+        - Tables:
+        - Migrations:
+        - Backfill:
+    validations:
+      required: true
+
+  - type: textarea
+    id: security
+    attributes:
+      label: Security & privacy considerations
+      description: Call out any public/private boundary risks, redaction rules, RBAC, secrets.
+      value: |
+        - Public redaction:
+        - Private RBAC:
+        - Secrets/Key Vault:
+        - Rate limits/WAF:
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria (Definition of Done)
+      description: Must be testable. Prefer checkboxes.
+      value: |
+        - [ ] Implemented and deployed
+        - [ ] Unit/integration tests added or updated
+        - [ ] No private data leaks on public surface
+        - [ ] Docs updated (README or methodology if needed)
+        - [ ] Observability: logs/metrics show expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies / Blockers
+      description: Link issues/PRs or external prerequisites.
+      placeholder: "- Depends on #123 (Postgres schema)\n- Blocked by domain DNS setup"
+    validations:
+      required: false
+
+  - type: textarea
+    id: links
+    attributes:
+      label: References
+      description: Link to specs, diagrams, tracker rows, or related docs.
+      placeholder: "- Master services kickoff doc\n- API spec section\n- Mermaid wiring diagram\n- Backlog ticket: T-XXX"
+    validations:
+      required: false
+
+  - type: textarea
+    id: backlog
+    attributes:
+      label: Backlog Ticket Reference
+      description: If this corresponds to a backlog ticket, reference it here (e.g., T-001)
+      placeholder: "T-XXX"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: quality
+    attributes:
+      label: Quality gates
+      options:
+        - label: Lint + typecheck pass
+          required: true
+        - label: Tests added/updated
+          required: true
+        - label: Minimal docs updated
+          required: true
+        - label: Observability checked (logs + run status)
+          required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes for implementation (Cursor/VS Code)
+      description: Any hints, file paths, pseudocode, or “start here” notes.
+      placeholder: "Start in apps/public-api/src/routes/mcp.ts and packages/shared/contracts/public.ts"

@@ -1,0 +1,15 @@
+{
+  "name": "@secai-radar/shared",
+  "version": "1.0.0",
+  "description": "Shared types, schemas, and utilities for SecAI Radar",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {}
+}

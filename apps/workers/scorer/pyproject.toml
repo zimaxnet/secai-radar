@@ -1,0 +1,13 @@
+[project]
+name = "secai-radar-scorer"
+version = "1.0.0"
+description = "Scorer worker for Trust Score calculation"
+requires-python = ">=3.11"
+dependencies = [
+    "psycopg2-binary>=2.9.0",
+    "secai-radar-scoring @ file://../../../../packages/scoring",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

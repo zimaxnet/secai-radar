@@ -1,0 +1,21 @@
+{
+  "routes": [
+    { "route": "/", "serve": "/index.html" },
+    { "route": "/tenant/*", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/mcp/*", "allowedRoles": ["anonymous", "authenticated"] }
+  ],
+  "navigationFallback": { 
+    "rewrite": "/index.html",
+    "exclude": ["/api/*", "/*.{js,css,png,jpg,svg,ico,json}"]
+  },
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/index.html",
+      "statusCode": 200
+    }
+  },
+  "globalHeaders": {
+    "Cache-Control": "public, max-age=0, must-revalidate",
+    "Cross-Origin-Opener-Policy": "unsafe-none"
+  }
+}

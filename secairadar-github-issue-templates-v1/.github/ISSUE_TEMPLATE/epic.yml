@@ -1,0 +1,91 @@
+name: "Epic"
+description: "Large multi-issue initiative (P0/P1 milestone or full phase)."
+title: "[EPIC][Phase ?] <epic title>"
+labels: []
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: P0 = Critical (must have for MVP), P1 = High, P2 = Nice to have
+      options: [priority:p0, priority:p1, priority:p2]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      description: Align to SecAI Radar build phases
+      options:
+        - phase:0 (Phase 0: Foundation)
+        - phase:1 (Phase 1: Public MVP)
+        - phase:2 (Phase 2: Automation)
+        - phase:3 (Phase 3: Private Registry)
+        - phase:4 (Phase 4: Graph + Hardening)
+        - phase:post-mvp (Post-MVP)
+    validations:
+      required: true
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Epic objective
+      placeholder: "Ship Public Trust Hub MVP with live rankings, server pages, daily brief, feeds, and run status."
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope (what's included)
+      value: |
+        -
+        -
+        -
+    validations:
+      required: true
+
+  - type: textarea
+    id: non
+    attributes:
+      label: Non-goals
+      value: |
+        -
+        -
+    validations:
+      required: false
+
+  - type: textarea
+    id: child
+    attributes:
+      label: Child issues checklist
+      description: Add a list of the issues this epic contains (tick off as you create/link them).
+      value: |
+        - [ ] #
+        - [ ] #
+        - [ ] #
+    validations:
+      required: true
+
+  - type: textarea
+    id: exit
+    attributes:
+      label: Exit criteria
+      value: |
+        - [ ] All child issues complete
+        - [ ] Demo recorded or screenshots captured
+        - [ ] Docs updated
+        - [ ] Tests passing
+        - [ ] Deployed to staging/production
+    validations:
+      required: true
+
+  - type: textarea
+    id: backlog
+    attributes:
+      label: Backlog Ticket Reference
+      description: If this corresponds to backlog tickets, reference them here (e.g., T-001, T-002)
+      placeholder: "T-XXX, T-YYY"
+    validations:
+      required: false

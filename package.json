@@ -1,0 +1,27 @@
+{
+  "name": "secai-radar",
+  "version": "1.0.0",
+  "description": "SecAI Radar Verified MCP Trust Hub - Monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "build:public-web": "npm run build --workspace=apps/public-web",
+    "build:public-api": "npm run build --workspace=apps/public-api",
+    "build:registry-api": "npm run build --workspace=apps/registry-api",
+    "dev:public-web": "npm run dev --workspace=apps/public-web",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "typecheck": "npm run typecheck --workspaces"
+  },
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

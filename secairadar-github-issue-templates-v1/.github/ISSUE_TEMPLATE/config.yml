@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability disclosure
+    url: https://zimax.net/security/disclosure
+    about: Please report security vulnerabilities privately via our disclosure policy.
+  - name: Product + methodology
+    url: https://secairadar.cloud/mcp/methodology
+    about: Read methodology and product context before filing issues.
+  - name: Backlog & Implementation Plan
+    url: https://github.com/zimaxnet/secai-radar/blob/main/docs/backlog/mvp-build-tickets.md
+    about: View the complete backlog and implementation plan for Verified MCP MVP.
+  - name: GitHub Project Board
+    url: https://github.com/orgs/zimaxnet/projects/3
+    about: Track progress on the Verified MCP MVP Implementation project board.

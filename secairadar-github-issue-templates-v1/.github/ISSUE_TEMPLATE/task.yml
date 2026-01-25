@@ -1,0 +1,92 @@
+name: "Task / Chore"
+description: "Smaller engineering task (refactor, wiring, config, docs, CI, infra)."
+title: "[P?][Phase ?] <task title>"
+labels: []
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What type of work is this?
+      options:
+        - category:frontend
+        - category:backend
+        - category:data
+        - category:pipeline
+        - category:security
+        - category:devops
+        - category:ux
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: P0 = Critical (must have for MVP), P1 = High, P2 = Nice to have
+      options: [priority:p0, priority:p1, priority:p2]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      description: Align to SecAI Radar build phases
+      options:
+        - phase:0 (Phase 0: Foundation)
+        - phase:1 (Phase 1: Public MVP)
+        - phase:2 (Phase 2: Automation)
+        - phase:3 (Phase 3: Private Registry)
+        - phase:4 (Phase 4: Graph + Hardening)
+        - phase:post-mvp (Post-MVP)
+    validations:
+      required: true
+
+  - type: textarea
+    id: task
+    attributes:
+      label: Task description
+      description: What needs doing?
+      placeholder: "Add GitHub Actions job to run a broken-link check on build."
+    validations:
+      required: true
+
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Implementation checklist
+      value: |
+        - [ ] Identify files/paths
+        - [ ] Make change
+        - [ ] Validate locally
+        - [ ] CI green
+        - [ ] Update docs if needed
+    validations:
+      required: true
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      placeholder: "CI job runs on PRs and fails on broken internal links."
+    validations:
+      required: true
+
+  - type: textarea
+    id: deps
+    attributes:
+      label: Dependencies / links
+      description: Link to related issues, PRs, or backlog tickets (e.g., T-001, #123)
+      placeholder: "- Depends on T-001\n- Related to #123"
+    validations:
+      required: false
+
+  - type: textarea
+    id: backlog
+    attributes:
+      label: Backlog Ticket Reference
+      description: If this corresponds to a backlog ticket, reference it here (e.g., T-001)
+      placeholder: "T-XXX"
+    validations:
+      required: false

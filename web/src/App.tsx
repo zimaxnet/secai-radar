@@ -21,6 +21,18 @@ const AgentDetail = lazy(() => import('./routes/AgentDetail'))
 const Observability = lazy(() => import('./routes/Observability'))
 const VoiceAgentInterface = lazy(() => import('./routes/VoiceAgentInterface'))
 
+// MCP (Model Context Protocol) public routes
+const MCPLayout = lazy(() => import('./routes/mcp/MCPLayout'))
+const MCPOverview = lazy(() => import('./routes/mcp/Overview'))
+const MCPRankings = lazy(() => import('./routes/mcp/Rankings'))
+const MCPServerDetail = lazy(() => import('./routes/mcp/ServerDetail'))
+const MCPProviderPortfolio = lazy(() => import('./routes/mcp/ProviderPortfolio'))
+const MCPDailyBrief = lazy(() => import('./routes/mcp/DailyBrief'))
+const MCPMethodology = lazy(() => import('./routes/mcp/Methodology'))
+const MCPChangelog = lazy(() => import('./routes/mcp/Changelog'))
+const MCPSubmit = lazy(() => import('./routes/mcp/Submit'))
+const MCPAbout = lazy(() => import('./routes/mcp/About'))
+
 function Shell() {
   const { id } = useParams()
   const tenantId = id || (import.meta.env.VITE_DEFAULT_TENANT as string) || 'CONTOSO'
@@ -143,6 +155,22 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/assessments" element={<Assessments />} />
+        
+        {/* MCP Public Routes */}
+        <Route path="/mcp" element={<MCPLayout />}>
+          <Route index element={<MCPOverview />} />
+          <Route path="rankings" element={<MCPRankings />} />
+          <Route path="servers/:serverSlug" element={<MCPServerDetail />} />
+          <Route path="providers/:providerSlug" element={<MCPProviderPortfolio />} />
+          <Route path="daily/:date" element={<MCPDailyBrief />} />
+          <Route path="daily" element={<Navigate to={`/mcp/daily/${new Date().toISOString().split('T')[0]}`} replace />} />
+          <Route path="methodology" element={<MCPMethodology />} />
+          <Route path="changelog" element={<MCPChangelog />} />
+          <Route path="submit" element={<MCPSubmit />} />
+          <Route path="about" element={<MCPAbout />} />
+        </Route>
+        
+        {/* Legacy tenant routes */}
         <Route path="/tenant/:id/*" element={<Shell />} />
         <Route path="*" element={<Navigate to={`/tenant/${defaultTenant}/dashboard`} replace />} />
       </Routes>
