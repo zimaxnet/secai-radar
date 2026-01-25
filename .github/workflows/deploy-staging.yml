@@ -1,3 +1,5 @@
+# Builds containers via az acr build (runs on Azure ACR; CPU only, no GPU).
+# Required secrets: AZURE_CREDENTIALS, ACR_NAME (e.g. secairadardevacr), AZURE_STATIC_WEB_APPS_API_TOKEN
 name: Deploy to Staging
 
 on:
@@ -44,13 +46,13 @@ jobs:
           output_location: "dist"
           skip_app_build: true
       
-      - name: Build and push container images
+      # Build on ACR (Azure); CPU only, no GPU. Images: python:3.11-slim.
+      - name: Build and push public-api
         run: |
-          # Build and push public-api
-          az acr build --registry ${{ secrets.ACR_NAME }} --image secai-radar-public-api:latest apps/public-api/ || true
-          
-          # Build and push registry-api
-          az acr build --registry ${{ secrets.ACR_NAME }} --image secai-radar-registry-api:latest apps/registry-api/ || true
+          az acr build --registry ${{ secrets.ACR_NAME }} --image secai-radar-public-api:latest apps/public-api
+      - name: Build and push registry-api
+        run: |
+          az acr build --registry ${{ secrets.ACR_NAME }} --image secai-radar-registry-api:latest apps/registry-api
       
       - name: Deploy to Container Apps
         run: |
