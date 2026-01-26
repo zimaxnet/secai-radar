@@ -66,6 +66,7 @@ export default function Overview() {
         const summary = await getSummary('24h')
         if (summary === null) {
           setApiError(true)
+          setLoading(false)
           return
         }
         if (summary) {

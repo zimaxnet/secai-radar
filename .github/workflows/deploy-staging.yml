@@ -218,3 +218,14 @@ jobs:
               --output none
           fi
           echo "Registry API FQDN: $(az containerapp show --name $APP_NAME -g $AZURE_RESOURCE_GROUP --query 'properties.configuration.ingress.fqdn' -o tsv)"
+
+      - name: Deploy summary
+        run: |
+          echo "## SecAI Radar deploy summary" >> $GITHUB_STEP_SUMMARY
+          FQDN=$(az containerapp show --name secai-radar-public-api --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query 'properties.configuration.ingress.fqdn' -o tsv 2>/dev/null || true)
+          if [ -n "$FQDN" ]; then
+            API_BASE="https://${FQDN}/api"
+            echo "- **Public API:** https://$FQDN" >> $GITHUB_STEP_SUMMARY
+            echo "- **VITE_API_BASE for next build:** \`$API_BASE\`" >> $GITHUB_STEP_SUMMARY
+            echo "If the frontend shows 'Unable to load dashboard', add or update GitHub secret **VITE_API_BASE** = \`$API_BASE\` and re-run this workflow to rebuild the frontend." >> $GITHUB_STEP_SUMMARY
+          fi
