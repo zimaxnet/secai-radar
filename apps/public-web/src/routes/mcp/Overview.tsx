@@ -53,17 +53,21 @@ export default function Overview() {
   const [riskFlags, setRiskFlags] = useState<RiskFlag[]>([])
   const [recentlyUpdated, setRecentlyUpdated] = useState<RecentlyUpdated[]>([])
   const [loading, setLoading] = useState(true)
+  const [apiError, setApiError] = useState(false)
+  const [retryKey, setRetryKey] = useState(0)
 
   useEffect(() => {
-    // Track page view
     trackPageView('/mcp')
+    setApiError(false)
 
-    // Fetch data from API
     const fetchData = async () => {
       setLoading(true)
       try {
-        // Fetch summary
         const summary = await getSummary('24h')
+        if (summary === null) {
+          setApiError(true)
+          return
+        }
         if (summary) {
           setTrustIndex({
             serversTracked: summary.serversTracked || 0,
@@ -122,18 +126,35 @@ export default function Overview() {
         setRiskFlags([])
       } catch (error) {
         console.error('Error fetching overview data:', error)
+        setApiError(true)
       } finally {
         setLoading(false)
       }
     }
 
     fetchData()
-  }, [])
+  }, [retryKey])
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
+      <div className="flex flex-col h-64 items-center justify-center gap-4">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+        <p className="text-slate-400 text-sm">Loading Verified MCP data…</p>
+      </div>
+    )
+  }
+
+  if (apiError) {
+    return (
+      <div className="flex flex-col h-64 items-center justify-center gap-4">
+        <p className="text-slate-300">Unable to load dashboard. The API may be temporarily unavailable.</p>
+        <button
+          type="button"
+          onClick={() => setRetryKey(k => k + 1)}
+          className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+        >
+          Retry
+        </button>
       </div>
     )
   }

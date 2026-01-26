@@ -45,7 +45,8 @@ jobs:
       - name: Install and build public-web
         working-directory: apps/public-web
         env:
-          VITE_API_BASE: ${{ secrets.VITE_API_BASE || 'https://secai-radar-api.azurewebsites.net/api' }}
+          # Point at public-api Container App. Set secret VITE_API_BASE if your FQDN differs.
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE || 'https://secai-radar-public-api.lemonriver-a8b248dc.centralus.azurecontainerapps.io/api' }}
         run: |
           npm ci
           npm run build

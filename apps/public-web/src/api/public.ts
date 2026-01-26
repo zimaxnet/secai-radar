@@ -21,16 +21,30 @@ import type {
 
 const API_BASE = import.meta.env.VITE_API_BASE || '/api'
 const PUBLIC_API = `${API_BASE}/v1/public/mcp`
+const FETCH_TIMEOUT_MS = 12_000
 
 /**
- * Standard fetch wrapper with error handling and caching support
+ * Fetch with timeout so the UI never spins indefinitely.
+ */
+function fetchWithTimeout(
+  url: string,
+  options: RequestInit & { timeoutMs?: number } = {}
+): Promise<Response> {
+  const { timeoutMs = FETCH_TIMEOUT_MS, ...init } = options
+  const controller = new AbortController()
+  const id = setTimeout(() => controller.abort(), timeoutMs)
+  return fetch(url, { ...init, signal: controller.signal }).finally(() => clearTimeout(id))
+}
+
+/**
+ * Standard fetch wrapper with timeout, error handling, and caching support
  */
 async function fetchPublicAPI<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<PublicAPIResponse<T> | null> {
   try {
-    const response = await fetch(`${PUBLIC_API}${endpoint}`, {
+    const response = await fetchWithTimeout(`${PUBLIC_API}${endpoint}`, {
       ...options,
       headers: {
         'Accept': 'application/json',
@@ -48,7 +62,11 @@ async function fetchPublicAPI<T>(
 
     return await response.json()
   } catch (error) {
-    console.error(`Public API error (${endpoint}):`, error)
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn(`Public API timeout (${endpoint})`)
+    } else {
+      console.error(`Public API error (${endpoint}):`, error)
+    }
     return null
   }
 }
