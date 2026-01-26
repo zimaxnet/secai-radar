@@ -153,6 +153,17 @@ export interface RSSFeedItem {
   mediaImageUrl?: string
 }
 
+// Gk-like attestation fields (optional, for feed items)
+export interface FeedItemProvenance {
+  sourceId: string
+  asOf: string
+  methodologyVersion: string
+}
+export interface FeedItemSecurityContext {
+  assessor: string
+  scope: string
+}
+
 // JSON Feed Item (JSON Feed v1)
 export interface JSONFeedItem {
   id: string
@@ -161,13 +172,17 @@ export interface JSONFeedItem {
   content_text: string
   content_html?: string
   date_published: string
-  tags: string[]
+  tags?: string[]
   attachments?: Array<{
     url: string
     mime_type: string
     title?: string
   }>
   author?: string
+  /** Gk-like attestation (when present) */
+  provenance?: FeedItemProvenance
+  integrityDigest?: string
+  security_context?: FeedItemSecurityContext
 }
 
 export interface JSONFeed {

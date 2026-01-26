@@ -63,9 +63,9 @@ export const COPY = {
 // ============================================================================
 
 export const DISCLAIMERS = {
-  short: 'Verified MCP provides a risk posture assessment, not a certification. Scores reflect evidence observed at the time of assessment.',
-  long: 'Scores are derived from public and/or submitted artifacts and may change as evidence changes. Providers can submit evidence and responses. Do not treat this as a guarantee of security.',
-  methodology: 'This assessment uses Trust Score v1 methodology. Scores are based on evidence available at the time of assessment and may change as new evidence is submitted or discovered.',
+  short: 'Verified MCP provides a risk posture assessment, not a certification. SecAI Radar attests to the evidence and context behind each score. Scores reflect evidence observed at the time of assessment.',
+  long: 'Scores are derived from public and/or submitted artifacts and may change as evidence changes. SecAI Radar provides independent attestation of MCP server trust posture. Providers can submit evidence and responses. Do not treat this as a guarantee of security.',
+  methodology: 'This assessment uses Trust Score v1 methodology. SecAI Radar attests to the evidence and context behind each score. Scores are based on evidence available at the time of assessment and may change as new evidence is submitted or discovered.',
 } as const
 
 // ============================================================================

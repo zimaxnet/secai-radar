@@ -16,7 +16,10 @@ export default function Methodology() {
     <div className="space-y-8">
       <div>
         <h1 className="text-4xl font-bold text-white mb-2">Methodology</h1>
-        <p className="text-slate-400">How we assess MCP server security posture</p>
+        <p className="text-slate-400">
+          How we assess MCP server security posture. SecAI Radar provides independent attestation
+          of MCP server trust posture; scores reflect evidence and context we attest to.
+        </p>
       </div>
 
       {/* What is Trust Score */}

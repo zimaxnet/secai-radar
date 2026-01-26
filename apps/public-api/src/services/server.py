@@ -31,12 +31,20 @@ def get_latest_score(db: Session, server_id: str) -> Optional[ScoreSnapshot]:
     ).order_by(ScoreSnapshot.assessed_at.desc()).first()
 
 
+def get_server_evidence_ids(db: Session, server_id: str) -> List[str]:
+    """Lightweight list of evidence IDs for a server (e.g. for integrity digest)."""
+    rows = db.query(EvidenceItem.evidence_id).filter(
+        EvidenceItem.server_id == server_id
+    ).all()
+    return [r[0] for r in rows]
+
+
 def get_server_evidence(db: Session, server_id: str) -> Dict[str, Any]:
     """Get evidence items and claims for a server"""
     evidence_items = db.query(EvidenceItem).filter(
         EvidenceItem.server_id == server_id
     ).all()
-    
+
     evidence_ids = [item.evidence_id for item in evidence_items]
     claims = db.query(ExtractedClaim).filter(
         ExtractedClaim.evidence_id.in_(evidence_ids)

@@ -5,6 +5,8 @@ export default function About() {
       <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6 space-y-4">
         <p className="text-slate-300">
           SecAI Radar is a transparent trust authority for MCP (Model Context Protocol) security posture.
+          SecAI Radar attests to the evidence and context behind each score, providing independent
+          attestation of MCP server trust posture.
         </p>
         <div>
           <h2 className="text-xl font-semibold text-white mb-2">Links</h2>
