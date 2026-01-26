@@ -108,9 +108,7 @@ jobs:
           SCALE_ARGS="--min-replicas 1 --max-replicas 10 --scale-rule-name http --scale-rule-type http --scale-rule-http-concurrency 10"
           if az containerapp show --name "$APP_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --output none 2>/dev/null; then
             echo "Updating existing Container App: $APP_NAME"
-            # Remove legacy ACR registry if present (avoids "no such host" when app still pointed at deleted ACR)
-            az containerapp registry remove --name "$APP_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --server secairadardevacr.azurecr.io --output none 2>/dev/null || true
-            # Ensure ghcr.io credentials are set so the new revision can pull the image (update does not accept registry args)
+            # Add ghcr.io first so the app can pull; then drop dead ACR so template validation passes
             az containerapp registry set \
               --name "$APP_NAME" \
               --resource-group "$AZURE_RESOURCE_GROUP" \
@@ -118,11 +116,19 @@ jobs:
               --username "$GHCR_USER" \
               --password "$GHCR_PAT" \
               --output none
+            az containerapp registry remove --name "$APP_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --server secairadardevacr.azurecr.io --output none 2>/dev/null || true
+            # Point container at ghcr.io image and create new revision
             az containerapp update \
               --name "$APP_NAME" \
               --resource-group "$AZURE_RESOURCE_GROUP" \
               --container-name "$APP_NAME" \
               --image "$IMAGE" \
+              --revision-suffix "ghcr" \
+              --output none
+            # Then ensure scale/ingress
+            az containerapp update \
+              --name "$APP_NAME" \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
               $SCALE_ARGS \
               --output none
             if [ -n "$DATABASE_URL" ]; then
@@ -176,9 +182,6 @@ jobs:
 
           if az containerapp show --name "$APP_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --output none 2>/dev/null; then
             echo "Updating existing Container App: $APP_NAME"
-            # Remove legacy ACR registry if present (avoids "no such host" when app still pointed at deleted ACR)
-            az containerapp registry remove --name "$APP_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --server secairadardevacr.azurecr.io --output none 2>/dev/null || true
-            # Ensure ghcr.io credentials are set so the new revision can pull the image (update does not accept registry args)
             az containerapp registry set \
               --name "$APP_NAME" \
               --resource-group "$AZURE_RESOURCE_GROUP" \
@@ -186,11 +189,17 @@ jobs:
               --username "$GHCR_USER" \
               --password "$GHCR_PAT" \
               --output none
+            az containerapp registry remove --name "$APP_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --server secairadardevacr.azurecr.io --output none 2>/dev/null || true
             az containerapp update \
               --name "$APP_NAME" \
               --resource-group "$AZURE_RESOURCE_GROUP" \
               --container-name "$APP_NAME" \
               --image "$IMAGE" \
+              --revision-suffix "ghcr" \
+              --output none
+            az containerapp update \
+              --name "$APP_NAME" \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
               $SCALE_ARGS \
               --output none
           else
