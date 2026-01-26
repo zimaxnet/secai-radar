@@ -2,8 +2,9 @@
 Server service - business logic for server endpoints
 """
 
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
-from typing import Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 from src.models.server import MCPServer
 from src.models.score_snapshot import ScoreSnapshot
 from src.models.evidence import EvidenceItem, ExtractedClaim
