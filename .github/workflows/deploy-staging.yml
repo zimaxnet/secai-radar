@@ -108,6 +108,14 @@ jobs:
           SCALE_ARGS="--min-replicas 1 --max-replicas 10 --scale-rule-name http --scale-rule-type http --scale-rule-http-concurrency 10"
           if az containerapp show --name "$APP_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --output none 2>/dev/null; then
             echo "Updating existing Container App: $APP_NAME"
+            # Ensure ghcr.io credentials are set so the new revision can pull the image (update does not accept registry args)
+            az containerapp registry set \
+              --name "$APP_NAME" \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
+              --server ghcr.io \
+              --username "$GHCR_USER" \
+              --password "$GHCR_PAT" \
+              --output none
             az containerapp update \
               --name "$APP_NAME" \
               --resource-group "$AZURE_RESOURCE_GROUP" \
@@ -165,6 +173,14 @@ jobs:
 
           if az containerapp show --name "$APP_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --output none 2>/dev/null; then
             echo "Updating existing Container App: $APP_NAME"
+            # Ensure ghcr.io credentials are set so the new revision can pull the image (update does not accept registry args)
+            az containerapp registry set \
+              --name "$APP_NAME" \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
+              --server ghcr.io \
+              --username "$GHCR_USER" \
+              --password "$GHCR_PAT" \
+              --output none
             az containerapp update \
               --name "$APP_NAME" \
               --resource-group "$AZURE_RESOURCE_GROUP" \
