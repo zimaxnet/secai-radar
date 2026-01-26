@@ -9,34 +9,26 @@ from sqlalchemy.orm import Session
 
 def get_summary_data(db: Session, window: str) -> Dict[str, Any]:
     """
-    Get summary KPIs and highlights for a given time window
-    
-    Args:
-        db: Database session
-        window: Time window (24h, 7d, 30d)
-    
-    Returns:
-        Dictionary with summary data
+    Get summary KPIs and highlights for a given time window.
+    Shape matches frontend SummaryResponse (serversTracked, topMovers, etc.).
     """
-    # Calculate time delta
     if window == "24h":
         delta = timedelta(days=1)
     elif window == "7d":
         delta = timedelta(days=7)
-    else:  # 30d
+    else:
         delta = timedelta(days=30)
-    
     cutoff_time = datetime.utcnow() - delta
-    
-    # TODO: Implement actual database queries
-    # - Count total servers
-    # - Count by tier
-    # - Count by evidence confidence
-    # - Get highlights (top movers, downgrades, new entrants)
-    
+
+    # TODO: Replace with real DB queries (count servers, tier, evidence, highlights)
     return {
-        "totalServers": 0,
+        "serversTracked": 0,
+        "providersTracked": 0,
         "tierCounts": {"A": 0, "B": 0, "C": 0, "D": 0},
         "evidenceConfidenceCounts": {"0": 0, "1": 0, "2": 0, "3": 0},
-        "highlights": []
+        "failFastCount": 0,
+        "topMovers": [],
+        "topDowngrades": [],
+        "newEntrants": [],
+        "notableDrift": [],
     }

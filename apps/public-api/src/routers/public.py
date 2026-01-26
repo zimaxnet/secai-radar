@@ -5,6 +5,9 @@ Public API routes
 from fastapi import APIRouter, Query, HTTPException, Depends
 from typing import Optional
 from datetime import datetime, timedelta
+from sqlalchemy.orm import Session
+
+from src.database import get_db
 
 router = APIRouter(prefix="/api/v1/public", tags=["public"])
 
@@ -36,15 +39,16 @@ async def get_summary(
 
 
 @router.get("/mcp/recently-updated")
-async def get_recently_updated(limit: int = Query(10, ge=1, le=100)):
-    """Get recently updated servers"""
+async def get_recently_updated(
+    limit: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    """Get recently updated servers. Frontend expects data.items."""
     # TODO: Implement actual database query
     return {
         "methodologyVersion": METHODOLOGY_VERSION,
         "generatedAt": datetime.utcnow().isoformat(),
-        "data": {
-            "servers": []
-        }
+        "data": {"items": []},
     }
 
 
@@ -64,19 +68,49 @@ async def get_rankings(
     
     data = get_rankings_data(db, q, category, tier, page, pageSize, sort)
     redacted_data = redact_response(data)
-    
+    # Frontend expects data.items and meta.{total,page,pageSize}
+    items = redacted_data.get("servers") or redacted_data.get("items") or []
     return {
         "methodologyVersion": METHODOLOGY_VERSION,
         "generatedAt": datetime.utcnow().isoformat(),
-        "data": redacted_data
+        "data": {"items": items},
+        "meta": {
+            "total": redacted_data.get("total", 0),
+            "page": redacted_data.get("page", 1),
+            "pageSize": redacted_data.get("pageSize", pageSize),
+        },
     }
 
 
 @router.get("/mcp/servers/{idOrSlug}")
-async def get_server(idOrSlug: str):
+async def get_server(idOrSlug: str, db: Session = Depends(get_db)):
     """Get server detail by ID or slug"""
-    # TODO: Implement actual database query
-    raise HTTPException(status_code=404, detail="Server not found")
+    from src.services.server import get_server_by_id_or_slug, get_latest_score
+    from src.middleware.redaction import redact_response
+
+    server = get_server_by_id_or_slug(db, idOrSlug)
+    if not server:
+        raise HTTPException(status_code=404, detail="Server not found")
+    score = get_latest_score(db, server.server_id)
+    provider_name = getattr(server.provider, "provider_name", None) if getattr(server, "provider", None) else None
+    data = {
+        "serverId": server.server_id,
+        "serverSlug": server.server_slug or server.server_id,
+        "serverName": server.server_name or server.server_slug or server.server_id,
+        "providerId": server.provider_id,
+        "providerName": provider_name,
+        "trustScore": float(score.trust_score) if score else 0,
+        "tier": (score.tier if score else "D") or "D",
+        "evidenceConfidence": int(score.evidence_confidence) if score else 0,
+        "lastAssessedAt": score.assessed_at.isoformat() if score and score.assessed_at else None,
+        "domainScores": {},
+        "enterpriseFit": (score.enterprise_fit if score else None) or "Experimental",
+    }
+    return {
+        "methodologyVersion": METHODOLOGY_VERSION,
+        "generatedAt": datetime.utcnow().isoformat(),
+        "data": redact_response(data),
+    }
 
 
 @router.get("/mcp/servers/{idOrSlug}/evidence")
