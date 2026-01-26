@@ -112,9 +112,6 @@ jobs:
               --name "$APP_NAME" \
               --resource-group "$AZURE_RESOURCE_GROUP" \
               --image "$IMAGE" \
-              --registry-server "ghcr.io" \
-              --registry-username "$GHCR_USER" \
-              --registry-password "$GHCR_PAT" \
               $SCALE_ARGS \
               --output none
             if [ -n "$DATABASE_URL" ]; then
@@ -172,9 +169,6 @@ jobs:
               --name "$APP_NAME" \
               --resource-group "$AZURE_RESOURCE_GROUP" \
               --image "$IMAGE" \
-              --registry-server "ghcr.io" \
-              --registry-username "$GHCR_USER" \
-              --registry-password "$GHCR_PAT" \
               $SCALE_ARGS \
               --output none
           else
