@@ -8,13 +8,17 @@
 #   AZURE_CREDENTIALS           - Service principal for Azure (subscription/resource group)
 #   AZURE_STATIC_WEB_APPS_API_TOKEN
 #   DATABASE_URL                - PostgreSQL connection string for public-api (for create/secret update)
-#   GHCR_PAT                    - GitHub PAT with read:packages (so Container Apps can pull from ghcr.io)
+#   GHCR_PAT                    - GitHub PAT with write:packages + read:packages (push from Actions; orgs often
+#                                 deny "Create organization package" for GITHUB_TOKEN, so PAT is required)
 #
 # Optional secrets:
 #   VITE_API_BASE               - Frontend API base URL (e.g. https://<public-api-fqdn>/api)
 #   CONTAINER_APPS_ENV          - Container Apps environment name (default: secai-radar-dev-env)
 #
 # To use ACR instead of ghcr.io, see docs/finops/USING-GHCR-INSTEAD-OF-ACR.md (revert this workflow and use ACR_NAME).
+#
+# If "Build and push" fails with "denied: installation not allowed to Create organization package":
+# use a PAT in GHCR_PAT with write:packages (this workflow uses GHCR_PAT for ghcr.io login, not GITHUB_TOKEN).
 #
 name: Deploy to Staging
 
@@ -67,13 +71,14 @@ jobs:
           output_location: "."
           skip_app_build: true
       
-      # Build and push to GitHub Container Registry (ghcr.io). No ACR needed.
+      # Build and push to GitHub Container Registry (ghcr.io). Use GHCR_PAT because orgs often deny
+      # "Create organization package" for the default GITHUB_TOKEN (see job annotation).
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GHCR_PAT }}
       - name: Build and push public-api
         uses: docker/build-push-action@v6
         with:
