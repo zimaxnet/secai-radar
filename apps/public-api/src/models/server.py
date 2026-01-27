@@ -5,6 +5,7 @@ MCP Server model
 from sqlalchemy import Column, String, Text, ForeignKey, ARRAY, DateTime
 from sqlalchemy.orm import relationship
 from .base import Base, TimestampMixin
+from .provider import Provider
 
 
 class MCPServer(Base, TimestampMixin):
@@ -26,4 +27,5 @@ class MCPServer(Base, TimestampMixin):
     first_seen_at = Column(DateTime, nullable=False)
     last_seen_at = Column(DateTime, nullable=False)
     
-    provider = relationship("Provider", backref="servers")
+    # Use direct class reference instead of string to avoid mapper init issues
+    provider = relationship(Provider, backref="servers")
