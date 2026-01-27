@@ -104,6 +104,15 @@ class TrustScore(BaseModel):
     evidence_confidence: EvidenceConfidence
 
 
+class ServerMetadata(BaseModel):
+    """Server metadata for scoring context"""
+    publisher: Optional[str] = None
+    deployment_type: Optional[str] = None  # Remote, Local, Hybrid, Unknown
+    transport: Optional[str] = None
+    source_provenance: Optional[str] = None  # Official Registry, MCPAnvil, Other
+    popularity_signals: Optional[Dict[str, Any]] = None  # stars, downloads, etc.
+
+
 class ScoreResult(BaseModel):
     """Complete score result"""
     domain_scores: DomainScore

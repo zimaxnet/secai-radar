@@ -15,45 +15,62 @@ from .models import (
     EvidenceType,
     Flag,
     ClaimType,
+    ServerMetadata,
 )
 
 
-def calculate_evidence_confidence(evidence_items: List[EvidenceItem]) -> EvidenceConfidence:
+def calculate_evidence_confidence(
+    evidence_items: List[EvidenceItem],
+    metadata: Optional[ServerMetadata] = None
+) -> EvidenceConfidence:
     """
-    Calculate Evidence Confidence (0-3) from evidence items.
+    Calculate Evidence Confidence (0-3) from evidence items and metadata.
     
     Rules:
     - 0: No evidence
     - 1: Public docs only
     - 2: Verifiable artifacts (repo, config)
     - 3: Validated evidence pack
+    
+    Provenance boost:
+    - Official Registry: +1 confidence boost (capped at 3)
+    - MCPAnvil: neutral
+    - Other: neutral
     """
     if not evidence_items:
         return EvidenceConfidence.NONE
+    
+    base_confidence = EvidenceConfidence.NONE
     
     has_validated_pack = any(
         item.type == EvidenceType.ATTESTATION and item.confidence == 3
         for item in evidence_items
     )
     if has_validated_pack:
-        return EvidenceConfidence.VALIDATED_PACK
-
-    has_verifiable = any(
-        item.type in (EvidenceType.REPO, EvidenceType.CONFIG, EvidenceType.REPORT)
-        and item.confidence >= 2
-        for item in evidence_items
-    )
-    if has_verifiable:
-        return EvidenceConfidence.VERIFIABLE_ARTIFACTS
-
-    has_public_docs = any(
-        item.type == EvidenceType.DOCS and item.confidence >= 1
-        for item in evidence_items
-    )
-    if has_public_docs:
-        return EvidenceConfidence.PUBLIC_DOCS
+        base_confidence = EvidenceConfidence.VALIDATED_PACK
+    else:
+        has_verifiable = any(
+            item.type in (EvidenceType.REPO, EvidenceType.CONFIG, EvidenceType.REPORT)
+            and item.confidence >= 2
+            for item in evidence_items
+        )
+        if has_verifiable:
+            base_confidence = EvidenceConfidence.VERIFIABLE_ARTIFACTS
+        else:
+            has_public_docs = any(
+                item.type == EvidenceType.DOCS and item.confidence >= 1
+                for item in evidence_items
+            )
+            if has_public_docs:
+                base_confidence = EvidenceConfidence.PUBLIC_DOCS
     
-    return EvidenceConfidence.NONE
+    # Apply provenance boost
+    if metadata and metadata.source_provenance == "Official Registry":
+        # Boost by 1, but cap at 3
+        boosted_value = min(base_confidence.value + 1, 3)
+        return EvidenceConfidence(boosted_value)
+    
+    return base_confidence
 
 
 def _claim_value(claims: List[ExtractedClaim], claim_type: ClaimType) -> Optional[Any]:
@@ -211,7 +228,8 @@ def detect_risk_flags(
 def calculate_trust_score(
     evidence_items: List[EvidenceItem],
     claims: List[ExtractedClaim],
-    methodology_version: str = "v1.0"
+    methodology_version: str = "v1.0",
+    metadata: Optional[ServerMetadata] = None
 ) -> ScoreResult:
     """
     Calculate complete Trust Score from evidence and claims.
@@ -220,12 +238,13 @@ def calculate_trust_score(
         evidence_items: List of evidence items
         claims: List of extracted claims
         methodology_version: Methodology version used
+        metadata: Optional server metadata for provenance weighting
     
     Returns:
         ScoreResult with domain scores, trust score, tier, flags, and explainability
     """
-    # Calculate evidence confidence
-    evidence_confidence = calculate_evidence_confidence(evidence_items)
+    # Calculate evidence confidence (with provenance boost)
+    evidence_confidence = calculate_evidence_confidence(evidence_items, metadata)
     
     # Detect fail-fast flags (if any, return early with D tier)
     fail_fast_flags = detect_fail_fast_flags(evidence_items, claims)

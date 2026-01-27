@@ -5,7 +5,8 @@ description = "Scorer worker for Trust Score calculation"
 requires-python = ">=3.11"
 dependencies = [
     "psycopg2-binary>=2.9.0",
-    "secai-radar-scoring @ file://../../../../packages/scoring",
+    # secai-radar-scoring is installed separately before this package
+    # See .github/workflows/daily-pipeline.yml and scripts/run-scorer.sh
 ]
 
 [build-system]

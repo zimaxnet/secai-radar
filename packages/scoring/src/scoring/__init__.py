@@ -15,6 +15,7 @@ from .models import (
     EvidenceType,
     ClaimType,
     Flag,
+    ServerMetadata,
 )
 
 __all__ = [
@@ -31,4 +32,5 @@ __all__ = [
     "EvidenceType",
     "ClaimType",
     "Flag",
+    "ServerMetadata",
 ]

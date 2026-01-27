@@ -16,7 +16,7 @@ import psycopg2
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../../packages/scoring/src'))
 
 from scoring import calculate_trust_score, calculate_evidence_confidence
-from scoring.models import EvidenceItem, ExtractedClaim, EvidenceType, ClaimType
+from scoring.models import EvidenceItem, ExtractedClaim, EvidenceType, ClaimType, ServerMetadata
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
@@ -138,14 +138,41 @@ def update_latest_score_staging(db, server_id: str, score_id: str):
         db.commit()
 
 
+def get_server_metadata(db, server_id: str) -> Optional[ServerMetadata]:
+    """Get server metadata for scoring context"""
+    with db.cursor() as cur:
+        cur.execute("""
+            SELECT deployment_type, metadata_json
+            FROM mcp_servers
+            WHERE server_id = %s
+        """, (server_id,))
+        row = cur.fetchone()
+        if not row:
+            return None
+        
+        deployment_type, metadata_json = row
+        metadata_dict = json.loads(metadata_json) if metadata_json else {}
+        
+        return ServerMetadata(
+            publisher=metadata_dict.get("publisher"),
+            deployment_type=deployment_type,
+            transport=metadata_dict.get("transport"),
+            source_provenance=metadata_dict.get("source_provenance"),
+            popularity_signals=metadata_dict.get("popularity_signals")
+        )
+
+
 def score_server(db, server_id: str) -> Dict[str, Any]:
     """Score a single server"""
     try:
         # Get evidence
         evidence_items, claims = get_server_evidence(db, server_id)
         
+        # Get metadata
+        metadata = get_server_metadata(db, server_id)
+        
         # Calculate score
-        score_result = calculate_trust_score(evidence_items, claims, METHODOLOGY_VERSION)
+        score_result = calculate_trust_score(evidence_items, claims, METHODOLOGY_VERSION, metadata)
         
         # Store snapshot
         score_id = store_score_snapshot(db, server_id, score_result)

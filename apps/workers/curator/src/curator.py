@@ -67,6 +67,69 @@ def generate_server_id(repo_url: Optional[str], endpoint: Optional[str], docs_ur
     return format(hash_val, '016x')
 
 
+def extract_deployment_type(obs: Dict[str, Any]) -> str:
+    """
+    Determine deployment_type from observation.
+    Checks for remotes[] and packages[] in _full_server_json or direct fields.
+    """
+    # Check if we have full server.json
+    full_server_json = obs.get("_full_server_json")
+    if full_server_json:
+        has_remotes = bool(full_server_json.get("remotes"))
+        has_packages = bool(full_server_json.get("packages"))
+        if has_remotes and has_packages:
+            return "Hybrid"
+        elif has_remotes:
+            return "Remote"
+        elif has_packages:
+            return "Local"
+    
+    # Fallback: check endpoint and package fields
+    has_endpoint = bool(obs.get("endpoint") or obs.get("url"))
+    has_package = bool(obs.get("package"))
+    if has_endpoint and has_package:
+        return "Hybrid"
+    elif has_endpoint:
+        return "Remote"
+    elif has_package:
+        return "Local"
+    
+    return "Unknown"
+
+
+def extract_metadata(obs: Dict[str, Any], source: str) -> Dict[str, Any]:
+    """
+    Extract metadata from observation for storage in metadata_json.
+    Includes: publisher, description, transport, package, source_provenance
+    """
+    metadata = {}
+    
+    # Extract from observation fields
+    if obs.get("publisher"):
+        metadata["publisher"] = obs["publisher"]
+    if obs.get("description"):
+        metadata["description"] = obs["description"]
+    if obs.get("transport"):
+        metadata["transport"] = obs["transport"]
+    if obs.get("package"):
+        metadata["package"] = obs["package"]
+    
+    # Determine source_provenance
+    source_lower = source.lower()
+    if "registry.modelcontextprotocol.io" in source_lower:
+        metadata["source_provenance"] = "Official Registry"
+    elif "mcpanvil.com" in source_lower or "mcpanvil" in source_lower:
+        metadata["source_provenance"] = "MCPAnvil"
+    else:
+        metadata["source_provenance"] = "Other"
+    
+    # Store full server.json reference if available (for evidence extraction)
+    if obs.get("_full_server_json"):
+        metadata["_full_server_json"] = obs["_full_server_json"]
+    
+    return metadata
+
+
 def dedupe_servers(
     db, raw_observations: List[Dict[str, Any]], review_log: Optional[List[tuple]] = None
 ) -> List[Dict[str, Any]]:
@@ -97,6 +160,10 @@ def dedupe_servers(
             continue
         seen_ids.add(server_id)
 
+        # Extract metadata and deployment_type
+        metadata = extract_metadata(obs, source)
+        deployment_type = extract_deployment_type(obs)
+
         canonical_servers.append({
             "server_id": server_id,
             "server_name": name,
@@ -104,6 +171,8 @@ def dedupe_servers(
             "repo_url": repo_url,
             "docs_url": docs_url,
             "source": source,
+            "deployment_type": deployment_type,
+            "metadata": metadata,
         })
     return canonical_servers
 
@@ -111,28 +180,73 @@ def dedupe_servers(
 def store_canonical_servers(db, servers: List[Dict[str, Any]], provider_id: str):
     """Store canonical server records. Required mcp_servers columns use Unknown defaults."""
     with db.cursor() as cur:
+        # Check if metadata_json column exists
+        cur.execute("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'mcp_servers' AND column_name = 'metadata_json'
+        """)
+        has_metadata_json = cur.fetchone() is not None
+        
         for server in servers:
-            cur.execute("""
-                INSERT INTO mcp_servers (
-                    server_id, server_slug, server_name, provider_id,
-                    deployment_type, auth_model, tool_agency,
-                    repo_url, docs_url, first_seen_at, last_seen_at
-                ) VALUES (%s, %s, %s, %s, 'Unknown', 'Unknown', 'Unknown', %s, %s, %s, %s)
-                ON CONFLICT (server_id)
-                DO UPDATE SET
-                    last_seen_at = EXCLUDED.last_seen_at,
-                    repo_url = COALESCE(EXCLUDED.repo_url, mcp_servers.repo_url),
-                    docs_url = COALESCE(EXCLUDED.docs_url, mcp_servers.docs_url)
-            """, (
-                server["server_id"],
-                server["server_slug"],
-                server["server_name"],
-                provider_id,
-                server.get("repo_url"),
-                server.get("docs_url"),
-                datetime.utcnow(),
-                datetime.utcnow()
-            ))
+            metadata_json = json.dumps(server.get("metadata", {}))
+            deployment_type = server.get("deployment_type", "Unknown")
+            
+            if has_metadata_json:
+                cur.execute("""
+                    INSERT INTO mcp_servers (
+                        server_id, server_slug, server_name, provider_id,
+                        deployment_type, auth_model, tool_agency,
+                        repo_url, docs_url, metadata_json, first_seen_at, last_seen_at
+                    ) VALUES (%s, %s, %s, %s, %s, 'Unknown', 'Unknown', %s, %s, %s, %s, %s)
+                    ON CONFLICT (server_id)
+                    DO UPDATE SET
+                        last_seen_at = EXCLUDED.last_seen_at,
+                        deployment_type = COALESCE(EXCLUDED.deployment_type, mcp_servers.deployment_type),
+                        repo_url = COALESCE(EXCLUDED.repo_url, mcp_servers.repo_url),
+                        docs_url = COALESCE(EXCLUDED.docs_url, mcp_servers.docs_url),
+                        metadata_json = CASE 
+                            WHEN EXCLUDED.metadata_json != '{}'::jsonb 
+                            THEN EXCLUDED.metadata_json 
+                            ELSE mcp_servers.metadata_json 
+                        END
+                """, (
+                    server["server_id"],
+                    server["server_slug"],
+                    server["server_name"],
+                    provider_id,
+                    deployment_type,
+                    server.get("repo_url"),
+                    server.get("docs_url"),
+                    metadata_json,
+                    datetime.utcnow(),
+                    datetime.utcnow()
+                ))
+            else:
+                # Fallback for databases without metadata_json column
+                cur.execute("""
+                    INSERT INTO mcp_servers (
+                        server_id, server_slug, server_name, provider_id,
+                        deployment_type, auth_model, tool_agency,
+                        repo_url, docs_url, first_seen_at, last_seen_at
+                    ) VALUES (%s, %s, %s, %s, %s, 'Unknown', 'Unknown', %s, %s, %s, %s)
+                    ON CONFLICT (server_id)
+                    DO UPDATE SET
+                        last_seen_at = EXCLUDED.last_seen_at,
+                        deployment_type = COALESCE(EXCLUDED.deployment_type, mcp_servers.deployment_type),
+                        repo_url = COALESCE(EXCLUDED.repo_url, mcp_servers.repo_url),
+                        docs_url = COALESCE(EXCLUDED.docs_url, mcp_servers.docs_url)
+                """, (
+                    server["server_id"],
+                    server["server_slug"],
+                    server["server_name"],
+                    provider_id,
+                    deployment_type,
+                    server.get("repo_url"),
+                    server.get("docs_url"),
+                    datetime.utcnow(),
+                    datetime.utcnow()
+                ))
         db.commit()
 
 

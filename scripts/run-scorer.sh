@@ -22,6 +22,23 @@ if [ ! -d "$VENV" ]; then
   exit 1
 fi
 
-# Scorer uses packages/scoring via sys.path; ensure pydantic is available
-"$VENV/bin/pip" install -q pydantic 2>/dev/null || true
+# Install scoring package first (required dependency)
+echo "Installing scoring package..."
+cd packages/scoring
+"$VENV/bin/pip" install -q -e . || {
+  echo "Failed to install scoring package"
+  exit 1
+}
+cd "$OLDPWD"
+
+# Install scorer worker
+echo "Installing scorer worker..."
+cd apps/workers/scorer
+"$VENV/bin/pip" install -q -e . || {
+  echo "Failed to install scorer worker"
+  exit 1
+}
+cd "$OLDPWD"
+
+# Run scorer
 "$VENV/bin/python" apps/workers/scorer/src/scorer.py

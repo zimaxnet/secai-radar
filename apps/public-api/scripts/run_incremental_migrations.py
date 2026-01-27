@@ -8,14 +8,33 @@ Safe to run after the main schema or on an already-migrated DB.
 import os
 import sys
 import psycopg2
+import subprocess
 from pathlib import Path
 
 _MIGRATIONS_DIR = Path(__file__).resolve().parent.parent / "migrations"
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://secairadar:password@localhost:5432/secairadar"
-)
+# Get DATABASE_URL from environment or Azure Key Vault (same pattern as other scripts)
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    # Try Azure Key Vault
+    KV_NAME = os.getenv("KEY_VAULT_NAME", "secai-radar-kv")
+    try:
+        result = subprocess.run(
+            ["az", "keyvault", "secret", "show", "--vault-name", KV_NAME, "--name", "database-url", "--query", "value", "-o", "tsv"],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            DATABASE_URL = result.stdout.strip()
+    except (FileNotFoundError, subprocess.SubprocessError):
+        pass
+
+if not DATABASE_URL:
+    DATABASE_URL = "postgresql://secairadar:password@localhost:5432/secairadar"
+    print(f"⚠️  DATABASE_URL not set. Using default: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'localhost'}")
+    print("   Set DATABASE_URL or use Azure CLI + Key Vault (secai-radar-kv / database-url)")
 
 
 def main() -> None:

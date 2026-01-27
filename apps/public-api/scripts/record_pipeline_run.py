@@ -10,17 +10,36 @@ import argparse
 import os
 import sys
 import uuid
+import json
 import psycopg2
+import subprocess
 from pathlib import Path
+from datetime import date
 
 # same resolve as run_incremental_migrations
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _MIGRATIONS_DIR = _SCRIPT_DIR.parent / "migrations"
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://secairadar:password@localhost:5432/secairadar",
-)
+# Get DATABASE_URL from environment or Azure Key Vault (same pattern as other scripts)
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    # Try Azure Key Vault
+    KV_NAME = os.getenv("KEY_VAULT_NAME", "secai-radar-kv")
+    try:
+        result = subprocess.run(
+            ["az", "keyvault", "secret", "show", "--vault-name", KV_NAME, "--name", "database-url", "--query", "value", "-o", "tsv"],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            DATABASE_URL = result.stdout.strip()
+    except (FileNotFoundError, subprocess.SubprocessError):
+        pass
+
+if not DATABASE_URL:
+    DATABASE_URL = "postgresql://secairadar:password@localhost:5432/secairadar"
 
 
 def _ensure_table(conn):
@@ -37,13 +56,66 @@ def start_run(trigger: str = "manual") -> str:
     try:
         _ensure_table(conn)
         with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO pipeline_runs (run_id, trigger, status, started_at)
-                VALUES (%s, %s, 'running', NOW())
-                """,
-                (run_id, trigger),
-            )
+            # Check if trigger column exists (migration 007 has it, but older schemas may not)
+            cur.execute("""
+                SELECT column_name FROM information_schema.columns 
+                WHERE table_name = 'pipeline_runs' AND column_name = 'trigger'
+            """)
+            has_trigger = cur.fetchone() is not None
+            
+            # Check schema columns to determine which INSERT to use
+            cur.execute("""
+                SELECT column_name FROM information_schema.columns 
+                WHERE table_name = 'pipeline_runs'
+            """)
+            columns = {row[0] for row in cur.fetchall()}
+            
+            has_date = 'date' in columns
+            has_trigger = 'trigger' in columns
+            has_stages_json = 'stages_json' in columns
+            has_deliverables_json = 'deliverables_json' in columns
+            
+            today = date.today()
+            empty_json = json.dumps([])
+            empty_deliverables = json.dumps({})
+            
+            # Build INSERT based on available columns
+            if has_date and has_stages_json and has_deliverables_json:
+                # Full schema (from database-schema.sql)
+                if has_trigger:
+                    cur.execute(
+                        """
+                        INSERT INTO pipeline_runs (run_id, date, trigger, status, started_at, stages_json, deliverables_json)
+                        VALUES (%s, %s, %s, 'Running', NOW(), %s, %s)
+                        """,
+                        (run_id, today, trigger, empty_json, empty_deliverables),
+                    )
+                else:
+                    cur.execute(
+                        """
+                        INSERT INTO pipeline_runs (run_id, date, status, started_at, stages_json, deliverables_json)
+                        VALUES (%s, %s, 'Running', NOW(), %s, %s)
+                        """,
+                        (run_id, today, empty_json, empty_deliverables),
+                    )
+            elif has_trigger:
+                # Migration 007 schema
+                cur.execute(
+                    """
+                    INSERT INTO pipeline_runs (run_id, trigger, status, started_at)
+                    VALUES (%s, %s, 'running', NOW())
+                    """,
+                    (run_id, trigger),
+                )
+            else:
+                # Minimal schema
+                cur.execute(
+                    """
+                    INSERT INTO pipeline_runs (run_id, status, started_at)
+                    VALUES (%s, 'running', NOW())
+                    """,
+                    (run_id,),
+                )
         conn.commit()
         return run_id
     finally:
@@ -53,14 +125,37 @@ def start_run(trigger: str = "manual") -> str:
 def finish_run(run_id: str, status: str = "success") -> None:
     conn = psycopg2.connect(DATABASE_URL)
     try:
+        # Map 'success' to appropriate status based on schema
+        # Check which status values the schema supports
         with conn.cursor() as cur:
+            cur.execute("""
+                SELECT column_name, data_type FROM information_schema.columns 
+                WHERE table_name = 'pipeline_runs' AND column_name = 'status'
+            """)
+            status_col = cur.fetchone()
+            
+            # Check for CHECK constraint to determine valid values
+            cur.execute("""
+                SELECT check_clause FROM information_schema.check_constraints
+                WHERE constraint_name LIKE '%pipeline_runs%status%'
+                LIMIT 1
+            """)
+            check_constraint = cur.fetchone()
+            
+            if check_constraint and 'Completed' in str(check_constraint[0]):
+                # Full schema uses 'Completed', 'Failed', 'Running', 'Partial'
+                mapped_status = "Completed" if status == "success" else ("Failed" if status == "failed" else status)
+            else:
+                # Migration 007 schema uses 'success', 'failed', 'running'
+                mapped_status = status
+            
             cur.execute(
                 """
                 UPDATE pipeline_runs
                 SET completed_at = NOW(), status = %s
                 WHERE run_id = %s
                 """,
-                (status, run_id),
+                (mapped_status, run_id),
             )
         conn.commit()
     finally:

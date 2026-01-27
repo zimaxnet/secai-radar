@@ -10,6 +10,13 @@ import psycopg2
 from datetime import datetime
 from typing import List, Dict, Any
 import json
+import sys
+
+# Add sources directory to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'sources'))
+
+from sources.registry import fetch_registry_servers
+from sources.mcpanvil import fetch_mcpanvil_servers
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
@@ -18,7 +25,7 @@ DATABASE_URL = os.getenv(
 
 # Tier 1 sources
 TIER1_SOURCES = [
-    "https://modelcontextprotocol.io/servers",  # Official registry
+    "https://registry.modelcontextprotocol.io/v0.1/servers",  # Official Registry API
     # Add more sources as needed
 ]
 
@@ -97,23 +104,61 @@ def run_scout():
     conn = psycopg2.connect(DATABASE_URL)
     
     total_observations = 0
+    errors = []
     
     try:
         for source_url in TIER1_SOURCES:
             print(f"Fetching from: {source_url}")
-            observations = fetch_source(source_url)
             
+            # Detect source type and use appropriate adapter
+            if "registry.modelcontextprotocol.io" in source_url:
+                # Use Official Registry adapter
+                try:
+                    observations = fetch_registry_servers(limit=100, use_latest_version=False)
+                    print(f"  Fetched {len(observations)} servers from Official Registry")
+                except Exception as e:
+                    error_msg = f"Registry adapter error: {e}"
+                    print(f"  {error_msg}")
+                    errors.append(error_msg)
+                    continue
+            elif "mcpanvil.com" in source_url:
+                # Use MCPAnvil adapter
+                try:
+                    observations = fetch_mcpanvil_servers(use_index=False)
+                    print(f"  Fetched {len(observations)} servers from MCPAnvil")
+                except Exception as e:
+                    error_msg = f"MCPAnvil adapter error: {e}"
+                    print(f"  {error_msg}")
+                    errors.append(error_msg)
+                    continue
+            else:
+                # Use generic fetch_source for simple JSON APIs
+                observations = fetch_source(source_url)
+            
+            # Store each observation
             for obs in observations:
-                store_raw_observation(conn, source_url, obs)
-                total_observations += 1
+                # If obs has _full_server_json, keep it for evidence extraction
+                # The normalized fields are already in obs for Curator
+                observation_to_store = obs
+                
+                try:
+                    store_raw_observation(conn, source_url, observation_to_store)
+                    total_observations += 1
+                except Exception as e:
+                    error_msg = f"Error storing observation: {e}"
+                    print(f"  {error_msg}")
+                    errors.append(error_msg)
         
         print(f"Scout completed: {total_observations} observations stored")
-        return {
+        result = {
             "success": True,
             "observationsStored": total_observations,
             "sourcesProcessed": len(TIER1_SOURCES),
             "completedAt": datetime.utcnow().isoformat()
         }
+        if errors:
+            result["errors"] = errors[:20]  # Limit error output
+        return result
     except Exception as e:
         print(f"Scout error: {e}")
         return {

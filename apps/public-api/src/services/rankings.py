@@ -3,8 +3,9 @@ Rankings service - business logic for rankings endpoint
 """
 
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import or_, case, desc, cast, Integer
 from typing import Dict, Any, List, Optional
+import json
 from src.models.server import MCPServer
 from src.models.score_snapshot import ScoreSnapshot
 from src.models.latest_score import LatestScore
@@ -44,13 +45,54 @@ def get_rankings(
             )
         )
     total = base.count()
-    sort_col = {
+    
+    # Multi-factor sorting:
+    # 1. Primary: trust_score (or user-specified sort)
+    # 2. Secondary: evidence_confidence
+    # 3. Tertiary: source_provenance (Official Registry first)
+    # 4. Quaternary: assessed_at (recency)
+    
+    # Determine primary sort column
+    primary_sort = {
         "trustScore": ScoreSnapshot.trust_score,
         "evidenceConfidence": ScoreSnapshot.evidence_confidence,
         "lastAssessedAt": ScoreSnapshot.assessed_at,
     }.get(sort, ScoreSnapshot.trust_score)
+    
+    # Create provenance priority for tertiary sort
+    # Official Registry = 1 (highest), MCPAnvil = 2, Other = 3
+    provenance_priority = case(
+        (
+            MCPServer.metadata_json['source_provenance'].astext == 'Official Registry',
+            1
+        ),
+        (
+            MCPServer.metadata_json['source_provenance'].astext == 'MCPAnvil',
+            2
+        ),
+        else_=3
+    )
+    
+    # Extract popularity signals for quaternary sort (GitHub stars)
+    # Handle missing popularity_signals gracefully with default 0
+    # Use safe JSONB path extraction with null handling
+    popularity_stars = case(
+        (
+            MCPServer.metadata_json['popularity_signals']['github']['stars'].astext.isnot(None),
+            cast(MCPServer.metadata_json['popularity_signals']['github']['stars'].astext, Integer)
+        ),
+        else_=0
+    )
+    
+    # Apply multi-factor ordering
     rows = (
-        base.order_by(sort_col.desc().nulls_last())
+        base.order_by(
+            primary_sort.desc().nulls_last(),  # Primary sort
+            ScoreSnapshot.evidence_confidence.desc().nulls_last(),  # Secondary
+            provenance_priority.asc().nulls_last(),  # Tertiary (lower number = higher priority)
+            popularity_stars.desc().nulls_last(),  # Quaternary (popularity: stars)
+            ScoreSnapshot.assessed_at.desc().nulls_last()  # Quinary (recency)
+        )
         .offset((page - 1) * page_size)
         .limit(page_size)
         .all()
