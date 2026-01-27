@@ -100,6 +100,7 @@ jobs:
       - name: Run Scorer
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          WRITE_TO_STAGING: "1"
         run: |
           cd apps/workers/scorer
           python src/scorer.py
