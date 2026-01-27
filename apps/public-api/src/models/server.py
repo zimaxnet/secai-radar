@@ -3,6 +3,7 @@ MCP Server model
 """
 
 from sqlalchemy import Column, String, Text, ForeignKey, ARRAY, DateTime
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from .base import Base, TimestampMixin
 from .provider import Provider
@@ -26,6 +27,7 @@ class MCPServer(Base, TimestampMixin):
     status = Column(String(50), nullable=False, default="Active")  # Active, Deprecated, Unknown
     first_seen_at = Column(DateTime, nullable=False)
     last_seen_at = Column(DateTime, nullable=False)
+    metadata_json = Column(JSONB, nullable=True, default={})  # Flexible metadata storage
     
     # Use direct class reference instead of string to avoid mapper init issues
     provider = relationship(Provider, backref="servers")
