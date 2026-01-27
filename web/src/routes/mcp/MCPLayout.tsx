@@ -1,4 +1,9 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { getStatus } from '../../api/public'
+
+/** T-081: Show stale-data banner when last run older than this (ms) */
+const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000
 
 /**
  * Layout component for the MCP (Model Context Protocol) public section
@@ -6,12 +11,24 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
  */
 export default function MCPLayout() {
   const location = useLocation()
+  const [lastSuccessfulRun, setLastSuccessfulRun] = useState<string | null | undefined>(undefined)
+
+  useEffect(() => {
+    getStatus().then((s) => setLastSuccessfulRun(s?.lastSuccessfulRun ?? null))
+  }, [])
+
+  const isStale =
+    lastSuccessfulRun === null ||
+    lastSuccessfulRun === undefined ||
+    (lastSuccessfulRun !== null && Date.now() - new Date(lastSuccessfulRun).getTime() > STALE_THRESHOLD_MS)
+  const showStaleBanner = lastSuccessfulRun !== undefined && isStale
 
   const navLinks = [
     { to: '/mcp', label: 'Verified MCP', exact: true },
     { to: '/mcp/rankings', label: 'Rankings' },
     { to: '/mcp/daily', label: 'Daily Brief' },
     { to: '/mcp/methodology', label: 'Methodology' },
+    { to: '/mcp/fairness', label: 'Fairness' },
     { to: '/mcp/submit', label: 'Submit Evidence', cta: true },
   ]
 
@@ -98,6 +115,13 @@ export default function MCPLayout() {
           </div>
         </div>
       </header>
+
+      {/* T-081: Stale-data banner when last pipeline run > 24h or never run */}
+      {showStaleBanner && (
+        <div className="bg-amber-500/10 border-b border-amber-500/30 text-amber-200 px-4 py-2 text-center text-sm">
+          Data may be outdated. Last pipeline run: {lastSuccessfulRun ? new Date(lastSuccessfulRun).toLocaleString() : 'never'}.
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">

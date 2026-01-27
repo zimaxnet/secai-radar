@@ -2,7 +2,7 @@
 Trust Score v1 calculation logic
 """
 
-from typing import List
+from typing import Any, List, Optional
 from .models import (
     EvidenceItem,
     ExtractedClaim,
@@ -12,6 +12,7 @@ from .models import (
     Tier,
     EnterpriseFit,
     EvidenceConfidence,
+    EvidenceType,
     Flag,
     ClaimType,
 )
@@ -31,21 +32,22 @@ def calculate_evidence_confidence(evidence_items: List[EvidenceItem]) -> Evidenc
         return EvidenceConfidence.NONE
     
     has_validated_pack = any(
-        item.type == "Attestation" and item.confidence == 3
+        item.type == EvidenceType.ATTESTATION and item.confidence == 3
         for item in evidence_items
     )
     if has_validated_pack:
         return EvidenceConfidence.VALIDATED_PACK
-    
+
     has_verifiable = any(
-        item.type in ["Repo", "Config", "Report"] and item.confidence >= 2
+        item.type in (EvidenceType.REPO, EvidenceType.CONFIG, EvidenceType.REPORT)
+        and item.confidence >= 2
         for item in evidence_items
     )
     if has_verifiable:
         return EvidenceConfidence.VERIFIABLE_ARTIFACTS
-    
+
     has_public_docs = any(
-        item.type == "Docs" and item.confidence >= 1
+        item.type == EvidenceType.DOCS and item.confidence >= 1
         for item in evidence_items
     )
     if has_public_docs:
@@ -54,25 +56,44 @@ def calculate_evidence_confidence(evidence_items: List[EvidenceItem]) -> Evidenc
     return EvidenceConfidence.NONE
 
 
+def _claim_value(claims: List[ExtractedClaim], claim_type: ClaimType) -> Optional[Any]:
+    for c in claims:
+        if c.claim_type == claim_type:
+            return c.value.get("value") if isinstance(c.value, dict) else c.value
+    return None
+
+
 def calculate_domain_scores(
     evidence_items: List[EvidenceItem],
-    claims: List[ExtractedClaim]
+    claims: List[ExtractedClaim],
 ) -> DomainScore:
     """
-    Calculate domain subscores (D1-D6) based on evidence and claims.
-    
-    This is a placeholder implementation. The actual scoring logic
-    will be implemented based on the methodology rubric.
+    Deterministic domain subscores (D1-D6) from evidence and claims.
+    D1=Auth, D2=Authz/Scopes, D3=Data/Hosting, D4=Audit, D5=Ops, D6=Compliance.
+    Uses claim values and evidence presence; scale 0-5.
     """
-    # Placeholder: return default scores
-    # TODO: Implement actual scoring logic based on methodology
+    auth = _claim_value(claims, ClaimType.AUTH_MODEL)
+    tool_agency = _claim_value(claims, ClaimType.TOOL_CAPABILITIES) or _claim_value(
+        claims, ClaimType.TOOL_LIST
+    )
+    hosting = _claim_value(claims, ClaimType.HOSTING_CUSTODY)
+    n_evidence = len(evidence_items)
+    base = 2.0 if n_evidence else 0.0
+
+    d1 = 4.0 if auth and str(auth).lower() not in ("unknown", "none", "") else max(0.0, base - 1.0)
+    d2 = 3.5 if tool_agency else base
+    d3 = 3.0 if hosting else base
+    d4 = min(5.0, base + 0.5 * n_evidence)
+    d5 = min(5.0, base + 0.3 * n_evidence)
+    d6 = base
+
     return DomainScore(
-        d1=0.0,  # Authentication
-        d2=0.0,  # Authorization
-        d3=0.0,  # Data Protection
-        d4=0.0,  # Audit & Logging
-        d5=0.0,  # Operational Security
-        d6=0.0,  # Compliance
+        d1=min(5.0, max(0.0, d1)),
+        d2=min(5.0, max(0.0, d2)),
+        d3=min(5.0, max(0.0, d3)),
+        d4=min(5.0, max(0.0, d4)),
+        d5=min(5.0, max(0.0, d5)),
+        d6=min(5.0, max(0.0, d6)),
     )
 
 
@@ -240,12 +261,13 @@ def calculate_trust_score(
     # Detect risk flags
     risk_flags = detect_risk_flags(evidence_items, claims, domain_scores)
     
-    # Generate explainability payload
+    # Generate explainability payload (Pydantic v2: model_dump)
+    _dump = lambda m: m.model_dump() if hasattr(m, "model_dump") else m.dict()
     explainability = {
         "methodology_version": methodology_version,
-        "domain_scores": domain_scores.dict(),
+        "domain_scores": _dump(domain_scores),
         "evidence_confidence": evidence_confidence.value,
-        "flags": [flag.dict() for flag in fail_fast_flags + risk_flags],
+        "flags": [_dump(f) for f in fail_fast_flags + risk_flags],
     }
     
     return ScoreResult(

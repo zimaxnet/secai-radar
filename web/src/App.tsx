@@ -33,6 +33,11 @@ const MCPChangelog = lazy(() => import('./routes/mcp/Changelog'))
 const MCPSubmit = lazy(() => import('./routes/mcp/Submit'))
 const MCPAbout = lazy(() => import('./routes/mcp/About'))
 
+const RegistryLayout = lazy(() => import('./routes/registry/RegistryLayout'))
+const RegistryInventory = lazy(() => import('./routes/registry/RegistryInventory'))
+const RegistryPolicies = lazy(() => import('./routes/registry/RegistryPolicies'))
+const RegistryEvidence = lazy(() => import('./routes/registry/RegistryEvidence'))
+
 function Shell() {
   const { id } = useParams()
   const tenantId = id || (import.meta.env.VITE_DEFAULT_TENANT as string) || 'CONTOSO'
@@ -157,6 +162,13 @@ function App() {
         <Route path="/assessments" element={<Assessments />} />
         
         {/* MCP Public Routes */}
+        {/* Private Registry (T-110–T-113): auth + workspace context */}
+        <Route path="/registry" element={<RegistryLayout />}>
+          <Route index element={<RegistryInventory />} />
+          <Route path="policies" element={<RegistryPolicies />} />
+          <Route path="evidence" element={<RegistryEvidence />} />
+        </Route>
+
         <Route path="/mcp" element={<MCPLayout />}>
           <Route index element={<MCPOverview />} />
           <Route path="rankings" element={<MCPRankings />} />
@@ -165,6 +177,7 @@ function App() {
           <Route path="daily/:date" element={<MCPDailyBrief />} />
           <Route path="daily" element={<Navigate to={`/mcp/daily/${new Date().toISOString().split('T')[0]}`} replace />} />
           <Route path="methodology" element={<MCPMethodology />} />
+          <Route path="fairness" element={<MCPFairness />} />
           <Route path="changelog" element={<MCPChangelog />} />
           <Route path="submit" element={<MCPSubmit />} />
           <Route path="about" element={<MCPAbout />} />

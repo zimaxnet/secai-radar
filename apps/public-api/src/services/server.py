@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from typing import Any, Dict, List, Optional
 from src.models.server import MCPServer
 from src.models.score_snapshot import ScoreSnapshot
+from src.models.latest_score import LatestScore
 from src.models.evidence import EvidenceItem, ExtractedClaim
 from src.models.drift import DriftEvent
 
@@ -24,8 +25,10 @@ def get_server_by_id_or_slug(db: Session, id_or_slug: str) -> Optional[MCPServer
 
 
 def get_latest_score(db: Session, server_id: str) -> Optional[ScoreSnapshot]:
-    """Get latest score snapshot for a server"""
-    # TODO: Use latest_scores pointer table or materialized view
+    """Get latest score snapshot for a server (uses latest_scores when populated)."""
+    ptr = db.query(LatestScore).filter(LatestScore.server_id == server_id).first()
+    if ptr:
+        return db.query(ScoreSnapshot).filter(ScoreSnapshot.score_id == ptr.score_id).first()
     return db.query(ScoreSnapshot).filter(
         ScoreSnapshot.server_id == server_id
     ).order_by(ScoreSnapshot.assessed_at.desc()).first()

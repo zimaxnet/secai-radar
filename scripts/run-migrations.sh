@@ -17,12 +17,13 @@ fi
 if [ -z "${DATABASE_URL}" ]; then
   echo "DATABASE_URL is not set."
   echo "Example:"
-  echo "  export DATABASE_URL=\"postgresql://ctxecoadmin:<PASSWORD>@ctxeco-db.postgres.database.azure.com:5432/secairadar\""
+  echo "  export DATABASE_URL=\"postgresql://ctxecoadmin:<PASSWORD>@ctxeco-db.postgres.database.azure.com:5432/secairadar?sslmode=require\""
   echo "Or store it in Key Vault and run with: KEY_VAULT_NAME=secai-radar-kv ./scripts/run-migrations.sh"
   echo "  (after: ./scripts/update-credentials.sh)"
   exit 1
 fi
 
+export DATABASE_URL
 API_DIR="apps/public-api"
 VENV="${API_DIR}/.venv"
 
@@ -35,5 +36,6 @@ echo "Installing dependencies ..."
 "$VENV/bin/pip" install -r "$API_DIR/requirements.txt" -q
 
 echo "Running migrations ..."
-"$VENV/bin/python" "$API_DIR/scripts/migrate.py"
+"$VENV/bin/python" "$API_DIR/scripts/migrate.py" || true
+"$VENV/bin/python" "$API_DIR/scripts/run_incremental_migrations.py"
 echo "Done."

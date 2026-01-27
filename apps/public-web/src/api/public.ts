@@ -23,6 +23,13 @@ const API_BASE = import.meta.env.VITE_API_BASE || '/api'
 const PUBLIC_API = `${API_BASE}/v1/public/mcp`
 const FETCH_TIMEOUT_MS = 12_000
 
+/** T-081: Status response for stale-data banner */
+export interface StatusResponse {
+  status: string
+  lastSuccessfulRun: string | null
+  timestamp: string
+}
+
 /**
  * Fetch with timeout so the UI never spins indefinitely.
  */
@@ -211,4 +218,25 @@ export async function getDailyBrief(date: string): Promise<DailyBrief | null> {
 export async function getCurrentDailyBrief(): Promise<DailyBrief | null> {
   const today = new Date().toISOString().split('T')[0]
   return getDailyBrief(today)
+}
+
+/**
+ * T-081: GET /api/v1/public/status — last successful pipeline run for stale-data banner
+ */
+export async function getStatus(): Promise<StatusResponse | null> {
+  try {
+    const url = `${API_BASE}/v1/public/status`
+    const response = await fetchWithTimeout(url, {
+      headers: { Accept: 'application/json' },
+    })
+    if (!response.ok) return null
+    const data = await response.json()
+    return {
+      status: data.status ?? 'operational',
+      lastSuccessfulRun: data.lastSuccessfulRun ?? null,
+      timestamp: data.timestamp ?? new Date().toISOString(),
+    }
+  } catch {
+    return null
+  }
 }

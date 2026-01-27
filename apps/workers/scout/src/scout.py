@@ -35,10 +35,13 @@ def fetch_source(source_url: str) -> List[Dict[str, Any]]:
         response.raise_for_status()
         
         # Parse response (format depends on source)
-        # For MVP, return placeholder structure
+        # Support top-level list or object with "servers" / "items" key
         data = response.json() if response.headers.get('content-type', '').startswith('application/json') else []
-        
-        return data if isinstance(data, list) else []
+        if isinstance(data, list):
+            return data
+        if isinstance(data, dict):
+            return data.get('servers') or data.get('items') or []
+        return []
     except Exception as e:
         print(f"Error fetching {source_url}: {e}")
         return []

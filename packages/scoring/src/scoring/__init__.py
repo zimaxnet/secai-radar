@@ -11,6 +11,9 @@ from .models import (
     TrustScore,
     Tier,
     EnterpriseFit,
+    EvidenceConfidence,
+    EvidenceType,
+    ClaimType,
     Flag,
 )
 
@@ -24,5 +27,8 @@ __all__ = [
     "TrustScore",
     "Tier",
     "EnterpriseFit",
+    "EvidenceConfidence",
+    "EvidenceType",
+    "ClaimType",
     "Flag",
 ]

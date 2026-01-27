@@ -2,12 +2,21 @@
 
 Private API service for Trust Registry at secairadar.cloud/api/v1/private/*
 
+All `/api/v1/private/*` routes require a valid Entra ID (Azure AD) JWT bearer token. See [Auth](#auth) and [Entra app registration](../../docs/setup/REGISTRY-API-ENTRA.md).
+
 ## Tech Stack
 - Python 3.11+
 - FastAPI
 - SQLAlchemy
 - PostgreSQL
 - Entra ID OIDC
+
+## Auth
+
+- **ENTRA_ID_JWKS_URL** – JWKS endpoint for token verification (e.g. `https://login.microsoftonline.com/{tenant}/discovery/v2.0/keys?appid={client_id}` or your tenant’s OpenID Config `jwks_uri`).
+- **ENTRA_ID_AUDIENCE** – Required audience in the JWT (e.g. API “Application ID URI” or client ID of the registry API app).
+
+If either is unset, the API returns 503 for protected routes. Entra app-registration steps: [REGISTRY-API-ENTRA.md](../../docs/setup/REGISTRY-API-ENTRA.md).
 
 ## Development
 ```bash

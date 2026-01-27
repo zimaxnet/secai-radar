@@ -31,7 +31,13 @@ async def etag_middleware(request: Request, call_next):
                 # Check If-None-Match header
                 if_none_match = request.headers.get("If-None-Match")
                 if if_none_match and if_none_match.strip('"') == etag:
-                    return Response(status_code=304)
+                    return Response(
+                        status_code=304,
+                        headers={
+                            "ETag": f'"{etag}"',
+                            "Cache-Control": "public, max-age=300",
+                        },
+                    )
             except:
                 pass
     

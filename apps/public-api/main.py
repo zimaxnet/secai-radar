@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from datetime import datetime
 from src.middleware.etag import etag_middleware
+from src.middleware.rate_limit import rate_limit_middleware
 
 app = FastAPI(
     title="SecAI Radar Public API",
@@ -23,7 +24,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ETag middleware
+# Rate limiting (T-130) then ETag
+app.middleware("http")(rate_limit_middleware)
 app.middleware("http")(etag_middleware)
 
 METHODOLOGY_VERSION = "v1.0"

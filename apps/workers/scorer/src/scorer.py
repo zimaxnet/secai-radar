@@ -3,12 +3,14 @@ Scorer Worker - Trust Score calculation
 Computes scores using packages/scoring library
 """
 
+import hashlib
+import json
 import os
 import sys
-import psycopg2
 from datetime import datetime
-from typing import Dict, Any, List
-import json
+from typing import Any, Dict, List
+
+import psycopg2
 
 # Add scoring package to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../../packages/scoring/src'))
@@ -103,8 +105,8 @@ def store_score_snapshot(db, server_id: str, score_result) -> str:
             score_result.trust_score.tier.value,
             score_result.trust_score.enterprise_fit.value,
             score_result.trust_score.evidence_confidence.value,
-            json.dumps([f.dict() for f in score_result.fail_fast_flags]),
-            json.dumps([f.dict() for f in score_result.risk_flags]),
+            json.dumps([(f.model_dump() if hasattr(f, "model_dump") else f.dict()) for f in score_result.fail_fast_flags]),
+            json.dumps([(f.model_dump() if hasattr(f, "model_dump") else f.dict()) for f in score_result.risk_flags]),
             json.dumps(score_result.explainability)
         ))
         db.commit()
@@ -113,10 +115,22 @@ def store_score_snapshot(db, server_id: str, score_result) -> str:
 
 
 def update_latest_score(db, server_id: str, score_id: str):
-    """Update latest_scores pointer"""
+    """Update latest_scores pointer (stable)."""
     with db.cursor() as cur:
         cur.execute("""
             INSERT INTO latest_scores (server_id, score_id, updated_at)
+            VALUES (%s, %s, %s)
+            ON CONFLICT (server_id)
+            DO UPDATE SET score_id = EXCLUDED.score_id, updated_at = EXCLUDED.updated_at
+        """, (server_id, score_id, datetime.utcnow()))
+        db.commit()
+
+
+def update_latest_score_staging(db, server_id: str, score_id: str):
+    """Update latest_scores_staging (T-051). Pipeline uses this when WRITE_TO_STAGING=1."""
+    with db.cursor() as cur:
+        cur.execute("""
+            INSERT INTO latest_scores_staging (server_id, score_id, updated_at)
             VALUES (%s, %s, %s)
             ON CONFLICT (server_id)
             DO UPDATE SET score_id = EXCLUDED.score_id, updated_at = EXCLUDED.updated_at
@@ -136,9 +150,11 @@ def score_server(db, server_id: str) -> Dict[str, Any]:
         # Store snapshot
         score_id = store_score_snapshot(db, server_id, score_result)
         
-        # Update latest pointer (staging - will be flipped by publisher)
-        # For MVP, update directly
-        update_latest_score(db, server_id, score_id)
+        # Update pointer: staging when WRITE_TO_STAGING=1 (pipeline), else stable (T-051)
+        if os.getenv("WRITE_TO_STAGING", "").strip().lower() in ("1", "true", "yes"):
+            update_latest_score_staging(db, server_id, score_id)
+        else:
+            update_latest_score(db, server_id, score_id)
         
         return {
             "success": True,

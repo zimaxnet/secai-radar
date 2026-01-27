@@ -1,0 +1,12 @@
+[project]
+name = "secai-radar-drift-sentinel"
+version = "1.0.0"
+description = "Drift Sentinel worker for score/flag/evidence change detection"
+requires-python = ">=3.11"
+dependencies = [
+    "psycopg2-binary>=2.9.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

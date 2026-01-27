@@ -1,0 +1,13 @@
+[project]
+name = "secai-radar-evidence-miner"
+version = "1.0.0"
+description = "Evidence Miner worker for docs/repo extraction and claim extraction"
+requires-python = ">=3.11"
+dependencies = [
+    "psycopg2-binary>=2.9.0",
+    "requests>=2.31.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

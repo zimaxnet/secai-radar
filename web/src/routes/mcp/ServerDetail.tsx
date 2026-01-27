@@ -1,11 +1,12 @@
 /**
  * MCP Server Detail (/mcp/servers/{serverSlug})
- * 
  * Purpose: full transparency - why scored, what changed, and what evidence exists.
+ * T-122: Graph tab loads GET .../graph and shows nodes/edges (list view + empty state).
  */
 
 import { useParams, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { getServerGraph } from '../../api/public'
 
 interface ServerData {
   id: string
@@ -28,6 +29,8 @@ export default function ServerDetail() {
   const [server, setServer] = useState<ServerData | null>(null)
   const [activeTab, setActiveTab] = useState<'overview' | 'evidence' | 'drift' | 'graph' | 'response'>('overview')
   const [loading, setLoading] = useState(true)
+  const [graphData, setGraphData] = useState<{ nodes: any[]; edges: any[]; hasSnapshot?: boolean } | null>(null)
+  const [graphLoading, setGraphLoading] = useState(false)
 
   useEffect(() => {
     // TODO: Replace with actual API calls
@@ -70,6 +73,23 @@ export default function ServerDetail() {
       setLoading(false)
     }, 500)
   }, [serverSlug])
+
+  useEffect(() => {
+    if (activeTab !== 'graph' || !serverSlug) return
+    setGraphLoading(true)
+    setGraphData(null)
+    getServerGraph(serverSlug).then((res) => {
+      if (res?.data) {
+        setGraphData({
+          nodes: res.data.nodes ?? [],
+          edges: res.data.edges ?? [],
+          hasSnapshot: res.meta?.hasSnapshot,
+        })
+      } else {
+        setGraphData({ nodes: [], edges: [], hasSnapshot: false })
+      }
+    }).catch(() => setGraphData({ nodes: [], edges: [] })).finally(() => setGraphLoading(false))
+  }, [activeTab, serverSlug])
 
   if (loading) {
     return (
@@ -253,9 +273,48 @@ export default function ServerDetail() {
         )}
 
         {activeTab === 'graph' && (
-          <div className="text-center py-12">
-            <p className="text-slate-400">Trust Graph Explorer tab - Coming soon</p>
-            <p className="text-sm text-slate-500 mt-2">Will show interactive graph: Server → Tools → Scopes → Data Domains → Evidence</p>
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-white">Trust Graph</h2>
+            {graphLoading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+              </div>
+            )}
+            {!graphLoading && graphData && (
+              <>
+                {(!graphData.nodes?.length && !graphData.edges?.length) && (
+                  <div className="text-center py-12 rounded-lg bg-slate-800/30 border border-slate-700/50">
+                    <p className="text-slate-400">No graph snapshot yet</p>
+                    <p className="text-sm text-slate-500 mt-2">Run the graph builder job to generate Server → Tools → Evidence nodes. Snapshot will appear here.</p>
+                  </div>
+                )}
+                {(graphData.nodes?.length > 0 || graphData.edges?.length > 0) && (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <h3 className="text-sm font-medium text-slate-400 mb-2">Nodes ({graphData.nodes?.length ?? 0})</h3>
+                      <ul className="space-y-1 max-h-64 overflow-y-auto">
+                        {(graphData.nodes ?? []).map((n: any, i: number) => (
+                          <li key={n.id ?? i} className="flex items-center gap-2 p-2 rounded bg-slate-800/50 text-sm">
+                            <span className="font-mono text-blue-400">{n.type}</span>
+                            <span className="text-white truncate">{n.label ?? n.id}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-slate-400 mb-2">Edges ({graphData.edges?.length ?? 0})</h3>
+                      <ul className="space-y-1 max-h-64 overflow-y-auto">
+                        {(graphData.edges ?? []).map((e: any, i: number) => (
+                          <li key={i} className="p-2 rounded bg-slate-800/50 text-sm font-mono text-slate-300">
+                            {e.from} → {e.to} <span className="text-slate-500">({e.type})</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
 

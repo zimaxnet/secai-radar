@@ -42,20 +42,18 @@ def normalize_url(url: str) -> Optional[str]:
         return None
 
 
-async def generate_provider_id(legal_name: str, primary_domain: str) -> str:
+def generate_provider_id(legal_name: str, primary_domain: str) -> str:
     """Generate canonical provider ID"""
     normalized = f"{normalize_name(legal_name)}|{normalize_url(primary_domain) or ''}"
-    # Use simple hash for MVP (port from TypeScript)
     hash_val = int(hashlib.sha256(normalized.encode()).hexdigest()[:16], 16)
     return format(hash_val, '016x')
 
 
-async def generate_server_id(repo_url: Optional[str], endpoint: Optional[str], docs_url: Optional[str], name: str, source: str) -> str:
+def generate_server_id(repo_url: Optional[str], endpoint: Optional[str], docs_url: Optional[str], name: str, source: str) -> str:
     """
-    Generate canonical server ID with precedence:
+    Generate canonical server ID with precedence (T-071):
     repoUrl > endpoint host > docs URL > name+source
     """
-    # Precedence order
     if repo_url:
         normalized = normalize_url(repo_url) or ""
     elif endpoint:
@@ -65,38 +63,40 @@ async def generate_server_id(repo_url: Optional[str], endpoint: Optional[str], d
         normalized = normalize_url(docs_url) or ""
     else:
         normalized = f"{normalize_name(name)}|{source}"
-    
     hash_val = int(hashlib.sha256(normalized.encode()).hexdigest()[:16], 16)
     return format(hash_val, '016x')
 
 
-def dedupe_servers(db, raw_observations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def dedupe_servers(
+    db, raw_observations: List[Dict[str, Any]], review_log: Optional[List[tuple]] = None
+) -> List[Dict[str, Any]]:
     """
-    Deduplicate servers using heuristics
-    
-    Returns:
-        List of canonical server records
+    Deduplicate servers using heuristics. ID precedence: repoUrl > endpoint host > docs URL > name+source.
+    Logs to review_log when skipping (duplicate or ambiguous) for T-071 acceptance.
     """
+    log = review_log if review_log is not None else []
     canonical_servers = []
-    
+    seen_ids = set()
+
     for obs in raw_observations:
-        # Extract server info
-        repo_url = obs.get('repo_url') or obs.get('repository')
-        endpoint = obs.get('endpoint') or obs.get('url')
-        docs_url = obs.get('docs_url') or obs.get('documentation')
-        name = obs.get('name') or obs.get('server_name', 'Unknown')
-        source = obs.get('source_url', 'unknown')
-        
-        # Generate canonical ID
+        repo_url = obs.get("repo_url") or obs.get("repository")
+        endpoint = obs.get("endpoint") or obs.get("url")
+        docs_url = obs.get("docs_url") or obs.get("documentation")
+        name = obs.get("name") or obs.get("server_name", "Unknown")
+        source = obs.get("source_url", "unknown")
+
         server_id = generate_server_id(repo_url, endpoint, docs_url, name, source)
-        
-        # Check if already exists
+
         with db.cursor() as cur:
             cur.execute("SELECT server_id FROM mcp_servers WHERE server_id = %s", (server_id,))
             if cur.fetchone():
-                continue  # Already exists
-        
-        # Create canonical record
+                log.append(("duplicate", server_id, name))
+                continue
+        if server_id in seen_ids:
+            log.append(("ambiguous_same_batch", server_id, name))
+            continue
+        seen_ids.add(server_id)
+
         canonical_servers.append({
             "server_id": server_id,
             "server_name": name,
@@ -105,21 +105,21 @@ def dedupe_servers(db, raw_observations: List[Dict[str, Any]]) -> List[Dict[str,
             "docs_url": docs_url,
             "source": source,
         })
-    
     return canonical_servers
 
 
 def store_canonical_servers(db, servers: List[Dict[str, Any]], provider_id: str):
-    """Store canonical server records"""
+    """Store canonical server records. Required mcp_servers columns use Unknown defaults."""
     with db.cursor() as cur:
         for server in servers:
             cur.execute("""
                 INSERT INTO mcp_servers (
                     server_id, server_slug, server_name, provider_id,
+                    deployment_type, auth_model, tool_agency,
                     repo_url, docs_url, first_seen_at, last_seen_at
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                ON CONFLICT (server_id) 
-                DO UPDATE SET 
+                ) VALUES (%s, %s, %s, %s, 'Unknown', 'Unknown', 'Unknown', %s, %s, %s, %s)
+                ON CONFLICT (server_id)
+                DO UPDATE SET
                     last_seen_at = EXCLUDED.last_seen_at,
                     repo_url = COALESCE(EXCLUDED.repo_url, mcp_servers.repo_url),
                     docs_url = COALESCE(EXCLUDED.docs_url, mcp_servers.docs_url)
@@ -161,19 +161,26 @@ def run_curator():
                 "processedAt": datetime.utcnow().isoformat()
             }
         
-        # Parse observations
-        observations = [json.loads(obs[2]) for obs in raw_obs]
+        # Parse observations and attach source_url (column, not in content_json)
+        observations = [dict(json.loads(obs[2]), source_url=obs[1]) for obs in raw_obs]
         
-        # Deduplicate and canonicalize
-        # For MVP, use a default provider_id
-        default_provider_id = "0000000000000000"  # TODO: Get/create actual provider
+        # Ensure default provider exists for canonical records
+        default_provider_id = "0000000000000000"
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO providers (provider_id, provider_name, primary_domain, provider_type)
+                VALUES (%s, 'Unknown', 'unknown.local', 'Community')
+                ON CONFLICT (provider_id) DO NOTHING
+            """, (default_provider_id,))
+            conn.commit()
         
-        canonical_servers = dedupe_servers(conn, observations)
-        
-        # Store canonical records
+        review_log: List[tuple] = []
+        canonical_servers = dedupe_servers(conn, observations, review_log)
+        if review_log:
+            print("Review queue:", [{"reason": r[0], "server_id": r[1], "name": r[2]} for r in review_log])
+
         store_canonical_servers(conn, canonical_servers, default_provider_id)
-        
-        # Mark observations as processed
+
         with conn.cursor() as cur:
             obs_ids = [obs[0] for obs in raw_obs]
             cur.execute("""
@@ -182,13 +189,16 @@ def run_curator():
                 WHERE observation_id = ANY(%s)
             """, (datetime.utcnow(), obs_ids))
             conn.commit()
-        
-        return {
+
+        out: Dict[str, Any] = {
             "success": True,
             "observationsProcessed": len(raw_obs),
             "canonicalServersCreated": len(canonical_servers),
-            "processedAt": datetime.utcnow().isoformat()
+            "processedAt": datetime.utcnow().isoformat(),
         }
+        if review_log:
+            out["reviewQueueCount"] = len(review_log)
+        return out
     except Exception as e:
         conn.rollback()
         print(f"Curator error: {e}")

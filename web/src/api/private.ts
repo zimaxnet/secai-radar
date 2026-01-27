@@ -1,61 +1,54 @@
 /**
- * Private API Client (Trust Registry)
- * Based on Step 4: Data Model + API Spec specification
- * 
- * Private endpoints require authentication (Entra ID / JWT) and RBAC.
+ * Private API Client (Trust Registry) — T-110/T-111/T-112/T-113
+ * Requires Entra ID JWT and workspace_id (query or X-Workspace-Id).
  */
-
-import type { PublicAPIResponse } from '../types/dataModel'
 
 const API_BASE = import.meta.env.VITE_API_BASE || '/api'
-const PRIVATE_API = `${API_BASE}/v1/private/registry`
+const REGISTRY_API = import.meta.env.VITE_REGISTRY_API_BASE || `${API_BASE}/v1/private/registry`
 
-/**
- * Get authentication token (placeholder - implement based on your auth system)
- */
-async function getAuthToken(): Promise<string | null> {
-  // TODO: Implement actual auth token retrieval
-  // This should use your Entra ID / OIDC implementation
-  return null
+let _config: { token: string | null; workspaceId: string | null } = { token: null, workspaceId: null }
+
+/** Set token and workspace after login (called from Registry layout). */
+export function setPrivateAPIConfig(token: string | null, workspaceId: string | null) {
+  _config = { token, workspaceId }
 }
 
-/**
- * Standard fetch wrapper for private API with auth
- */
-async function fetchPrivateAPI<T>(
+function urlWithWorkspace(path: string, workspaceId?: string | null): string {
+  const wid = workspaceId ?? _config.workspaceId
+  const base = `${REGISTRY_API}${path}`
+  if (!wid) return base
+  const sep = path.includes('?') ? '&' : '?'
+  return `${base}${sep}workspace_id=${encodeURIComponent(wid)}`
+}
+
+async function fetchPrivate<T>(
   endpoint: string,
-  options: RequestInit = {}
-): Promise<PublicAPIResponse<T> | null> {
-  const token = await getAuthToken()
-  
+  options: RequestInit = {},
+  workspaceId?: string | null
+): Promise<T | null> {
+  const token = _config.token
   if (!token) {
-    console.error('No authentication token available')
+    console.error('No auth token — sign in in Registry')
     return null
   }
-
+  const url = urlWithWorkspace(endpoint, workspaceId)
   try {
-    const response = await fetch(`${PRIVATE_API}${endpoint}`, {
+    const res = await fetch(url, {
       ...options,
       headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...options.headers,
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+        ...(options.headers as Record<string, string>),
       },
     })
-
-    if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        // Handle auth errors
-        console.error('Authentication/authorization error')
-        return null
-      }
-      const error = await response.json().catch(() => ({ error: { code: 'Unknown', message: response.statusText } }))
-      throw new Error(error.error?.message || `API error: ${response.status}`)
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) return null
+      const err = await res.json().catch(() => ({}))
+      throw new Error((err as { detail?: string }).detail || res.statusText)
     }
-
-    return await response.json()
-  } catch (error) {
-    console.error(`Private API error (${endpoint}):`, error)
+    return await res.json()
+  } catch (e) {
+    console.error(`Private API ${endpoint}:`, e)
     return null
   }
 }
@@ -64,318 +57,154 @@ async function fetchPrivateAPI<T>(
 // 6.2 Private Endpoints
 // ============================================================================
 
-/**
- * Registry inventory
- * GET /api/v1/private/registry/servers
- */
-export async function getRegistryServers(workspaceId?: string): Promise<any[]> {
-  const params = workspaceId ? `?workspaceId=${workspaceId}` : ''
-  const response = await fetchPrivateAPI<{ items: any[] }>(`/servers${params}`)
-  return response?.data?.items || []
+/** GET /api/v1/private/registry/servers */
+export async function getRegistryServers(workspaceId?: string | null): Promise<{ servers: any[]; total: number }> {
+  const r = await fetchPrivate<{ servers: any[]; total: number }>('/servers', {}, workspaceId)
+  return r ?? { servers: [], total: 0 }
 }
 
-/**
- * POST /api/v1/private/registry/servers
- * Add server to org inventory
- */
-export async function addRegistryServer(serverId: string, metadata: {
-  owner?: string
-  purpose?: string
-  environment?: string
-}): Promise<any> {
-  const response = await fetchPrivateAPI<any>('/servers', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      serverId,
-      ...metadata,
-    }),
-  })
-  return response?.data || null
-}
-
-/**
- * GET /api/v1/private/registry/servers/{serverId}
- */
-export async function getRegistryServer(serverId: string): Promise<any> {
-  const response = await fetchPrivateAPI<any>(`/servers/${serverId}`)
-  return response?.data || null
-}
-
-/**
- * PATCH /api/v1/private/registry/servers/{serverId}
- * Update org metadata
- */
-export async function updateRegistryServer(
-  serverId: string,
-  metadata: {
-    owner?: string
-    purpose?: string
-    environment?: string
-  }
+/** POST /api/v1/private/registry/servers */
+export async function addRegistryServer(
+  body: { serverId: string; owner?: string; purpose?: string; environment?: string },
+  workspaceId?: string | null
 ): Promise<any> {
-  const response = await fetchPrivateAPI<any>(`/servers/${serverId}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(metadata),
-  })
-  return response?.data || null
+  return await fetchPrivate<any>('/servers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }, workspaceId)
 }
 
 /**
- * Policies + approvals
  * GET /api/v1/private/registry/policies
  */
-export async function getPolicies(workspaceId?: string): Promise<any[]> {
-  const params = workspaceId ? `?workspaceId=${workspaceId}` : ''
-  const response = await fetchPrivateAPI<{ items: any[] }>(`/policies${params}`)
-  return response?.data?.items || []
+export async function getPolicies(workspaceId?: string | null): Promise<{ policies: any[] }> {
+  const r = await fetchPrivate<{ policies: any[] }>('/policies', {}, workspaceId)
+  return r ?? { policies: [] }
 }
 
-/**
- * POST /api/v1/private/registry/policies
- * Create allow/deny/prompt-for-approval rules
- */
+/** POST /api/v1/private/registry/policies */
 export interface CreatePolicyRequest {
-  workspaceId: string
-  scope: {
-    type: 'server' | 'tool' | 'category'
-    value: string
-  }
+  scope: { type: 'server' | 'tool' | 'category'; value: string }
   decision: 'Allow' | 'Deny' | 'RequireApproval'
-  conditions?: {
-    env?: string
-    dataClass?: string
-    toolAgency?: string
-    evidenceConfidence?: number
-  }
+  conditions?: Record<string, unknown>
   expiresAt?: string
 }
 
-export async function createPolicy(policy: CreatePolicyRequest): Promise<any> {
-  const response = await fetchPrivateAPI<any>('/policies', {
+export async function createPolicy(body: CreatePolicyRequest, workspaceId?: string | null): Promise<any> {
+  return await fetchPrivate<any>('/policies', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(policy),
-  })
-  return response?.data || null
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }, workspaceId)
 }
 
-/**
- * POST /api/v1/private/registry/policies/{policyId}/approve
- */
-export async function approvePolicy(policyId: string, approval: {
-  approvedBy: string
-  notes?: string
-}): Promise<any> {
-  const response = await fetchPrivateAPI<any>(`/policies/${policyId}/approve`, {
+/** POST /api/v1/private/registry/policies/{policyId}/approve */
+export async function approvePolicy(policyId: string, body?: { notes?: string }, workspaceId?: string | null): Promise<any> {
+  return await fetchPrivate<any>(`/policies/${policyId}/approve`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(approval),
-  })
-  return response?.data || null
+    headers: body ? { 'Content-Type': 'application/json' } : {},
+    body: body ? JSON.stringify(body) : undefined,
+  } as RequestInit, workspaceId)
 }
 
-/**
- * POST /api/v1/private/registry/policies/{policyId}/deny
- */
-export async function denyPolicy(policyId: string, denial: {
-  deniedBy: string
-  reason: string
-}): Promise<any> {
-  const response = await fetchPrivateAPI<any>(`/policies/${policyId}/deny`, {
+/** POST /api/v1/private/registry/policies/{policyId}/deny */
+export async function denyPolicy(policyId: string, body?: { notes?: string }, workspaceId?: string | null): Promise<any> {
+  return await fetchPrivate<any>(`/policies/${policyId}/deny`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(denial),
-  })
-  return response?.data || null
-}
-
-/**
- * Evidence packs (private uploads)
- * POST /api/v1/private/registry/evidence-packs
- */
-export async function uploadEvidencePack(file: File, metadata: {
-  serverId: string
-  type: string
-  description?: string
-}): Promise<any> {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('metadata', JSON.stringify(metadata))
-
-  const response = await fetchPrivateAPI<any>('/evidence-packs', {
-    method: 'POST',
-    body: formData,
-  })
-  return response?.data || null
+    headers: body ? { 'Content-Type': 'application/json' } : {},
+    body: body ? JSON.stringify(body) : undefined,
+  }, workspaceId)
 }
 
 /**
  * GET /api/v1/private/registry/evidence-packs
+ * Query by workspace (from context or param). Optional: serverId, status (Submitted|Validated|Rejected).
  */
-export async function getEvidencePacks(workspaceId?: string): Promise<any[]> {
-  const params = workspaceId ? `?workspaceId=${workspaceId}` : ''
-  const response = await fetchPrivateAPI<{ items: any[] }>(`/evidence-packs${params}`)
-  return response?.data?.items || []
+export async function getEvidencePacks(
+  params?: { serverId?: string; status?: string },
+  workspaceId?: string | null
+): Promise<{ items: Array<{ packId: string; serverId: string; status: string; submittedAt?: string; validatedAt?: string; validatedBy?: string; confidence?: number }>; total: number }> {
+  const q = new URLSearchParams()
+  if (params?.serverId) q.set('serverId', params.serverId)
+  if (params?.status) q.set('status', params.status)
+  const suffix = q.toString() ? `?${q.toString()}` : ''
+  const r = await fetchPrivate<{ items: unknown[]; total: number }>(`/evidence-packs${suffix}`, {}, workspaceId)
+  return r ?? { items: [], total: 0 }
 }
 
 /**
- * POST /api/v1/private/registry/evidence-packs/{id}/validate
+ * POST /api/v1/private/registry/evidence-packs — multipart: serverId (form) + file
  */
-export async function validateEvidencePack(packId: string, validation: {
-  validatedBy: string
-  confidence: 1 | 2 | 3
-  notes?: string
-}): Promise<any> {
-  const response = await fetchPrivateAPI<any>(`/evidence-packs/${packId}/validate`, {
+export async function uploadEvidencePack(
+  serverId: string,
+  file?: File | null,
+  workspaceId?: string | null
+): Promise<any> {
+  const form = new FormData()
+  form.append('serverId', serverId)
+  if (file) form.append('file', file)
+  return await fetchPrivate<any>('/evidence-packs', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(validation),
-  })
-  return response?.data || null
+    body: form,
+  }, workspaceId)
 }
 
-/**
- * Exports (audit packs)
- * POST /api/v1/private/registry/exports/audit-pack
- */
-export interface CreateAuditPackRequest {
-  serverIds: string[]
-  dateRange: {
-    from: string
-    to: string
-  }
-  includeLogs: boolean
-  redactionLevel: 'none' | 'partial' | 'full'
+/** POST /api/v1/private/registry/evidence-packs/{id}/validate */
+export async function validateEvidencePack(
+  packId: string,
+  params?: { confidence?: number },
+  workspaceId?: string | null
+): Promise<any> {
+  const q = params?.confidence != null ? `?confidence=${params.confidence}` : ''
+  return await fetchPrivate<any>(`/evidence-packs/${packId}/validate${q}`, { method: 'POST' }, workspaceId)
 }
 
-export async function createAuditPack(request: CreateAuditPackRequest): Promise<{
-  exportId: string
-  status: 'queued' | 'processing' | 'completed' | 'failed'
-}> {
-  const response = await fetchPrivateAPI<{
-    exportId: string
-    status: string
-  }>('/exports/audit-pack', {
+/** POST /api/v1/private/registry/exports/audit-pack */
+export async function createAuditPack(
+  body?: { dateFrom?: string; dateTo?: string },
+  workspaceId?: string | null
+): Promise<{ exportId: string; status: string }> {
+  const r = await fetchPrivate<{ exportId: string; status: string }>('/exports/audit-pack', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(request),
-  })
-  return response?.data || { exportId: '', status: 'failed' }
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body ?? {}),
+  }, workspaceId)
+  return r ?? { exportId: '', status: 'failed' }
 }
 
-/**
- * GET /api/v1/private/registry/exports/{exportId}
- */
-export async function getExport(exportId: string): Promise<{
-  exportId: string
-  status: 'queued' | 'processing' | 'completed' | 'failed'
-  downloadUrl?: string
-  error?: string
-}> {
-  const response = await fetchPrivateAPI<any>(`/exports/${exportId}`)
-  return response?.data || { exportId, status: 'failed' }
+/** GET /api/v1/private/registry/exports/{exportId} */
+export async function getExport(exportId: string, workspaceId?: string | null): Promise<any> {
+  return await fetchPrivate<any>(`/exports/${exportId}`, {}, workspaceId)
 }
 
-/**
- * Automation runs
- * GET /api/v1/private/registry/agents/runs?date=...
- */
-export async function getAgentRuns(date?: string): Promise<any[]> {
-  const params = date ? `?date=${date}` : ''
-  const response = await fetchPrivateAPI<{ items: any[] }>(`/agents/runs${params}`)
-  return response?.data?.items || []
+/** Stub: agents/runs (not implemented in registry-api yet) */
+export async function getAgentRuns(_date?: string, workspaceId?: string | null): Promise<any[]> {
+  await fetchPrivate<any>('/agents/runs', {}, workspaceId)
+  return []
 }
 
-/**
- * POST /api/v1/private/registry/agents/run
- * Trigger run
- */
-export async function triggerAgentRun(config?: {
-  stages?: string[]
-  force?: boolean
-}): Promise<any> {
-  const response = await fetchPrivateAPI<any>('/agents/run', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(config || {}),
-  })
-  return response?.data || null
+/** Stub: agents/run */
+export async function triggerAgentRun(_config?: object, workspaceId?: string | null): Promise<any> {
+  return await fetchPrivate<any>('/agents/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }, workspaceId)
 }
 
-/**
- * POST /api/v1/private/registry/agents/schedules
- * Configure daily schedules
- */
-export async function configureSchedule(schedule: {
-  enabled: boolean
-  cronExpression?: string
-  stages?: string[]
-}): Promise<any> {
-  const response = await fetchPrivateAPI<any>('/agents/schedules', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(schedule),
-  })
-  return response?.data || null
+/** Stub: agents/schedules */
+export async function configureSchedule(_schedule: object, workspaceId?: string | null): Promise<any> {
+  return await fetchPrivate<any>('/agents/schedules', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }, workspaceId)
 }
 
-/**
- * Outbox (distribution drafts)
- * GET /api/v1/private/outbox?date=...
- */
-export async function getOutbox(date?: string): Promise<any[]> {
-  const params = date ? `?date=${date}` : ''
-  const response = await fetchPrivateAPI<{ items: any[] }>(`/outbox${params}`)
-  return response?.data?.items || []
+/** Stub: outbox */
+export async function getOutbox(_date?: string): Promise<any[]> {
+  return []
 }
 
-/**
- * POST /api/v1/private/outbox
- * Create scheduled post payload
- */
-export async function createOutboxItem(item: {
-  channel: 'x' | 'linkedin' | 'reddit' | 'hn' | 'mastodon' | 'bluesky'
-  content: string
-  media?: string[]
-  links: string[]
-  scheduledFor?: string
-}): Promise<any> {
-  const response = await fetchPrivateAPI<any>('/outbox', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(item),
-  })
-  return response?.data || null
+/** Stub: createOutboxItem */
+export async function createOutboxItem(_item: object): Promise<any> {
+  return null
 }
 
-/**
- * POST /api/v1/private/outbox/{id}/mark-sent
- */
-export async function markOutboxItemSent(outboxId: string): Promise<any> {
-  const response = await fetchPrivateAPI<any>(`/outbox/${outboxId}/mark-sent`, {
-    method: 'POST',
-  })
-  return response?.data || null
+/** Stub: markOutboxItemSent */
+export async function markOutboxItemSent(_outboxId: string): Promise<any> {
+  return null
 }

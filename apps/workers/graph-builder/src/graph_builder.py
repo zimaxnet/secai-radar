@@ -1,12 +1,15 @@
 """
-Graph Builder Worker - Builds per-server graph snapshots
+Graph Builder Worker (T-120) - Builds per-server graph snapshots.
+Writes to server_graph_snapshots (snapshot_id, server_id, assessed_at, graph_json).
 """
 
-import os
-import psycopg2
+import hashlib
 import json
-from datetime import datetime
-from typing import Dict, Any, List
+import os
+from datetime import datetime, timezone
+from typing import Any, Dict
+
+import psycopg2
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
@@ -64,7 +67,18 @@ def build_server_graph(db, server_id: str) -> Dict[str, Any]:
             LIMIT 1
         """, (server_id,))
         score_row = cur.fetchone()
-        
+
+        # Handle json/dict from DB
+        def _load(v):
+            if v is None:
+                return []
+            if isinstance(v, (list, dict)):
+                return v
+            try:
+                return json.loads(v) if isinstance(v, str) else []
+            except Exception:
+                return []
+
         # Build graph structure
         graph = {
             "nodes": [],
@@ -124,8 +138,8 @@ def build_server_graph(db, server_id: str) -> Dict[str, Any]:
                 "properties": {
                     "tier": score_row[0],
                     "trustScore": float(score_row[1]),
-                    "failFastFlags": json.loads(score_row[2] or "[]"),
-                    "riskFlags": json.loads(score_row[3] or "[]")
+                    "failFastFlags": _load(score_row[2]),
+                    "riskFlags": _load(score_row[3])
                 }
             })
             graph["edges"].append({
@@ -137,27 +151,16 @@ def build_server_graph(db, server_id: str) -> Dict[str, Any]:
         return graph
 
 
-def store_graph_snapshot(db, server_id: str, graph: Dict[str, Any]):
-    """Store graph snapshot"""
-    graph_id = hashlib.sha256(
-        f"{server_id}|{datetime.utcnow().isoformat()}".encode()
-    ).hexdigest()[:16]
-    
-    with db.cursor() as cur:
-        # Check if table exists (would be created by migration)
+def store_graph_snapshot(conn, server_id: str, graph: Dict[str, Any]) -> None:
+    """Write one row to server_graph_snapshots (migration 006)."""
+    assessed_at = datetime.now(timezone.utc)
+    snapshot_id = ("sg" + hashlib.sha256(f"{server_id}|{assessed_at.isoformat()}".encode()).hexdigest())[:16]
+    with conn.cursor() as cur:
         cur.execute("""
-            INSERT INTO server_graph_snapshots (
-                graph_id, server_id, graph_json, assessed_at
-            ) VALUES (%s, %s, %s, %s)
-            ON CONFLICT (server_id, assessed_at) DO UPDATE SET
-                graph_json = EXCLUDED.graph_json
-        """, (
-            graph_id,
-            server_id,
-            json.dumps(graph),
-            datetime.utcnow()
-        ))
-        db.commit()
+            INSERT INTO server_graph_snapshots (snapshot_id, server_id, assessed_at, graph_json, created_at)
+            VALUES (%s, %s, %s, %s::jsonb, NOW())
+        """, (snapshot_id, server_id, assessed_at, json.dumps(graph)))
+    conn.commit()
 
 
 def run_graph_builder():
@@ -198,6 +201,5 @@ def run_graph_builder():
 
 
 if __name__ == "__main__":
-    import hashlib
     result = run_graph_builder()
     print(json.dumps(result, indent=2, default=str))

@@ -1,0 +1,4 @@
+MCP Trust Radar daily brief for {date}. {movers_phrase} {downgrades_phrase} {drift_phrase}
+
+Highlights:
+{highlights_list}

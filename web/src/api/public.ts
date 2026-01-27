@@ -153,12 +153,21 @@ export async function getServerDrift(
 }
 
 /**
- * 4.7 Server graph (public redacted)
+ * 4.7 Server graph (T-121). Public redacted; 200 with empty nodes/edges when missing.
  * GET /api/v1/public/mcp/servers/{serverIdOrSlug}/graph
  */
-export async function getServerGraph(serverIdOrSlug: string): Promise<ServerGraphResponse | null> {
-  const response = await fetchPublicAPI<ServerGraphResponse>(`/servers/${encodeURIComponent(serverIdOrSlug)}/graph`)
-  return response?.data || null
+export async function getServerGraph(serverIdOrSlug: string): Promise<{
+  methodologyVersion?: string
+  generatedAt?: string
+  data: { nodes: any[]; edges: any[] }
+  meta?: { hasSnapshot: boolean }
+} | null> {
+  const res = await fetch(`${PUBLIC_API}/servers/${encodeURIComponent(serverIdOrSlug)}/graph`, {
+    headers: { Accept: 'application/json' },
+  })
+  if (!res.ok) return null
+  const body = await res.json()
+  return body as any
 }
 
 /**
@@ -193,4 +202,30 @@ export async function getDailyBrief(date: string): Promise<DailyBrief | null> {
 export async function getCurrentDailyBrief(): Promise<DailyBrief | null> {
   const today = new Date().toISOString().split('T')[0]
   return getDailyBrief(today)
+}
+
+/** T-081: Status response for stale-data banner */
+export interface StatusResponse {
+  status: string
+  lastSuccessfulRun: string | null
+  timestamp: string
+}
+
+/**
+ * T-081: GET /api/v1/public/status — last successful pipeline run for stale-data banner
+ */
+export async function getStatus(): Promise<StatusResponse | null> {
+  try {
+    const url = `${API_BASE}/v1/public/status`
+    const response = await fetch(url, { headers: { Accept: 'application/json' } })
+    if (!response.ok) return null
+    const data = await response.json()
+    return {
+      status: data.status ?? 'operational',
+      lastSuccessfulRun: data.lastSuccessfulRun ?? null,
+      timestamp: data.timestamp ?? new Date().toISOString(),
+    }
+  } catch {
+    return null
+  }
 }
