@@ -117,6 +117,8 @@ jobs:
         run: |
           cd apps/workers/sage-meridian
           pip install -e .
+          echo "Running daily_brief.py..."
+          ls -la src/
           python src/daily_brief.py
 
   publisher:
