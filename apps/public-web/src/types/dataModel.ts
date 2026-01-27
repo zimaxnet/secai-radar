@@ -333,3 +333,19 @@ export interface ProviderPortfolioResponse {
     flags: string[]
   }>
 }
+
+export interface ServerStory {
+  serverId: string
+  serverSlug: string
+  serverName: string
+  providerName: string
+  title: string
+  narrative: string
+  highlights: string[]
+  benefits: string[]
+  researchPoints: string[]
+  trustScore: number
+  tier: 'A' | 'B' | 'C' | 'D'
+  evidenceConfidence: number
+  featuredAt: string
+}

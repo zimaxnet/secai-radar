@@ -8,6 +8,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { getServerDetail } from '../../api/public'
 import { trackPageView } from '../../utils/analytics'
+import type { ServerStory } from '../../types/dataModel'
 
 interface ServerData {
   id: string
@@ -28,8 +29,88 @@ interface ServerData {
 export default function ServerDetail() {
   const { serverSlug } = useParams<{ serverSlug: string }>()
   const [server, setServer] = useState<ServerData | null>(null)
-  const [activeTab, setActiveTab] = useState<'overview' | 'evidence' | 'drift' | 'graph' | 'response'>('overview')
+  const [serverStory, setServerStory] = useState<ServerStory | null>(null)
+  const [activeTab, setActiveTab] = useState<'story' | 'overview' | 'evidence' | 'drift' | 'graph' | 'response'>('story')
   const [loading, setLoading] = useState(true)
+
+  // Generate story from server data
+  const generateStory = (serverData: ServerData): ServerStory => {
+    const tier = serverData.tier
+    const trustScore = serverData.trustScore
+    const evidenceConfidence = serverData.evidenceConfidence
+    const serverName = serverData.name
+    const providerName = serverData.provider
+
+    // Generate story based on tier and score
+    let title = ''
+    let narrative = ''
+    const highlights: string[] = []
+    const benefits: string[] = []
+    const researchPoints: string[] = []
+
+    if (tier === 'A' && trustScore >= 85) {
+      title = `Why ${serverName} Sets the Standard for MCP Security`
+      narrative = `${serverName} from ${providerName} represents the gold standard in MCP server security and trustworthiness. With a Trust Score of ${trustScore} and Tier A rating, this server demonstrates exceptional security practices across all six security domains. Our research shows that ${serverName} consistently maintains high evidence confidence (${evidenceConfidence}/3), meaning its security claims are well-documented and verifiable.`
+      
+      highlights.push(`Tier A rating with ${trustScore} Trust Score`)
+      highlights.push(`Evidence Confidence: ${evidenceConfidence}/3 (High)`)
+      highlights.push(`Enterprise-ready for regulated environments`)
+      
+      benefits.push('Strong authentication and authorization controls')
+      benefits.push('Comprehensive audit logging and compliance')
+      benefits.push('Proven track record of security best practices')
+      
+      researchPoints.push('Verified through multiple evidence sources')
+      researchPoints.push('Regular security assessments and updates')
+      researchPoints.push('Transparent security documentation')
+    } else if (tier === 'B' && trustScore >= 70) {
+      title = `${serverName}: A Reliable Choice for MCP Integration`
+      narrative = `${serverName} from ${providerName} offers a solid security foundation with a Trust Score of ${trustScore} and Tier B rating. This server provides good security coverage across key domains and is suitable for most enterprise use cases. With evidence confidence of ${evidenceConfidence}/3, ${serverName} demonstrates commitment to security transparency.`
+      
+      highlights.push(`Tier B rating with ${trustScore} Trust Score`)
+      highlights.push(`Evidence Confidence: ${evidenceConfidence}/3`)
+      highlights.push(`Suitable for standard enterprise deployments`)
+      
+      benefits.push('Good security posture with room for improvement')
+      benefits.push('Active development and maintenance')
+      benefits.push('Growing evidence base')
+      
+      researchPoints.push('Regular security assessments')
+      researchPoints.push('Ongoing security improvements')
+      researchPoints.push('Community and vendor support')
+    } else {
+      title = `Exploring ${serverName}: An Emerging MCP Server`
+      narrative = `${serverName} from ${providerName} is an emerging MCP server with a Trust Score of ${trustScore} and Tier ${tier} rating. While still building its security foundation, this server shows promise and active development. With evidence confidence of ${evidenceConfidence}/3, there's opportunity for growth in security transparency and practices.`
+      
+      highlights.push(`Tier ${tier} rating with ${trustScore} Trust Score`)
+      highlights.push(`Evidence Confidence: ${evidenceConfidence}/3`)
+      highlights.push(`Early stage with development potential`)
+      
+      benefits.push('Active development community')
+      benefits.push('Innovative features and capabilities')
+      benefits.push('Growing security awareness')
+      
+      researchPoints.push('Limited evidence base')
+      researchPoints.push('Opportunities for security improvements')
+      researchPoints.push('Community-driven development')
+    }
+
+    return {
+      serverId: serverData.id,
+      serverSlug: serverData.slug,
+      serverName,
+      providerName,
+      title,
+      narrative,
+      highlights,
+      benefits,
+      researchPoints,
+      trustScore,
+      tier,
+      evidenceConfidence: evidenceConfidence as 0 | 1 | 2 | 3,
+      featuredAt: new Date().toISOString(),
+    }
+  }
 
   useEffect(() => {
     if (!serverSlug) return
@@ -46,7 +127,7 @@ export default function ServerDetail() {
         if (serverData && serverData.server && serverData.latestScore) {
           const score = serverData.latestScore
           
-          setServer({
+          const serverObj = {
             id: serverData.server.serverId,
             name: serverData.server.serverName,
             slug: serverData.server.serverSlug,
@@ -74,9 +155,16 @@ export default function ServerDetail() {
               severity: 'Medium',
               mitigation: 'Review configuration',
             })),
-          })
+          }
+          
+          setServer(serverObj)
+          
+          // Generate story for this server
+          const story = generateStory(serverObj)
+          setServerStory(story)
         } else {
           setServer(null)
+          setServerStory(null)
         }
       } catch (error) {
         console.error('Error fetching server data:', error)
@@ -161,6 +249,7 @@ export default function ServerDetail() {
       <div className="border-b border-slate-800">
         <nav className="flex gap-1">
           {[
+            { id: 'story', label: 'Story' },
             { id: 'overview', label: 'Overview' },
             { id: 'evidence', label: 'Evidence' },
             { id: 'drift', label: 'Drift Timeline' },
@@ -184,6 +273,65 @@ export default function ServerDetail() {
 
       {/* Tab Content */}
       <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+        {activeTab === 'story' && serverStory && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-4">{serverStory.title}</h2>
+              <p className="text-lg text-slate-300 leading-relaxed mb-6">
+                {serverStory.narrative}
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Key Highlights</h3>
+                <ul className="space-y-3">
+                  {serverStory.highlights.map((highlight, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-slate-300">
+                      <svg className="w-6 h-6 text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-base">{highlight}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">How You Can Benefit</h3>
+                <ul className="space-y-3">
+                  {serverStory.benefits.map((benefit, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-slate-300">
+                      <svg className="w-6 h-6 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-base">{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="bg-slate-800/50 rounded-lg p-6 border border-slate-700">
+              <h3 className="text-xl font-semibold text-white mb-4">Research Insights</h3>
+              <ul className="space-y-2">
+                {serverStory.researchPoints.map((point, idx) => (
+                  <li key={idx} className="text-slate-300 flex items-start gap-3">
+                    <span className="text-blue-400 mt-1 text-lg">•</span>
+                    <span className="text-base">{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'story' && !serverStory && (
+          <div className="text-center py-12">
+            <p className="text-slate-400">Story not available for this server.</p>
+          </div>
+        )}
+
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Domain Breakdown */}

@@ -62,9 +62,9 @@ export default function Rankings() {
         setRankings(result.items.map((item: any, index: number) => ({
           rank: index + 1,
           server: item.serverName || item.server,
-          serverSlug: item.serverSlug || item.serverId,
+          serverSlug: item.serverSlug || item.serverId || '',
           provider: item.providerName || item.provider,
-          providerSlug: item.providerSlug || item.providerId,
+          providerSlug: item.providerSlug || item.providerId || '',
           category: item.categoryPrimary || item.category || 'Unknown',
           trustScore: item.trustScore || 0,
           tier: item.tier || 'D',
@@ -232,9 +232,13 @@ export default function Rankings() {
                     <tr key={item.rank} className="hover:bg-slate-800/30 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-slate-400">#{item.rank}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Link to={`/mcp/servers/${item.serverSlug}`} className="text-white hover:text-blue-400 font-medium">
-                          {item.server}
-                        </Link>
+                        {item.serverSlug ? (
+                          <Link to={`/mcp/servers/${item.serverSlug}`} className="text-white hover:text-blue-400 font-medium">
+                            {item.server}
+                          </Link>
+                        ) : (
+                          <span className="text-white font-medium">{item.server}</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link to={`/mcp/providers/${item.providerSlug}`} className="text-slate-400 hover:text-white">
