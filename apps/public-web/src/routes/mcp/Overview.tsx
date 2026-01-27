@@ -102,7 +102,7 @@ export default function Overview() {
               score: 0 // Not in summary response
             })) || [],
             driftEvents: summary.notableDrift?.map((d: any) => ({
-              server: d.serverId, // Will need to fetch server name
+              server: d.serverName || d.serverId, // Use serverName from enriched data
               event: d.summary,
               severity: d.severity
             })) || [],

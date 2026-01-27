@@ -197,33 +197,48 @@ def publish() -> Dict[str, Any]:
     Validate and publish. Uses staging when latest_scores_staging exists and passes
     validate_staging(); otherwise no-op or validate stable only (T-051).
     """
+    import sys
     conn = psycopg2.connect(DATABASE_URL)
     try:
         if _staging_exists(conn):
+            print("Publisher: Staging table exists, validating...", file=sys.stderr)
             is_valid, errors = validate_staging(conn)
             if not is_valid:
+                error_msg = f"Staging validation failed: {', '.join(errors)}"
+                print(f"Publisher: {error_msg}", file=sys.stderr)
                 return {
                     "success": False,
                     "errors": errors,
                     "message": "Staging validation failed - keeping previous stable dataset",
                 }
+            print("Publisher: Staging validation passed, flipping to stable...", file=sys.stderr)
             if not flip_stable_pointer(conn):
+                error_msg = "Failed to flip stable pointer"
+                print(f"Publisher: {error_msg}", file=sys.stderr)
                 return {
                     "success": False,
                     "errors": ["Failed to flip stable pointer"],
                     "message": "Pointer flip failed - keeping previous stable dataset",
                 }
+            print("Publisher: Staging flipped to stable successfully", file=sys.stderr)
         else:
+            print("Publisher: No staging table, validating stable dataset...", file=sys.stderr)
             is_valid, errors = validate_dataset(conn)
             if not is_valid:
+                error_msg = f"Dataset validation failed: {', '.join(errors)}"
+                print(f"Publisher: {error_msg}", file=sys.stderr)
                 return {
                     "success": False,
                     "errors": errors,
                     "message": "Dataset validation failed",
                 }
+        print("Publisher: Refreshing rankings cache...", file=sys.stderr)
         cache_updated, cache_errors = refresh_rankings_cache(conn)
         if cache_updated:
             conn.commit()
+            print(f"Publisher: Rankings cache refreshed ({cache_updated} entries)", file=sys.stderr)
+        if cache_errors:
+            print(f"Publisher: Rankings cache warnings: {cache_errors}", file=sys.stderr)
         out = {
             "success": True,
             "publishedAt": datetime.now(timezone.utc).isoformat(),

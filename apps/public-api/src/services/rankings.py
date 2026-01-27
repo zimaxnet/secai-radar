@@ -31,6 +31,7 @@ def get_rankings(
         .join(LatestScore, MCPServer.server_id == LatestScore.server_id)
         .join(ScoreSnapshot, LatestScore.score_id == ScoreSnapshot.score_id)
         .join(Provider, MCPServer.provider_id == Provider.provider_id)
+        .filter(MCPServer.status == 'Active')  # Only show active servers in rankings
     )
     if tier:
         base = base.filter(ScoreSnapshot.tier == tier)

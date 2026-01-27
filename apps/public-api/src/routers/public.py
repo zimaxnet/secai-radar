@@ -55,13 +55,17 @@ async def get_recently_updated(
     db: Session = Depends(get_db),
 ):
     """Get recently updated servers. Frontend expects data.items."""
-    # TODO: Implement actual database query
+    from src.services.recently_updated import get_recently_updated as get_recently_updated_data
+    from src.middleware.redaction import redact_response
+    
+    items = get_recently_updated_data(db, limit)
+    redacted_items = redact_response(items)
     now = datetime.utcnow()
     return {
         "attestation": build_attestation_envelope(METHODOLOGY_VERSION, as_of=now),
         "methodologyVersion": METHODOLOGY_VERSION,
         "generatedAt": now.isoformat(),
-        "data": {"items": []},
+        "data": {"items": redacted_items if isinstance(redacted_items, list) else items},
     }
 
 
