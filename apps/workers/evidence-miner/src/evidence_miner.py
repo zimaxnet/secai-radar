@@ -433,6 +433,8 @@ def run_evidence_miner() -> Dict[str, Any]:
         evidence_from_json = 0
         popularity_signals_from_registry = 0
         
+        print(f"Found {len(registry_servers)} servers from Official Registry")
+        
         # First pass: Collect popularity signals from GitHub for registry servers
         for row in registry_servers:
             if len(row) < 4:
@@ -496,6 +498,11 @@ def run_evidence_miner() -> Dict[str, Any]:
                         eid = _extract_from_server_json(cur, server_id, full_server_json, now)
                         if eid:
                             evidence_from_json += 1
+                            print(f"  Extracted evidence from server.json for {server_name} (server_id: {server_id})")
+                        else:
+                            print(f"  Skipped {server_name}: evidence already exists or error")
+                    else:
+                        print(f"  No _full_server_json found for {server_name}")
             except Exception as e:
                 print(f"Error processing server.json for {server_id}: {e}")
         

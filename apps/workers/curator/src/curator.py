@@ -97,22 +97,90 @@ def extract_deployment_type(obs: Dict[str, Any]) -> str:
     return "Unknown"
 
 
+def extract_from_full_server_json(obs: Dict[str, Any], field: str, default: Any = None) -> Any:
+    """
+    Extract field from _full_server_json with fallback to top-level.
+    Handles nested paths like 'repository.url' or 'remotes[0].url'.
+    """
+    # First try top-level
+    if field in obs and obs[field]:
+        return obs[field]
+    
+    # Then try _full_server_json
+    full_json = obs.get("_full_server_json")
+    if not full_json or not isinstance(full_json, dict):
+        return default
+    
+    # Handle simple field
+    if field in full_json and full_json[field]:
+        return full_json[field]
+    
+    # Handle nested paths (e.g., 'repository.url')
+    if '.' in field:
+        parts = field.split('.')
+        value = full_json
+        for part in parts:
+            if isinstance(value, dict):
+                value = value.get(part)
+            else:
+                return default
+            if value is None:
+                return default
+        return value if value else default
+    
+    return default
+
+
 def extract_metadata(obs: Dict[str, Any], source: str) -> Dict[str, Any]:
     """
     Extract metadata from observation for storage in metadata_json.
     Includes: publisher, description, transport, package, source_provenance
     """
     metadata = {}
+    full_json = obs.get("_full_server_json", {})
     
-    # Extract from observation fields
-    if obs.get("publisher"):
-        metadata["publisher"] = obs["publisher"]
-    if obs.get("description"):
-        metadata["description"] = obs["description"]
-    if obs.get("transport"):
-        metadata["transport"] = obs["transport"]
-    if obs.get("package"):
-        metadata["package"] = obs["package"]
+    # Extract publisher - try multiple sources
+    publisher = (obs.get("publisher") or 
+                 full_json.get("publisher") if isinstance(full_json, dict) else None)
+    if publisher:
+        metadata["publisher"] = publisher
+    
+    # Extract description
+    description = (obs.get("description") or 
+                  full_json.get("description") if isinstance(full_json, dict) else None)
+    if description:
+        metadata["description"] = description
+    
+    # Extract transport - from remotes[0].type or transport field
+    transport = obs.get("transport")
+    if not transport and isinstance(full_json, dict):
+        remotes = full_json.get("remotes", [])
+        if remotes and isinstance(remotes, list) and len(remotes) > 0:
+            first_remote = remotes[0]
+            if isinstance(first_remote, dict):
+                transport = first_remote.get("type")
+                if not transport and "transport" in first_remote:
+                    transport_obj = first_remote["transport"]
+                    if isinstance(transport_obj, dict):
+                        transport = transport_obj.get("type")
+    if transport:
+        metadata["transport"] = transport
+    
+    # Extract package info
+    package = obs.get("package")
+    if not package and isinstance(full_json, dict):
+        packages = full_json.get("packages", [])
+        if packages and isinstance(packages, list) and len(packages) > 0:
+            first_package = packages[0]
+            if isinstance(first_package, dict):
+                package = {
+                    "registry": first_package.get("registryType") or first_package.get("registry"),
+                    "type": first_package.get("type"),
+                    "identifier": first_package.get("identifier"),
+                    "version": first_package.get("version") or full_json.get("version"),
+                }
+    if package:
+        metadata["package"] = package
     
     # Determine source_provenance
     source_lower = source.lower()
@@ -140,29 +208,81 @@ def dedupe_servers(
     log = review_log if review_log is not None else []
     canonical_servers = []
     seen_ids = set()
+    
+    print(f"Processing {len(raw_observations)} observations...")
 
-    for obs in raw_observations:
-        repo_url = obs.get("repo_url") or obs.get("repository")
-        endpoint = obs.get("endpoint") or obs.get("url")
-        docs_url = obs.get("docs_url") or obs.get("documentation")
-        name = obs.get("name") or obs.get("server_name", "Unknown")
+    for idx, obs in enumerate(raw_observations):
+        # Extract name with fallback to _full_server_json
+        name = (obs.get("name") or 
+                obs.get("server_name") or 
+                (obs.get("_full_server_json", {}).get("name") if isinstance(obs.get("_full_server_json"), dict) else None) or
+                "Unknown")
+        
+        # Handle empty strings - treat as None
+        if name == "":
+            full_json = obs.get("_full_server_json", {})
+            if isinstance(full_json, dict):
+                name = full_json.get("name") or "Unknown"
+            else:
+                name = "Unknown"
+        
         source = obs.get("source_url", "unknown")
+        
+        # Extract repo_url with fallback to _full_server_json
+        repo_url = (obs.get("repo_url") or 
+                   obs.get("repository") or
+                   extract_from_full_server_json(obs, "repo_url"))
+        
+        # If repo_url is a dict (from _full_server_json.repository), extract url
+        if isinstance(repo_url, dict):
+            repo_url = repo_url.get("url")
+        
+        # Extract endpoint from remotes[0].url if not in top-level
+        endpoint = (obs.get("endpoint") or 
+                   obs.get("url"))
+        if not endpoint:
+            full_json = obs.get("_full_server_json", {})
+            if isinstance(full_json, dict):
+                remotes = full_json.get("remotes", [])
+                if remotes and isinstance(remotes, list) and len(remotes) > 0:
+                    first_remote = remotes[0]
+                    if isinstance(first_remote, dict):
+                        endpoint = first_remote.get("url")
+        
+        # Extract docs_url with fallback
+        docs_url = (obs.get("docs_url") or 
+                   obs.get("documentation") or
+                   extract_from_full_server_json(obs, "docs_url"))
+        
+        # Log extraction for first few observations
+        if idx < 5:
+            print(f"  Observation {idx+1}: name={name}, repo_url={bool(repo_url)}, endpoint={bool(endpoint)}, docs_url={bool(docs_url)}")
 
         server_id = generate_server_id(repo_url, endpoint, docs_url, name, source)
+        
+        if idx < 5:
+            print(f"    Generated server_id: {server_id}")
 
         with db.cursor() as cur:
             cur.execute("SELECT server_id FROM mcp_servers WHERE server_id = %s", (server_id,))
             if cur.fetchone():
                 log.append(("duplicate", server_id, name))
+                if idx < 10:
+                    print(f"    Skipped: duplicate server_id {server_id}")
                 continue
         if server_id in seen_ids:
             log.append(("ambiguous_same_batch", server_id, name))
+            if idx < 10:
+                print(f"    Skipped: ambiguous (same batch) server_id {server_id}")
             continue
         seen_ids.add(server_id)
 
         # Extract metadata and deployment_type
         metadata = extract_metadata(obs, source)
         deployment_type = extract_deployment_type(obs)
+        
+        if idx < 5:
+            print(f"    Creating server: {name} (deployment: {deployment_type}, source: {metadata.get('source_provenance')})")
 
         canonical_servers.append({
             "server_id": server_id,
@@ -174,11 +294,61 @@ def dedupe_servers(
             "deployment_type": deployment_type,
             "metadata": metadata,
         })
+    
+    print(f"Created {len(canonical_servers)} canonical servers from {len(raw_observations)} observations")
+    if log:
+        print(f"Skipped {len(log)} observations (duplicates/ambiguous)")
+    
     return canonical_servers
 
 
-def store_canonical_servers(db, servers: List[Dict[str, Any]], provider_id: str):
-    """Store canonical server records. Required mcp_servers columns use Unknown defaults."""
+def get_or_create_provider(db, publisher: Optional[str], metadata: Dict[str, Any]) -> str:
+    """
+    Get or create provider from publisher information.
+    Returns provider_id (defaults to Unknown provider if publisher not available).
+    """
+    if not publisher:
+        # Return default Unknown provider
+        return "0000000000000000"
+    
+    # Try to extract domain from metadata or publisher string
+    primary_domain = "unknown.local"
+    
+    # Try to extract domain from publisher (might be email or domain)
+    if "@" in publisher:
+        # Email format: extract domain
+        primary_domain = publisher.split("@")[-1]
+    elif "." in publisher and not publisher.startswith("http"):
+        # Might be a domain
+        primary_domain = publisher
+    else:
+        # Use publisher name as domain fallback (normalized)
+        primary_domain = f"{normalize_name(publisher)}.local"
+    
+    # Generate provider ID
+    provider_id = generate_provider_id(publisher, primary_domain)
+    
+    # Get or create provider
+    with db.cursor() as cur:
+        cur.execute("""
+            SELECT provider_id FROM providers WHERE provider_id = %s
+        """, (provider_id,))
+        if cur.fetchone():
+            return provider_id
+        
+        # Create new provider
+        cur.execute("""
+            INSERT INTO providers (provider_id, provider_name, primary_domain, provider_type)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (provider_id) DO NOTHING
+        """, (provider_id, publisher, primary_domain, "Community"))
+        db.commit()
+    
+    return provider_id
+
+
+def store_canonical_servers(db, servers: List[Dict[str, Any]], default_provider_id: str):
+    """Store canonical server records. Creates providers from publisher info when available."""
     with db.cursor() as cur:
         # Check if metadata_json column exists
         cur.execute("""
@@ -191,6 +361,11 @@ def store_canonical_servers(db, servers: List[Dict[str, Any]], provider_id: str)
         for server in servers:
             metadata_json = json.dumps(server.get("metadata", {}))
             deployment_type = server.get("deployment_type", "Unknown")
+            metadata = server.get("metadata", {})
+            
+            # Get or create provider from publisher
+            publisher = metadata.get("publisher")
+            provider_id = get_or_create_provider(db, publisher, metadata) if publisher else default_provider_id
             
             if has_metadata_json:
                 cur.execute("""
@@ -214,7 +389,7 @@ def store_canonical_servers(db, servers: List[Dict[str, Any]], provider_id: str)
                     server["server_id"],
                     server["server_slug"],
                     server["server_name"],
-                    provider_id,
+                    provider_id,  # Use proper provider_id
                     deployment_type,
                     server.get("repo_url"),
                     server.get("docs_url"),
@@ -240,7 +415,7 @@ def store_canonical_servers(db, servers: List[Dict[str, Any]], provider_id: str)
                     server["server_id"],
                     server["server_slug"],
                     server["server_name"],
-                    provider_id,
+                    provider_id,  # Use proper provider_id
                     deployment_type,
                     server.get("repo_url"),
                     server.get("docs_url"),

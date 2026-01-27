@@ -178,10 +178,27 @@ def score_server(db, server_id: str) -> Dict[str, Any]:
         score_id = store_score_snapshot(db, server_id, score_result)
         
         # Update pointer: staging when WRITE_TO_STAGING=1 (pipeline), else stable (T-051)
+        # Always use the highest-scoring snapshot, not just the latest
         if os.getenv("WRITE_TO_STAGING", "").strip().lower() in ("1", "true", "yes"):
+            # For staging, we'll update to best score after all servers are scored
+            # For now, update to this score_id (Publisher will validate and flip)
             update_latest_score_staging(db, server_id, score_id)
         else:
-            update_latest_score(db, server_id, score_id)
+            # For stable, find the best-scoring snapshot for this server
+            with db.cursor() as cur:
+                cur.execute("""
+                    SELECT score_id 
+                    FROM score_snapshots
+                    WHERE server_id = %s
+                    ORDER BY trust_score DESC, assessed_at DESC
+                    LIMIT 1
+                """, (server_id,))
+                best_row = cur.fetchone()
+                if best_row:
+                    best_score_id = best_row[0]
+                    update_latest_score(db, server_id, best_score_id)
+                else:
+                    update_latest_score(db, server_id, score_id)
         
         return {
             "success": True,
@@ -203,6 +220,7 @@ def run_scorer():
     Main scorer function - score all active servers
     """
     conn = psycopg2.connect(DATABASE_URL)
+    use_staging = os.getenv("WRITE_TO_STAGING", "").strip().lower() in ("1", "true", "yes")
     
     try:
         # Get active servers
@@ -213,12 +231,39 @@ def run_scorer():
             """)
             server_ids = [row[0] for row in cur.fetchall()]
         
+        print(f"Scoring {len(server_ids)} active servers...")
+        
         results = []
-        for server_id in server_ids:
+        for idx, server_id in enumerate(server_ids):
             result = score_server(conn, server_id)
             results.append(result)
+            if (idx + 1) % 10 == 0:
+                print(f"  Scored {idx + 1}/{len(server_ids)} servers...")
         
         successful = sum(1 for r in results if r.get("success"))
+        
+        # If using staging, update all staging entries to point to best scores
+        if use_staging:
+            print("Updating latest_scores_staging to use best-scoring snapshots...")
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE latest_scores_staging ls
+                    SET score_id = (
+                        SELECT score_id 
+                        FROM score_snapshots ss
+                        WHERE ss.server_id = ls.server_id
+                        ORDER BY ss.trust_score DESC, ss.assessed_at DESC
+                        LIMIT 1
+                    )
+                    WHERE EXISTS (
+                        SELECT 1 
+                        FROM score_snapshots ss
+                        WHERE ss.server_id = ls.server_id
+                    )
+                """)
+                updated = cur.rowcount
+                conn.commit()
+                print(f"  Updated {updated} staging entries to best scores")
         
         return {
             "success": True,
