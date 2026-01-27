@@ -6,8 +6,29 @@ on:
   workflow_dispatch:
 
 jobs:
+  record-start:
+    name: Record Pipeline Start
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install psycopg2-binary>=2.9.0
+      - name: Record pipeline start
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          pip install psycopg2-binary>=2.9.0
+          cd apps/public-api
+          python scripts/record_pipeline_run.py --start --trigger "github-actions"
+
   scout:
     name: Scout - Discovery
+    needs: record-start
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -138,3 +159,54 @@ jobs:
           cd apps/workers/publisher
           pip install -e .
           python src/publisher.py
+      - name: Record pipeline success
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          pip install psycopg2-binary>=2.9.0
+          cd apps/public-api
+          # Get the latest run_id from the database
+          RUN_ID=$(python -c "
+          import os, psycopg2
+          conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+          cur = conn.cursor()
+          cur.execute(\"SELECT run_id FROM pipeline_runs WHERE status = 'Running' ORDER BY started_at DESC LIMIT 1\")
+          row = cur.fetchone()
+          print(row[0] if row else '')
+          conn.close()
+          " 2>/dev/null || echo '')
+          if [ -n "$RUN_ID" ]; then
+            python scripts/record_pipeline_run.py --finish "$RUN_ID"
+          fi
+        if: success()
+
+  record-failure:
+    name: Record Pipeline Failure
+    needs: [record-start, scout, curator, evidence-miner, scorer, drift-sentinel, sage-meridian, publisher]
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Record pipeline failure
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          pip install psycopg2-binary>=2.9.0
+          cd apps/public-api
+          # Get the latest run_id from the database
+          RUN_ID=$(python -c "
+          import os, psycopg2
+          conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+          cur = conn.cursor()
+          cur.execute(\"SELECT run_id FROM pipeline_runs WHERE status = 'Running' ORDER BY started_at DESC LIMIT 1\")
+          row = cur.fetchone()
+          print(row[0] if row else '')
+          conn.close()
+          " 2>/dev/null || echo '')
+          if [ -n "$RUN_ID" ]; then
+            python scripts/record_pipeline_run.py --finish "$RUN_ID" --failed
+          fi
