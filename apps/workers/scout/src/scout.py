@@ -101,7 +101,17 @@ def run_scout():
     """
     Main scout function - fetch from all Tier 1 sources and store
     """
-    conn = psycopg2.connect(DATABASE_URL)
+    print("Connecting to database...")
+    try:
+        conn = psycopg2.connect(DATABASE_URL, connect_timeout=10)
+        print("Database connection established")
+    except Exception as e:
+        print(f"Database connection error: {e}")
+        return {
+            "success": False,
+            "error": f"Database connection failed: {e}",
+            "completedAt": datetime.utcnow().isoformat()
+        }
     
     total_observations = 0
     errors = []
@@ -114,6 +124,7 @@ def run_scout():
             if "registry.modelcontextprotocol.io" in source_url:
                 # Use Official Registry adapter
                 try:
+                    print("  Calling fetch_registry_servers()...")
                     observations = fetch_registry_servers(limit=100, use_latest_version=False)
                     print(f"  Fetched {len(observations)} servers from Official Registry")
                 except Exception as e:
@@ -136,7 +147,8 @@ def run_scout():
                 observations = fetch_source(source_url)
             
             # Store each observation
-            for obs in observations:
+            print(f"  Storing {len(observations)} observations...")
+            for idx, obs in enumerate(observations):
                 # If obs has _full_server_json, keep it for evidence extraction
                 # The normalized fields are already in obs for Curator
                 observation_to_store = obs
@@ -144,6 +156,8 @@ def run_scout():
                 try:
                     store_raw_observation(conn, source_url, observation_to_store)
                     total_observations += 1
+                    if (idx + 1) % 10 == 0:
+                        print(f"    Stored {idx + 1}/{len(observations)} observations...")
                 except Exception as e:
                     error_msg = f"Error storing observation: {e}"
                     print(f"  {error_msg}")

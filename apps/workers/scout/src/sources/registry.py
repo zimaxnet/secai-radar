@@ -76,20 +76,25 @@ def fetch_registry_servers(limit: int = 100, use_latest_version: bool = False) -
             # Option A: Use list endpoint (faster)
             list_url = f"{REGISTRY_BASE_URL}/servers?limit={limit}"
             cursor = None
+            page_count = 0
             
             while True:
+                page_count += 1
                 url = list_url
                 if cursor:
                     url = f"{url}&cursor={cursor}"
                 
+                print(f"    Fetching page {page_count}...")
                 response = requests.get(url, timeout=30)
                 response.raise_for_status()
                 data = response.json()
                 
                 servers_list = data.get("servers", []) if isinstance(data, dict) else data
                 if not servers_list:
+                    print(f"    No more servers on page {page_count}")
                     break
                 
+                print(f"    Processing {len(servers_list)} servers from page {page_count}...")
                 for server_item in servers_list:
                     # Official Registry wraps server.json in a "server" key
                     # Extract the actual server.json from the wrapper
@@ -110,6 +115,7 @@ def fetch_registry_servers(limit: int = 100, use_latest_version: bool = False) -
                         cursor = metadata.get("nextCursor")
                 
                 if not cursor:
+                    print(f"    No more pages (processed {page_count} pages)")
                     break
         
         return normalized_servers
