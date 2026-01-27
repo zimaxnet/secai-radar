@@ -117,7 +117,7 @@ jobs:
         run: |
           cd apps/workers/sage-meridian
           pip install -e .
-          python src/sage_meridian.py
+          python src/daily_brief.py
 
   publisher:
     name: Publisher
