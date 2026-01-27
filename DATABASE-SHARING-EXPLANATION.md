@@ -4,14 +4,18 @@
 
 PostgreSQL Flexible Servers support **multiple databases** on a single server instance. Each database is completely isolated from others.
 
+**Canonical reference:** For the integrated workspace (secai-radar + ctxEco sharing one server), see **`INTEGRATED-WORKSPACE-DATABASE.md`** at the workspace root. It describes the security model (admin vs `secairadar_app`), which Key Vault holds which secrets, and the one-time steps to create the secai-radar app user.
+
 ## Current Setup
 
-**Server:** `ctxeco-db` in `ctxeco-rg`
+**Server:** `ctxeco-db` in `ctxeco-rg` (same server as ctxEco when ctxEco is deployed with `envName: "ctxeco"`)
 
 **Databases on Server:**
-- `ctxeco` database (existing) - Used by ctxeco application
-- `secairadar` database (new) - Used by secai-radar application
-- `postgres` database (system default)
+- `ctxEco` database – ctxEco API/worker
+- `zep` – Zep (memory)
+- `temporal`, `temporal_visibility` – Temporal
+- `secairadar` – secai-radar (created by ctxEco Bicep when using the shared server, or by migration/manual)
+- `postgres` (system default)
 
 ## How It Works
 
@@ -70,9 +74,9 @@ postgresql://ctxecoadmin:<PASSWORD>@ctxeco-db.postgres.database.azure.com:5432/s
 - Backup retention applies to all databases
 
 ### Security
-- Same admin user (`ctxecoadmin`) for both
-- Consider creating database-specific users for better isolation
-- Firewall rules apply to entire server
+- **Recommended:** Use a dedicated DB user for secai-radar (`secairadar_app`) with access only to `secairadar`. Create it once with `scripts/create-secairadar-db-user.py`; store the connection string in **secai-radar-kv** as `database-url`. See `docs/CREDENTIALS-SETUP.md` and workspace `INTEGRATED-WORKSPACE-DATABASE.md`.
+- The server admin (`ctxecoadmin` or `cogadmin`) should be used only for setup and by ctxEco components; do not run secai-radar in production with the admin user.
+- Firewall rules apply to entire server.
 
 ### Scaling
 - If you need to scale, you scale the entire server

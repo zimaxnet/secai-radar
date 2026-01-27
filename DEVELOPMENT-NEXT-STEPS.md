@@ -7,8 +7,10 @@
 
 - **Phases 0–4:** Implemented (monorepo, public-api, registry-api, workers, scoring, graph).
 - **SWA:** Standard tier ✅; app_location `apps/public-web`, output `dist`.
-- **Database:** `secairadar` on `ctxeco-db` (ctxeco-rg); migrations ready, not yet run.
-- **Containers:** public-api, registry-api, publisher built locally; ready to push to ACR.
+- **Database:** `secairadar` on `ctxeco-db` (ctxeco-rg); migrations and seed run ✅.
+- **Containers:** public-api and registry-api deploy via GitHub Actions to Azure Container Apps ✅.
+- **Public API FQDN:** `secai-radar-public-api.lemonriver-a8b248dc.centralus.azurecontainerapps.io`
+- **VITE_API_BASE:** Set in GitHub secrets → frontend will call the deployed API after the next deploy.
 
 ## Ordered Plan (Do in This Order)
 
@@ -84,9 +86,11 @@ The workflow:
 
 **Manual one-off (if you prefer not to use the workflow for create):** run the same `az containerapp create` locally once, then the workflow will only perform `az containerapp update --image ...` on future runs.
 
-### 5. Link SWA to Public API (Standard tier)
+### 5. Link SWA to Public API (Standard tier) ✅
 
-With SWA on **Standard** you can attach a backend:
+**Done:** `VITE_API_BASE` set in GitHub secrets so the SPA calls the deployed public-api; deploy was re-triggered to rebuild the frontend.
+
+With SWA on **Standard** you can also attach a backend:
 
 - **Option A – SWA “Linked backends”:**  
   In Azure Portal: Static Web App → **Backends** → Link backend → choose the Public API Container App (or its FQDN).  
@@ -97,22 +101,28 @@ With SWA on **Standard** you can attach a backend:
   `https://<public-api-fqdn>/api`  
   so the SPA calls the API directly. No SWA backend link needed for that.
 
-### 6. Configure frontend API base
+### 6. Configure frontend API base ✅
 
-- **GitHub:** Repository → Settings → Secrets and variables → Actions → add or update `VITE_API_BASE` (e.g. `https://<public-api-host>/api`).
-- **SWA:** Configuration → Application settings → add `VITE_API_BASE` if build reads it from there.
+- **Done:** `VITE_API_BASE` is in repository Secrets; the deploy-staging workflow uses it when building public-web.
 
 ### 7. Test end-to-end
 
-- [ ] SWA loads at secairadar.cloud (or default hostname).
-- [ ] Public API: `GET /health` and `GET /api/v1/public/health` return 200.
-- [ ] MCP pages load and hit the API (Overview, Rankings, Server Detail, Daily Brief).
-- [ ] Feeds: `/mcp/feed.json` (and RSS if implemented) return valid data.
+Run from repo root:
+```bash
+./scripts/test-e2e.sh
+```
+Override API base if needed: `PUBLIC_API_BASE=https://your-api.example.com ./scripts/test-e2e.sh`
+
+Manual checks:
+- [ ] SWA loads: try **https://purple-moss-0942f9e10.3.azurestaticapps.net** first (default hostname). If that works but **https://secairadar.cloud** does not, see **docs/SWA-SITE-TROUBLESHOOTING.md** (DNS/custom domain).
+- [ ] MCP pages load and use the API (Overview, Rankings, Server Detail, Daily Brief).
+- [ ] Feeds: `/api/v1/public/mcp/feed.json` returns valid JSON.
 
 ### 8. Daily pipeline
 
-- Workflow: `.github/workflows/daily-pipeline.yml` (e.g. 02:30 UTC).
-- First run: trigger manually from Actions; confirm workers run and DB is updated.
+- **Workflow:** `.github/workflows/daily-pipeline.yml` (schedule: 02:30 UTC daily; or **Run workflow** from Actions).
+- **Secrets:** Uses `DATABASE_URL` (already set).
+- **Note:** Scout and Curator have runnable workers. Evidence Miner, Drift Sentinel, and Sage Meridian still need `src/` entrypoints; the pipeline will fail at the first missing worker until those are implemented.
 
 ---
 

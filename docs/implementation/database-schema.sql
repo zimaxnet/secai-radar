@@ -238,16 +238,16 @@ CREATE INDEX idx_latest_assessments_tier ON latest_assessments_view(tier);
 -- Rankings Cache
 CREATE TABLE rankings_cache (
     cache_id SERIAL PRIMARY KEY,
-    window VARCHAR(10) NOT NULL, -- '24h', '7d', '30d'
+    "window" VARCHAR(10) NOT NULL, -- '24h', '7d', '30d'
     filters_hash VARCHAR(64) NOT NULL, -- Hash of filter params
     payload_json JSONB NOT NULL,
     generated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMPTZ NOT NULL,
-    UNIQUE(window, filters_hash)
+    UNIQUE("window", filters_hash)
 );
 
 CREATE INDEX idx_rankings_cache_expires ON rankings_cache(expires_at);
-CREATE INDEX idx_rankings_cache_window ON rankings_cache(window);
+CREATE INDEX idx_rankings_cache_window ON rankings_cache("window");
 
 -- ============================================================================
 -- 2.3 Private Registry (Multi-tenant)

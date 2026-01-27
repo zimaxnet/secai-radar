@@ -1,6 +1,6 @@
 # SecAI Radar Cloud Refactoring Progress
 
-**Last Updated:** 2026-01-23  
+**Last Updated:** 2026-01-25  
 **Reference Document:** `secairadar-cloud-master-services-kickoff-v1.md`  
 **Repository:** https://github.com/zimaxnet/secai-radar  
 **Azure Resource:** `secai-radar` (Static Web App) in `secai-radar-rg`
@@ -10,10 +10,10 @@
 - **Subscription ID:** `23f4e2c5-0667-4514-8e2e-f02ca7880c95`
 - **Resource Group:** `secai-radar-rg`
 - **Static Web App:** `secai-radar`
-- **Default Hostname:** `purple-moss-0942f9e10.3.azurestaticapps.net`
-- **Custom Domain:** `secairadar.cloud` (Status: Ready)
+- **Default Hostname:** `purple-moss-0942f9e10.3.azurestaticapps.net` (use this if secairadar.cloud doesn’t load)
+- **Custom Domain:** `secairadar.cloud` (Azure status: Ready; if no site, see **docs/SWA-SITE-TROUBLESHOOTING.md**)
 - **Location:** Central US
-- **SKU:** Free tier
+- **SKU:** **Standard** (upgraded 2026-01-25; required for linking backends)
 
 ## Target Architecture (from Master Services Doc)
 
@@ -345,12 +345,12 @@
 2. ✅ **Issue Templates Updated** - Complete
 3. ✅ **All Implementation Phases** - Complete
 4. ✅ **Database Created** - `secairadar` database on `ctxeco-db` (2026-01-23)
-5. **Update Azure Static Web App Configuration** - Change app_location from `web/` to `apps/public-web/`
-6. **Run Database Migrations** - Execute migration scripts to create schema
-7. **Deploy Infrastructure** - Run Bicep templates (without PostgreSQL, using existing)
-8. **Deploy Public API** - Build and deploy Container App
-9. **Test End-to-End** - Verify all components work together
-10. Update this document as deployment progresses
+5. ✅ **Azure Static Web App Configuration** - app_location `apps/public-web`, output `dist`; SWA on **Standard**
+6. **Run Database Migrations** - `apps/public-api/scripts/migrate.py` (set `DATABASE_URL` first); see `DEVELOPMENT-NEXT-STEPS.md`
+7. **Deploy Infrastructure** - `infra/mcp-infrastructure-existing-db.bicep` (without PostgreSQL)
+8. **Deploy Public API** - Build/push to ACR, deploy Container App
+9. **Link SWA to API** - Use SWA Standard “Linked backends” or set `VITE_API_BASE`; see `docs/SWA-STANDARD-AND-CONTAINERS.md`
+10. **Test End-to-End** - Verify SWA, API, and MCP pages; then run daily pipeline
 
 ## Database Configuration ✅
 
@@ -368,9 +368,9 @@ See `DATABASE-READY.md` for connection details and next steps.
 
 ## Getting Started
 
-**When you return to start implementation:**
+**To proceed with development according to the plan:**
 
-👉 **See `GETTING-STARTED.md` for a complete guide on where to begin!**
+👉 **See `DEVELOPMENT-NEXT-STEPS.md` for the ordered sequence (migrations → infra → API deploy → SWA link → test).**
 
 **Quick Start:**
 1. Start with **T-001: Monorepo scaffolding** (4 hours)

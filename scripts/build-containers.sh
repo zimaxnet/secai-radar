@@ -55,9 +55,19 @@ fi
 cd ../..
 
 echo ""
-echo "✅ All containers built successfully!"
+
+# Build Publisher worker (optional - used in pipeline)
+echo "Building Publisher worker container..."
+cd apps/workers/publisher
+
+docker build -t secai-radar-publisher:local . 2>/dev/null && echo "✅ Publisher container built: secai-radar-publisher:local" || echo "⚠️  Publisher build skipped or failed (optional)"
+
+cd ../../..
+
 echo ""
-echo "To run containers:"
+echo "✅ Container build phase complete."
+echo ""
+echo "To run API containers:"
 echo ""
 echo "Public API:"
 echo "  docker run -p 8000:8000 \\"
