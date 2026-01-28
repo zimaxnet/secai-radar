@@ -124,7 +124,7 @@ export async function getRankings(params: RankingsParams = {}): Promise<{
   pageSize: number
 }> {
   const queryParams = new URLSearchParams()
-  
+
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       if (Array.isArray(value)) {
@@ -135,10 +135,11 @@ export async function getRankings(params: RankingsParams = {}): Promise<{
     }
   })
 
-  const response = await fetchPublicAPI<{ items: RankingItem[] }>(`/rankings?${queryParams.toString()}`)
-  
+  const response = await fetchPublicAPI<any>(`/rankings?${queryParams.toString()}`)
+
+  // Correctly map the enveloped response structure: { data: { servers: [] }, meta: { ... } }
   return {
-    items: response?.data?.items || [],
+    items: response?.data?.servers || [],
     total: response?.meta?.total || 0,
     page: response?.meta?.page || 1,
     pageSize: response?.meta?.pageSize || 50,
