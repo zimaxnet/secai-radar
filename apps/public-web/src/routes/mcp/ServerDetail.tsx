@@ -139,22 +139,26 @@ export default function ServerDetail() {
             lastVerified: score.assessedAt,
             enterpriseFit: score.enterpriseFit,
             domainBreakdown: [
-              { domain: 'D1: Authentication', score: score.d1 * 20 },
-              { domain: 'D2: Authorization', score: score.d2 * 20 },
-              { domain: 'D3: Data Protection', score: score.d3 * 20 },
-              { domain: 'D4: Audit & Logging', score: score.d4 * 20 },
-              { domain: 'D5: Operational Security', score: score.d5 * 20 },
-              { domain: 'D6: Compliance', score: score.d6 * 20 },
+              { domain: 'D1: Authentication', score: (score.d1 || 0) * 20 },
+              { domain: 'D2: Authorization', score: (score.d2 || 0) * 20 },
+              { domain: 'D3: Data Protection', score: (score.d3 || 0) * 20 },
+              { domain: 'D4: Audit & Logging', score: (score.d4 || 0) * 20 },
+              { domain: 'D5: Operational Security', score: (score.d5 || 0) * 20 },
+              { domain: 'D6: Compliance', score: (score.d6 || 0) * 20 },
             ],
-            failFastChecklist: (score.failFastFlags || []).map((flag: string) => ({
-              item: flag,
-              pass: false,
-            })),
-            flags: (score.riskFlags || []).map((flag: string) => ({
-              name: flag,
-              severity: 'Medium',
-              mitigation: 'Review configuration',
-            })),
+            failFastChecklist: Array.isArray(score.failFastFlags) 
+              ? score.failFastFlags.map((flag: string) => ({
+                  item: flag,
+                  pass: false,
+                }))
+              : [],
+            flags: Array.isArray(score.riskFlags)
+              ? score.riskFlags.map((flag: string) => ({
+                  name: flag,
+                  severity: 'Medium',
+                  mitigation: 'Review configuration',
+                }))
+              : [],
           }
           
           setServer(serverObj)
@@ -338,11 +342,11 @@ export default function ServerDetail() {
             <div>
               <h2 className="text-xl font-semibold text-white mb-4">Domain Breakdown</h2>
               <div className="space-y-3">
-                {server.domainBreakdown.map((domain, idx) => (
+                {server.domainBreakdown?.map((domain, idx) => (
                   <div key={idx}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm text-slate-300">{domain.domain}</span>
-                      <span className="text-sm font-semibold text-white">{domain.score}</span>
+                      <span className="text-sm font-semibold text-white">{domain.score.toFixed(0)}</span>
                     </div>
                     <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                       <div
@@ -358,24 +362,30 @@ export default function ServerDetail() {
             {/* Fail-Fast Checklist */}
             <div>
               <h2 className="text-xl font-semibold text-white mb-4">Fail-Fast Checklist</h2>
-              <div className="space-y-2">
-                {server.failFastChecklist.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg">
-                    {item.pass ? (
-                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    )}
-                    <span className={`text-sm ${item.pass ? 'text-green-400' : 'text-red-400'}`}>
-                      {item.item}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              {server.failFastChecklist && server.failFastChecklist.length > 0 ? (
+                <div className="space-y-2">
+                  {server.failFastChecklist.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg">
+                      {item.pass ? (
+                        <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      )}
+                      <span className={`text-sm ${item.pass ? 'text-green-400' : 'text-red-400'}`}>
+                        {item.item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-slate-400">
+                  No fail-fast checklist items available
+                </div>
+              )}
             </div>
 
             {/* Key Flags & Mitigations */}
