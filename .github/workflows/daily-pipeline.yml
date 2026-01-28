@@ -9,6 +9,8 @@ jobs:
   record-start:
     name: Record Pipeline Start
     runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ steps.record-start.outputs.run_id }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -19,12 +21,14 @@ jobs:
         run: |
           pip install psycopg2-binary>=2.9.0
       - name: Record pipeline start
+        id: record-start
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          pip install psycopg2-binary>=2.9.0
           cd apps/public-api
-          python scripts/record_pipeline_run.py --start --trigger "github-actions"
+          RUN_ID=$(python scripts/record_pipeline_run.py --start --trigger "github-actions")
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "Pipeline run ID: $RUN_ID"
 
   scout:
     name: Scout - Discovery
@@ -145,7 +149,7 @@ jobs:
 
   publisher:
     name: Publisher
-    needs: sage-meridian
+    needs: [sage-meridian, record-start]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -163,23 +167,19 @@ jobs:
       - name: Record pipeline success
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          RUN_ID: ${{ needs.record-start.outputs.run_id }}
         run: |
           pip install psycopg2-binary>=2.9.0
           cd apps/public-api
-          # Get the latest run_id from the database
-          RUN_ID=$(python -c "
-          import os, psycopg2
-          conn = psycopg2.connect(os.getenv('DATABASE_URL'))
-          cur = conn.cursor()
-          cur.execute(\"SELECT run_id FROM pipeline_runs WHERE status = 'Running' ORDER BY started_at DESC LIMIT 1\")
-          row = cur.fetchone()
-          print(row[0] if row else '')
-          conn.close()
-          " 2>/dev/null || echo '')
           if [ -n "$RUN_ID" ]; then
+            echo "Recording success for run ID: $RUN_ID"
             python scripts/record_pipeline_run.py --finish "$RUN_ID"
+          else
+            echo "Warning: No run_id found, skipping record"
           fi
-        if: success()  record-failure:
+        if: success()
+
+  record-failure:
     name: Record Pipeline Failure
     needs: [record-start, scout, curator, evidence-miner, scorer, drift-sentinel, sage-meridian, publisher]
     runs-on: ubuntu-latest
@@ -199,13 +199,12 @@ jobs:
           # Get the latest run_id from the database
           RUN_ID=$(python -c "
           import os, psycopg2
-          conn = psycopg2.connect(os.getenv('DATABASE_URL'))
-          cur = conn.cursor()
-          cur.execute(\"SELECT run_id FROM pipeline_runs WHERE status = 'Running' ORDER BY started_at DESC LIMIT 1\")
-          row = cur.fetchone()
-          print(row[0] if row else '')
-          conn.close()
-          " 2>/dev/null || echo '')
+          RUN_ID: ${{ needs.record-start.outputs.run_id }}
+        run: |
+          pip install psycopg2-binary>=2.9.0
+          cd apps/public-api
           if [ -n "$RUN_ID" ]; then
+            echo "Recording failure for run ID: $RUN_ID"
             python scripts/record_pipeline_run.py --finish "$RUN_ID" --failed
-          fi
+          else
+            echo "Warning: No run_id found, skipping record"
