@@ -16,9 +16,16 @@ app = FastAPI(
 )
 
 # CORS middleware
+origins = [
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "https://secairadar.cloud",
+    "https://www.secairadar.cloud"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
