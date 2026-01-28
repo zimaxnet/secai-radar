@@ -137,9 +137,9 @@ export async function getRankings(params: RankingsParams = {}): Promise<{
 
   const response = await fetchPublicAPI<any>(`/rankings?${queryParams.toString()}`)
 
-  // Correctly map the enveloped response structure: { data: { servers: [] }, meta: { ... } }
+  // Correctly map the enveloped response structure: { data: { items: [] }, meta: { ... } }
   return {
-    items: response?.data?.servers || [],
+    items: response?.data?.items || [],
     total: response?.meta?.total || 0,
     page: response?.meta?.page || 1,
     pageSize: response?.meta?.pageSize || 50,
