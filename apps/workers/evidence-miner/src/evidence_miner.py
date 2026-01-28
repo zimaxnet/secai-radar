@@ -115,7 +115,14 @@ def _update_server_popularity_signals(db, server_id: str, signals: Dict[str, Any
         """, (server_id,))
         row = cur.fetchone()
         
-        current_metadata = json.loads(row[0]) if row and row[0] else {}
+        # metadata_json from PostgreSQL JSONB is already a dict, not a string
+        if row and row[0]:
+            if isinstance(row[0], str):
+                current_metadata = json.loads(row[0])
+            else:
+                current_metadata = row[0]  # Already a dict
+        else:
+            current_metadata = {}
         
         # Merge popularity signals
         if "popularity_signals" not in current_metadata:
@@ -447,7 +454,13 @@ def run_evidence_miner() -> Dict[str, Any]:
                 if repo_info:
                     owner, repo = repo_info
                     # Check if we already have recent popularity signals
-                    metadata = json.loads(metadata_json_str) if metadata_json_str else {}
+                    # metadata_json from PostgreSQL JSONB is already a dict, not a string
+                    if metadata_json_str is None:
+                        metadata = {}
+                    elif isinstance(metadata_json_str, str):
+                        metadata = json.loads(metadata_json_str)
+                    else:
+                        metadata = metadata_json_str  # Already a dict
                     popularity = metadata.get("popularity_signals", {})
                     last_updated = popularity.get("last_updated")
                     
@@ -528,7 +541,13 @@ def run_evidence_miner() -> Dict[str, Any]:
                 if repo_info:
                     owner, repo = repo_info
                     # Check if we already have recent popularity signals (avoid rate limits)
-                    metadata = json.loads(metadata_json_str) if metadata_json_str else {}
+                    # metadata_json from PostgreSQL JSONB is already a dict, not a string
+                    if metadata_json_str is None:
+                        metadata = {}
+                    elif isinstance(metadata_json_str, str):
+                        metadata = json.loads(metadata_json_str)
+                    else:
+                        metadata = metadata_json_str  # Already a dict
                     popularity = metadata.get("popularity_signals", {})
                     last_updated = popularity.get("last_updated")
                     

@@ -119,28 +119,94 @@ async def get_server(idOrSlug: str, db: Session = Depends(get_db)):
     if not server:
         raise HTTPException(status_code=404, detail="Server not found")
     score = get_latest_score(db, server.server_id)
-    provider_name = getattr(server.provider, "provider_name", None) if getattr(server, "provider", None) else None
-    trust_score = float(score.trust_score) if score else 0.0
-    tier = (score.tier if score else "D") or "D"
     now = datetime.utcnow()
     evidence_ids = get_server_evidence_ids(db, server.server_id)
-    integrity_digest = record_integrity_digest(
-        server.server_id, trust_score, tier, evidence_ids, now
-    )
-    data = {
+    
+    # Build server object
+    provider = server.provider if hasattr(server, 'provider') and server.provider else None
+    server_obj = {
         "serverId": server.server_id,
         "serverSlug": server.server_slug or server.server_id,
         "serverName": server.server_name or server.server_slug or server.server_id,
         "providerId": server.provider_id,
-        "providerName": provider_name,
-        "trustScore": trust_score,
-        "tier": tier,
-        "evidenceConfidence": int(score.evidence_confidence) if score else 0,
-        "lastAssessedAt": score.assessed_at.isoformat() if score and score.assessed_at else None,
-        "domainScores": {},
-        "enterpriseFit": (score.enterprise_fit if score else None) or "Experimental",
-        "integrityDigest": integrity_digest,
+        "categoryPrimary": server.category_primary or "Unknown",
+        "tags": server.tags or [],
+        "deploymentType": server.deployment_type or "Unknown",
+        "authModel": server.auth_model or "Unknown",
+        "toolAgency": server.tool_agency or "Unknown",
+        "endpoints": [],  # TODO: Populate from server_endpoints table if needed
+        "repoUrl": server.repo_url,
+        "docsUrl": server.docs_url,
+        "status": server.status or "Unknown",
+        "firstSeenAt": server.first_seen_at.isoformat() if server.first_seen_at else None,
+        "lastSeenAt": server.last_seen_at.isoformat() if server.last_seen_at else None,
+        "provider": {
+            "providerId": provider.provider_id if provider else server.provider_id,
+            "providerName": provider.provider_name if provider else "Unknown",
+            "primaryDomain": provider.primary_domain if provider else "",
+        } if provider else {
+            "providerId": server.provider_id,
+            "providerName": "Unknown",
+            "primaryDomain": "",
+        },
     }
+    
+    # Build latestScore object
+    if score:
+        trust_score = float(score.trust_score) if score.trust_score else 0.0
+        tier = (score.tier if score.tier else "D") or "D"
+        integrity_digest = record_integrity_digest(
+            server.server_id, trust_score, tier, evidence_ids, now
+        )
+        latest_score_obj = {
+            "scoreId": score.score_id,
+            "serverId": score.server_id,
+            "methodologyVersion": score.methodology_version or METHODOLOGY_VERSION,
+            "assessedAt": score.assessed_at.isoformat() if score.assessed_at else None,
+            "d1": float(score.d1) if score.d1 else 0.0,
+            "d2": float(score.d2) if score.d2 else 0.0,
+            "d3": float(score.d3) if score.d3 else 0.0,
+            "d4": float(score.d4) if score.d4 else 0.0,
+            "d5": float(score.d5) if score.d5 else 0.0,
+            "d6": float(score.d6) if score.d6 else 0.0,
+            "trustScore": trust_score,
+            "tier": tier,
+            "enterpriseFit": (score.enterprise_fit if score.enterprise_fit else None) or "Experimental",
+            "evidenceConfidence": int(score.evidence_confidence) if score.evidence_confidence else 0,
+            "failFastFlags": score.fail_fast_flags if score.fail_fast_flags else [],
+            "riskFlags": score.risk_flags if score.risk_flags else [],
+            "explainability": score.explainability_json if score.explainability_json else {},
+        }
+    else:
+        # Default score if none exists
+        integrity_digest = record_integrity_digest(
+            server.server_id, 0.0, "D", evidence_ids, now
+        )
+        latest_score_obj = {
+            "scoreId": "",
+            "serverId": server.server_id,
+            "methodologyVersion": METHODOLOGY_VERSION,
+            "assessedAt": None,
+            "d1": 0.0,
+            "d2": 0.0,
+            "d3": 0.0,
+            "d4": 0.0,
+            "d5": 0.0,
+            "d6": 0.0,
+            "trustScore": 0.0,
+            "tier": "D",
+            "enterpriseFit": "Experimental",
+            "evidenceConfidence": 0,
+            "failFastFlags": [],
+            "riskFlags": [],
+            "explainability": {},
+        }
+    
+    data = {
+        "server": server_obj,
+        "latestScore": latest_score_obj,
+    }
+    
     return {
         "attestation": build_attestation_envelope(METHODOLOGY_VERSION, as_of=now),
         "methodologyVersion": METHODOLOGY_VERSION,

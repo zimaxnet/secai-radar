@@ -179,9 +179,7 @@ jobs:
           if [ -n "$RUN_ID" ]; then
             python scripts/record_pipeline_run.py --finish "$RUN_ID"
           fi
-        if: success()
-
-  record-failure:
+        if: success()  record-failure:
     name: Record Pipeline Failure
     needs: [record-start, scout, curator, evidence-miner, scorer, drift-sentinel, sage-meridian, publisher]
     runs-on: ubuntu-latest

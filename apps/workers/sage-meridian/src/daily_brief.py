@@ -67,26 +67,42 @@ def _gather_from_drift(conn, brief_date: date) -> Dict[str, Any]:
 
 
 def _new_entrants(conn, brief_date: date) -> List[Dict[str, Any]]:
-    """Servers whose first score_snapshot was assessed on brief_date."""
+    """
+    Servers whose first score_snapshot was assessed on brief_date.
+    Deduplicates by server_id to avoid multiple entries for the same server.
+    """
     start = datetime(brief_date.year, brief_date.month, brief_date.day, tzinfo=timezone.utc)
     end = start + timedelta(days=1)
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT ss.server_id, ss.trust_score, ss.tier, ss.assessed_at
+            SELECT DISTINCT ON (ss.server_id)
+                ss.server_id, ss.trust_score, ss.tier, ss.assessed_at
             FROM score_snapshots ss
             WHERE ss.assessed_at >= %s AND ss.assessed_at < %s
             AND NOT EXISTS (
                 SELECT 1 FROM score_snapshots ss2
                 WHERE ss2.server_id = ss.server_id AND ss2.assessed_at < %s
             )
+            ORDER BY ss.server_id, ss.assessed_at ASC
             """,
             (start, end, start),
         )
-        return [
-            {"server_id": r[0], "trust_score": float(r[1]), "tier": r[2], "assessed_at": r[3].isoformat() if hasattr(r[3], "isoformat") else str(r[3])}
-            for r in cur.fetchall()
-        ]
+        results = cur.fetchall()
+        # Additional deduplication by server_id (in case DISTINCT ON doesn't work as expected)
+        seen_server_ids = set()
+        deduplicated = []
+        for r in results:
+            server_id = r[0]
+            if server_id not in seen_server_ids:
+                seen_server_ids.add(server_id)
+                deduplicated.append({
+                    "server_id": server_id,
+                    "trust_score": float(r[1]),
+                    "tier": r[2],
+                    "assessed_at": r[3].isoformat() if hasattr(r[3], "isoformat") else str(r[3])
+                })
+        return deduplicated
 
 
 def _build_highlights(movers: List, downgrades: List, new_entrants: List, notable: List) -> List[str]:

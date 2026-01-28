@@ -52,6 +52,11 @@ def validate_staging(db) -> tuple[bool, List[str]]:
     Validate latest_scores_staging before flipping (T-051).
     Failure keeps previous stable dataset live.
     Returns (is_valid, error_messages).
+    Validates:
+    - Staging exists and is not empty
+    - All valid Active servers (with repo_url or docs_url) are in staging
+    - No invalid servers (missing required data) in staging
+    - No duplicate servers (same normalized URLs) in staging
     """
     errors = []
     if not _staging_exists(db):
@@ -60,22 +65,77 @@ def validate_staging(db) -> tuple[bool, List[str]]:
         cur.execute("SELECT COUNT(*) FROM latest_scores_staging")
         if cur.fetchone()[0] == 0:
             errors.append("Staging is empty")
+        
+        # Check that all valid Active servers are in staging
+        # Valid = has repo_url or docs_url, name is not "Unknown"
         cur.execute("""
             SELECT COUNT(*) FROM mcp_servers s
             LEFT JOIN latest_scores_staging st ON s.server_id = st.server_id
-            WHERE s.status = 'Active' AND st.server_id IS NULL
+            WHERE s.status = 'Active'
+            AND (s.repo_url IS NOT NULL OR s.docs_url IS NOT NULL)
+            AND s.server_name IS NOT NULL
+            AND s.server_name != ''
+            AND LOWER(TRIM(s.server_name)) != 'unknown'
+            AND st.server_id IS NULL
         """)
         missing = cur.fetchone()[0]
         if missing > 0:
-            errors.append(f"{missing} active servers missing in staging")
+            errors.append(f"{missing} valid active servers missing in staging")
+        
+        # Check that no invalid servers are in staging
+        cur.execute("""
+            SELECT COUNT(*) FROM latest_scores_staging st
+            JOIN mcp_servers s ON st.server_id = s.server_id
+            WHERE s.status IN ('Unknown', 'Deprecated')
+            OR (s.repo_url IS NULL AND s.docs_url IS NULL)
+            OR s.server_name IS NULL
+            OR s.server_name = ''
+            OR LOWER(TRIM(s.server_name)) = 'unknown'
+        """)
+        invalid = cur.fetchone()[0]
+        if invalid > 0:
+            errors.append(f"{invalid} invalid or deprecated servers in staging")
+        
+        # Check for duplicate servers (same normalized repo_url or docs_url)
+        cur.execute("""
+            WITH normalized_urls AS (
+                SELECT 
+                    st.server_id,
+                    LOWER(TRIM(REGEXP_REPLACE(s.repo_url, '[?#].*', ''))) as normalized_repo,
+                    LOWER(TRIM(REGEXP_REPLACE(s.docs_url, '[?#].*', ''))) as normalized_docs
+                FROM latest_scores_staging st
+                JOIN mcp_servers s ON st.server_id = s.server_id
+                WHERE s.status = 'Active'
+            ),
+            duplicates AS (
+                SELECT normalized_repo, COUNT(*) as cnt
+                FROM normalized_urls
+                WHERE normalized_repo IS NOT NULL AND normalized_repo != ''
+                GROUP BY normalized_repo
+                HAVING COUNT(*) > 1
+                UNION
+                SELECT normalized_docs, COUNT(*) as cnt
+                FROM normalized_urls
+                WHERE normalized_docs IS NOT NULL AND normalized_docs != ''
+                GROUP BY normalized_docs
+                HAVING COUNT(*) > 1
+            )
+            SELECT COUNT(*) FROM duplicates
+        """)
+        duplicate_count = cur.fetchone()[0]
+        if duplicate_count > 0:
+            errors.append(f"{duplicate_count} duplicate server groups found in staging (same normalized URLs)")
+        
+        # Check that score_snapshots are valid
         cur.execute("""
             SELECT COUNT(*) FROM latest_scores_staging st
             LEFT JOIN score_snapshots ss ON st.score_id = ss.score_id
             WHERE ss.score_id IS NULL
         """)
-        invalid = cur.fetchone()[0]
-        if invalid > 0:
-            errors.append(f"{invalid} staging rows reference invalid score_snapshots")
+        invalid_snapshots = cur.fetchone()[0]
+        if invalid_snapshots > 0:
+            errors.append(f"{invalid_snapshots} staging rows reference invalid score_snapshots")
+    
     return len(errors) == 0, errors
 
 
@@ -124,7 +184,12 @@ def _fetch_rankings_payload(cur, tier: Optional[str], page: int = 1, page_size: 
             JOIN latest_scores ls ON s.server_id = ls.server_id
             JOIN score_snapshots ss ON ls.score_id = ss.score_id
             JOIN providers p ON s.provider_id = p.provider_id
-            WHERE s.status = 'Active' {where}
+            WHERE s.status = 'Active'
+            AND (s.repo_url IS NOT NULL OR s.docs_url IS NOT NULL)
+            AND s.server_name IS NOT NULL
+            AND s.server_name != ''
+            AND LOWER(TRIM(s.server_name)) != 'unknown'
+            {where}
         )
         SELECT COUNT(*) OVER () AS total,
                server_id, server_slug, server_name, provider_id, provider_name,

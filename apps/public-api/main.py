@@ -2,9 +2,10 @@
 Public API service for SecAI Radar Verified MCP
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from datetime import datetime
 from src.middleware.etag import etag_middleware
 from src.middleware.rate_limit import rate_limit_middleware
@@ -15,7 +16,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+# CORS middleware - must be added first to apply to all responses
 origins = [
     "http://localhost:5173",
     "http://localhost:4173",
@@ -27,13 +28,30 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Rate limiting (T-130) then ETag
 app.middleware("http")(rate_limit_middleware)
 app.middleware("http")(etag_middleware)
+
+# Global exception handlers to ensure CORS headers are included in error responses
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Handle any unhandled exceptions with proper CORS headers"""
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Internal server error",
+            "error": str(exc) if str(exc) else "Unknown error"
+        },
+        headers={
+            "Access-Control-Allow-Origin": "https://secairadar.cloud, https://www.secairadar.cloud",
+            "Access-Control-Allow-Credentials": "true",
+        }
+    )
 
 METHODOLOGY_VERSION = "v1.0"
 

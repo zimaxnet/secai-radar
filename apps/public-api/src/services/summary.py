@@ -198,7 +198,16 @@ def get_summary_data(db: Session, window: str) -> Dict[str, Any]:
             # Extract new entrants
             new_entrants_raw = payload.get("newEntrants", [])
             if new_entrants_raw:
-                new_entrants = _enrich_server_data(db, new_entrants_raw, "server_id")
+                # Deduplicate by server_id before enriching (safety check)
+                seen_server_ids = set()
+                deduplicated_raw = []
+                for entry in new_entrants_raw:
+                    server_id = entry.get("server_id") if isinstance(entry, dict) else None
+                    if server_id and server_id not in seen_server_ids:
+                        seen_server_ids.add(server_id)
+                        deduplicated_raw.append(entry)
+                
+                new_entrants = _enrich_server_data(db, deduplicated_raw, "server_id")
                 # Format for frontend
                 new_entrants = [
                     {

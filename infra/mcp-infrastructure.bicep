@@ -16,6 +16,10 @@ param environment string = 'dev'
 @description('Base application name')
 param appName string = 'secai-radar'
 
+@description('PostgreSQL admin password (should be provided at deployment time)')
+@secure()
+param postgresAdminPassword string
+
 // ============================================================================
 // PostgreSQL Database
 // ============================================================================
@@ -30,7 +34,7 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-pr
   properties: {
     version: '15'
     administratorLogin: 'secairadar'
-    administratorLoginPassword: '@secureString()' // Should use Key Vault reference
+    administratorLoginPassword: postgresAdminPassword
     storage: {
       storageSizeGB: 32
     }
@@ -174,7 +178,7 @@ resource publicApiApp 'Microsoft.App/containerApps@2023-05-01' = {
       secrets: [
         {
           name: 'database-connection'
-          value: 'postgresql://...' // Should reference Key Vault
+          value: 'postgresql://secairadar:${postgresAdminPassword}@${postgresServer.properties.fullyQualifiedDomainName}:5432/secairadar'
         }
       ]
     }
@@ -222,7 +226,7 @@ resource registryApiApp 'Microsoft.App/containerApps@2023-05-01' = {
       secrets: [
         {
           name: 'database-connection'
-          value: 'postgresql://...' // Should reference Key Vault
+          value: 'postgresql://secairadar:${postgresAdminPassword}@${postgresServer.properties.fullyQualifiedDomainName}:5432/secairadar'
         }
         {
           name: 'entra-tenant-id'
@@ -292,7 +296,7 @@ resource scoutJob 'Microsoft.App/jobs@2023-05-01' = {
       secrets: [
         {
           name: 'database-connection'
-          value: 'postgresql://...'
+          value: 'postgresql://secairadar:${postgresAdminPassword}@${postgresServer.properties.fullyQualifiedDomainName}:5432/secairadar'
         }
       ]
     }

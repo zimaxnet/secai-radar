@@ -40,6 +40,9 @@ echo "==> Scout (T-070)"
 echo "==> Curator (T-071)"
 ./scripts/run-curator.sh
 
+echo "==> Cleanup Duplicates (before Evidence Miner)"
+./scripts/cleanup-duplicates.sh
+
 echo "==> Evidence Miner (T-072)"
 ./scripts/run-evidence-miner.sh
 

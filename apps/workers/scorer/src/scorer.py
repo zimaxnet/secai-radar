@@ -151,7 +151,13 @@ def get_server_metadata(db, server_id: str) -> Optional[ServerMetadata]:
             return None
         
         deployment_type, metadata_json = row
-        metadata_dict = json.loads(metadata_json) if metadata_json else {}
+        # metadata_json from PostgreSQL JSONB is already a dict, not a string
+        if metadata_json is None:
+            metadata_dict = {}
+        elif isinstance(metadata_json, str):
+            metadata_dict = json.loads(metadata_json)
+        else:
+            metadata_dict = metadata_json  # Already a dict
         
         return ServerMetadata(
             publisher=metadata_dict.get("publisher"),
@@ -223,15 +229,56 @@ def run_scorer():
     use_staging = os.getenv("WRITE_TO_STAGING", "").strip().lower() in ("1", "true", "yes")
     
     try:
-        # Get active servers
+        # Get active servers with validation: must have repo_url, docs_url, or endpoint in metadata_json
+        # and name must not be "Unknown"
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT server_id FROM mcp_servers
+                SELECT server_id, server_name, repo_url, docs_url, metadata_json
+                FROM mcp_servers
                 WHERE status = 'Active'
+                AND server_name IS NOT NULL
+                AND server_name != ''
+                AND LOWER(TRIM(server_name)) != 'unknown'
+                AND (
+                    repo_url IS NOT NULL 
+                    OR docs_url IS NOT NULL
+                    OR (metadata_json IS NOT NULL AND (
+                        metadata_json::text LIKE '%"remotes"%'
+                        OR metadata_json::text LIKE '%"url"%'
+                        OR metadata_json::text LIKE '%"endpoint"%'
+                    ))
+                )
             """)
-            server_ids = [row[0] for row in cur.fetchall()]
+            valid_servers = cur.fetchall()
+            server_ids = [row[0] for row in valid_servers]
         
-        print(f"Scoring {len(server_ids)} active servers...")
+        print(f"Found {len(server_ids)} valid active servers to score (filtered from all Active servers)...")
+        
+        # Mark invalid servers as Unknown status (but don't mark ones with endpoint in metadata)
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE mcp_servers
+                SET status = 'Unknown'
+                WHERE status = 'Active'
+                AND (
+                    server_name IS NULL
+                    OR server_name = ''
+                    OR LOWER(TRIM(server_name)) = 'unknown'
+                    OR (
+                        repo_url IS NULL 
+                        AND docs_url IS NULL
+                        AND (metadata_json IS NULL OR (
+                            metadata_json::text NOT LIKE '%"remotes"%'
+                            AND metadata_json::text NOT LIKE '%"url"%'
+                            AND metadata_json::text NOT LIKE '%"endpoint"%'
+                        ))
+                    )
+                )
+            """)
+            invalid_count = cur.rowcount
+            if invalid_count > 0:
+                print(f"  Marked {invalid_count} invalid servers as 'Unknown' status")
+            conn.commit()
         
         results = []
         for idx, server_id in enumerate(server_ids):

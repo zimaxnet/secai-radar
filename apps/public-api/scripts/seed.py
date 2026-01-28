@@ -25,6 +25,7 @@ PROVIDER_DOMAINS = [
     ("OpenAI", "openai.com", "Vendor"),
     ("Google", "google.com", "Vendor"),
     ("Microsoft", "microsoft.com", "Vendor"),
+    ("GitHub", "github.com", "Vendor"),
 ]
 METHODOLOGY_VERSION = "2024.1"
 

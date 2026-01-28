@@ -198,16 +198,38 @@ def extract_metadata(obs: Dict[str, Any], source: str) -> Dict[str, Any]:
     return metadata
 
 
+def is_valid_mcp_server(obs: Dict[str, Any], repo_url: Optional[str], endpoint: Optional[str], docs_url: Optional[str], name: str) -> tuple[bool, str]:
+    """
+    Validate that an observation represents a real MCP server.
+    Returns (is_valid, reason).
+    """
+    # Must have at least one of: repo_url, endpoint, or docs_url
+    if not repo_url and not endpoint and not docs_url:
+        return False, "missing_all_urls"
+    
+    # Name must not be "Unknown" or empty
+    if not name or name.lower().strip() in ("unknown", ""):
+        return False, "invalid_name"
+    
+    # Must have some identifying information
+    if not repo_url and not endpoint and not docs_url:
+        return False, "no_identifiers"
+    
+    return True, "valid"
+
+
 def dedupe_servers(
     db, raw_observations: List[Dict[str, Any]], review_log: Optional[List[tuple]] = None
 ) -> List[Dict[str, Any]]:
     """
     Deduplicate servers using heuristics. ID precedence: repoUrl > endpoint host > docs URL > name+source.
     Logs to review_log when skipping (duplicate or ambiguous) for T-071 acceptance.
+    Also validates that servers are real MCPs with required data.
     """
     log = review_log if review_log is not None else []
     canonical_servers = []
     seen_ids = set()
+    seen_urls = {}  # Map normalized URL -> server_id for content-based deduplication
     
     print(f"Processing {len(raw_observations)} observations...")
 
@@ -254,15 +276,44 @@ def dedupe_servers(
                    obs.get("documentation") or
                    extract_from_full_server_json(obs, "docs_url"))
         
+        # Normalize URLs for content-based deduplication
+        normalized_repo = normalize_url(repo_url) if repo_url else None
+        normalized_endpoint = normalize_url(endpoint) if endpoint else None
+        normalized_docs = normalize_url(docs_url) if docs_url else None
+        
         # Log extraction for first few observations
         if idx < 5:
             print(f"  Observation {idx+1}: name={name}, repo_url={bool(repo_url)}, endpoint={bool(endpoint)}, docs_url={bool(docs_url)}")
+
+        # Validate that this is a real MCP server
+        is_valid, reason = is_valid_mcp_server(obs, repo_url, endpoint, docs_url, name)
+        if not is_valid:
+            log.append(("invalid", None, name, reason))
+            if idx < 10:
+                print(f"    Skipped: invalid MCP server ({reason}): {name}")
+            continue
+
+        # Check for content-based duplicates (same normalized URLs)
+        duplicate_id = None
+        if normalized_repo and normalized_repo in seen_urls:
+            duplicate_id = seen_urls[normalized_repo]
+        elif normalized_endpoint and normalized_endpoint in seen_urls:
+            duplicate_id = seen_urls[normalized_endpoint]
+        elif normalized_docs and normalized_docs in seen_urls:
+            duplicate_id = seen_urls[normalized_docs]
+        
+        if duplicate_id:
+            log.append(("duplicate_content", duplicate_id, name))
+            if idx < 10:
+                print(f"    Skipped: duplicate content (matches {duplicate_id}): {name}")
+            continue
 
         server_id = generate_server_id(repo_url, endpoint, docs_url, name, source)
         
         if idx < 5:
             print(f"    Generated server_id: {server_id}")
 
+        # Check database for existing server_id
         with db.cursor() as cur:
             cur.execute("SELECT server_id FROM mcp_servers WHERE server_id = %s", (server_id,))
             if cur.fetchone():
@@ -270,12 +321,23 @@ def dedupe_servers(
                 if idx < 10:
                     print(f"    Skipped: duplicate server_id {server_id}")
                 continue
+        
+        # Check for same server_id in current batch
         if server_id in seen_ids:
             log.append(("ambiguous_same_batch", server_id, name))
             if idx < 10:
                 print(f"    Skipped: ambiguous (same batch) server_id {server_id}")
             continue
+        
         seen_ids.add(server_id)
+        
+        # Track normalized URLs for content-based deduplication
+        if normalized_repo:
+            seen_urls[normalized_repo] = server_id
+        if normalized_endpoint:
+            seen_urls[normalized_endpoint] = server_id
+        if normalized_docs:
+            seen_urls[normalized_docs] = server_id
 
         # Extract metadata and deployment_type
         metadata = extract_metadata(obs, source)
@@ -302,31 +364,118 @@ def dedupe_servers(
     return canonical_servers
 
 
-def get_or_create_provider(db, publisher: Optional[str], metadata: Dict[str, Any]) -> str:
+def extract_provider_from_repo_url(repo_url: Optional[str]) -> Optional[tuple[str, str]]:
     """
-    Get or create provider from publisher information.
-    Returns provider_id (defaults to Unknown provider if publisher not available).
+    Extract provider name and domain from repository URL.
+    Returns (provider_name, primary_domain) or None.
+    For GitHub/GitLab, uses username as provider name and creates unique domain.
     """
-    if not publisher:
-        # Return default Unknown provider
+    if not repo_url:
+        return None
+    
+    # GitHub: github.com/username/repo or github.com/org/repo
+    if 'github.com' in repo_url.lower():
+        match = re.search(r'github\.com[:/]([^/]+)', repo_url, re.IGNORECASE)
+        if match:
+            username = match.group(1)
+            # Use username as provider name, and create unique domain
+            # Format: username.github.com (unique per username)
+            return (username, f"{username}.github.com")
+    
+    # GitLab: gitlab.com/username/repo
+    if 'gitlab.com' in repo_url.lower():
+        match = re.search(r'gitlab\.com[:/]([^/]+)', repo_url, re.IGNORECASE)
+        if match:
+            username = match.group(1)
+            return (username, f"{username}.gitlab.com")
+    
+    # Bitbucket: bitbucket.org/username/repo
+    if 'bitbucket.org' in repo_url.lower():
+        match = re.search(r'bitbucket\.org[:/]([^/]+)', repo_url, re.IGNORECASE)
+        if match:
+            username = match.group(1)
+            return (username, f"{username}.bitbucket.org")
+    
+    # Generic: Extract domain from URL
+    try:
+        parsed = urlparse(repo_url)
+        domain = parsed.netloc or parsed.path.split('/')[0] if parsed.path else None
+        if domain and '.' in domain:
+            # Use domain as provider name
+            return (domain, domain)
+    except:
+        pass
+    
+    return None
+
+
+def extract_category(server_name: str, description: Optional[str] = None) -> str:
+    """
+    Extract category from server name or description.
+    Returns category string or "Tools" as default.
+    """
+    name_lower = server_name.lower()
+    desc_lower = (description or "").lower()
+    combined = f"{name_lower} {desc_lower}"
+    
+    # Pattern-based extraction
+    if any(keyword in combined for keyword in ['database', 'db', 'sql', 'postgres', 'mysql', 'mongodb', 'redis']):
+        return "Database"
+    if any(keyword in combined for keyword in ['api', 'rest', 'graphql', 'rpc']):
+        return "API"
+    if any(keyword in combined for keyword in ['file', 'storage', 's3', 'blob', 'bucket']):
+        return "Storage"
+    if any(keyword in combined for keyword in ['email', 'mail', 'smtp', 'sendgrid']):
+        return "Communication"
+    if any(keyword in combined for keyword in ['auth', 'oauth', 'oidc', 'sso', 'login']):
+        return "Authentication"
+    if any(keyword in combined for keyword in ['ai', 'llm', 'gpt', 'openai', 'anthropic', 'model']):
+        return "AI/ML"
+    if any(keyword in combined for keyword in ['code', 'git', 'github', 'gitlab', 'repo', 'repository']):
+        return "Development"
+    if any(keyword in combined for keyword in ['slack', 'discord', 'teams', 'chat', 'message']):
+        return "Communication"
+    
+    # Default to Tools
+    return "Tools"
+
+
+def get_or_create_provider(db, publisher: Optional[str], metadata: Dict[str, Any], repo_url: Optional[str] = None) -> str:
+    """
+    Get or create provider from publisher information or repo_url.
+    Returns provider_id (defaults to Unknown provider if neither available).
+    """
+    provider_name = None
+    primary_domain = None
+    
+    # Try publisher first
+    if publisher:
+        # Try to extract domain from publisher (might be email or domain)
+        if "@" in publisher:
+            # Email format: extract domain
+            primary_domain = publisher.split("@")[-1]
+            provider_name = publisher.split("@")[0]
+        elif "." in publisher and not publisher.startswith("http"):
+            # Might be a domain
+            primary_domain = publisher
+            provider_name = publisher.split('.')[0] if '.' in publisher else publisher
+        else:
+            # Use publisher name as domain fallback (normalized)
+            provider_name = publisher
+            primary_domain = f"{normalize_name(publisher)}.local"
+    
+    # Try repo_url if publisher not available
+    if not provider_name and repo_url:
+        provider_info = extract_provider_from_repo_url(repo_url)
+        if provider_info:
+            provider_name, primary_domain = provider_info
+    
+    # If still no provider, return Unknown
+    if not provider_name:
         return "0000000000000000"
     
-    # Try to extract domain from metadata or publisher string
-    primary_domain = "unknown.local"
-    
-    # Try to extract domain from publisher (might be email or domain)
-    if "@" in publisher:
-        # Email format: extract domain
-        primary_domain = publisher.split("@")[-1]
-    elif "." in publisher and not publisher.startswith("http"):
-        # Might be a domain
-        primary_domain = publisher
-    else:
-        # Use publisher name as domain fallback (normalized)
-        primary_domain = f"{normalize_name(publisher)}.local"
-    
     # Generate provider ID
-    provider_id = generate_provider_id(publisher, primary_domain)
+    provider_id = generate_provider_id(provider_name, primary_domain)
     
     # Get or create provider
     with db.cursor() as cur:
@@ -341,88 +490,187 @@ def get_or_create_provider(db, publisher: Optional[str], metadata: Dict[str, Any
             INSERT INTO providers (provider_id, provider_name, primary_domain, provider_type)
             VALUES (%s, %s, %s, %s)
             ON CONFLICT (provider_id) DO NOTHING
-        """, (provider_id, publisher, primary_domain, "Community"))
+        """, (provider_id, provider_name, primary_domain, "Community"))
         db.commit()
     
     return provider_id
 
 
 def store_canonical_servers(db, servers: List[Dict[str, Any]], default_provider_id: str):
-    """Store canonical server records. Creates providers from publisher info when available."""
-    with db.cursor() as cur:
-        # Check if metadata_json column exists
-        cur.execute("""
-            SELECT column_name 
-            FROM information_schema.columns 
-            WHERE table_name = 'mcp_servers' AND column_name = 'metadata_json'
-        """)
-        has_metadata_json = cur.fetchone() is not None
+    """
+    Store canonical server records. Creates providers from publisher info when available.
+    Sets status to 'Unknown' if server lacks required data (repo_url, endpoint, or docs_url).
+    """
+    print(f"store_canonical_servers: Starting to store {len(servers)} servers...", flush=True)
+    stored_count = 0
+    error_count = 0
+    try:
+        with db.cursor() as cur:
+            # Check if metadata_json column exists
+            cur.execute("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'mcp_servers' AND column_name = 'metadata_json'
+            """)
+            has_metadata_json = cur.fetchone() is not None
+            print(f"  Has metadata_json column: {has_metadata_json}", flush=True)
         
-        for server in servers:
-            metadata_json = json.dumps(server.get("metadata", {}))
-            deployment_type = server.get("deployment_type", "Unknown")
-            metadata = server.get("metadata", {})
+            for idx, server in enumerate(servers):
+                try:
+                    metadata_json = json.dumps(server.get("metadata", {}))
+                    deployment_type = server.get("deployment_type", "Unknown")
+                    metadata = server.get("metadata", {})
+                    
+                    # Get or create provider from publisher or repo_url
+                    publisher = metadata.get("publisher")
+                    repo_url = server.get("repo_url")
+                    provider_id = get_or_create_provider(db, publisher, metadata, repo_url) if (publisher or repo_url) else default_provider_id
+                    
+                    # Extract category
+                    server_name = server.get("server_name", "Unknown")
+                    description = metadata.get("description") or (metadata.get("_full_server_json", {}).get("description") if isinstance(metadata.get("_full_server_json"), dict) else None)
+                    category_primary = extract_category(server_name, description)
+                    
+                    # Determine status: 'Active' if has required data (repo_url, docs_url, or endpoint), 'Unknown' otherwise
+                    docs_url = server.get("docs_url")
+                    # Check for endpoint in metadata (from remotes[0].url)
+                    endpoint = None
+                    if isinstance(metadata, dict):
+                        full_json = metadata.get("_full_server_json", {})
+                        if isinstance(full_json, dict):
+                            remotes = full_json.get("remotes", [])
+                            if remotes and isinstance(remotes, list) and len(remotes) > 0:
+                                first_remote = remotes[0]
+                                if isinstance(first_remote, dict):
+                                    endpoint = first_remote.get("url")
+                    has_required_data = bool(repo_url or docs_url or endpoint)
+                    status = 'Active' if has_required_data else 'Unknown'
+                    
+                    # Ensure unique server_slug by appending server_id suffix if needed
+                    base_slug = server["server_slug"]
+                    server_slug = base_slug
+                    slug_attempts = 0
+                    while slug_attempts < 10:  # Limit attempts to avoid infinite loop
+                        try:
+                            # Check if slug exists for a different server_id
+                            cur.execute("SELECT server_id FROM mcp_servers WHERE server_slug = %s AND server_id != %s", 
+                                      (server_slug, server["server_id"]))
+                            if cur.fetchone():
+                                # Slug exists for different server, append server_id suffix
+                                server_slug = f"{base_slug}-{server['server_id'][:8]}"
+                                slug_attempts += 1
+                            else:
+                                break
+                        except:
+                            break
+                    
+                    if has_metadata_json:
+                        # Use INSERT with ON CONFLICT for server_id, and handle slug conflicts by making slug unique
+                        cur.execute("""
+                            INSERT INTO mcp_servers (
+                                server_id, server_slug, server_name, provider_id, category_primary,
+                                deployment_type, auth_model, tool_agency,
+                                repo_url, docs_url, metadata_json, status, first_seen_at, last_seen_at
+                            ) VALUES (%s, %s, %s, %s, %s, %s, 'Unknown', 'Unknown', %s, %s, %s, %s, %s, %s)
+                            ON CONFLICT (server_id)
+                            DO UPDATE SET
+                                last_seen_at = EXCLUDED.last_seen_at,
+                                deployment_type = COALESCE(EXCLUDED.deployment_type, mcp_servers.deployment_type),
+                                repo_url = COALESCE(EXCLUDED.repo_url, mcp_servers.repo_url),
+                                docs_url = COALESCE(EXCLUDED.docs_url, mcp_servers.docs_url),
+                                status = EXCLUDED.status,
+                                category_primary = COALESCE(EXCLUDED.category_primary, mcp_servers.category_primary),
+                                provider_id = CASE 
+                                    WHEN mcp_servers.provider_id = '0000000000000000' 
+                                    THEN EXCLUDED.provider_id 
+                                    ELSE mcp_servers.provider_id 
+                                END,
+                                metadata_json = CASE 
+                                    WHEN EXCLUDED.metadata_json != '{}'::jsonb 
+                                    THEN EXCLUDED.metadata_json 
+                                    ELSE mcp_servers.metadata_json 
+                                END
+                        """, (
+                            server["server_id"],
+                            server_slug,
+                            server["server_name"],
+                            provider_id,  # Use proper provider_id
+                            category_primary,  # Set category
+                            deployment_type,
+                            server.get("repo_url"),
+                            server.get("docs_url"),
+                            metadata_json,
+                            status,
+                            datetime.utcnow(),
+                            datetime.utcnow()
+                        ))
+                    else:
+                        # Fallback for databases without metadata_json column
+                        cur.execute("""
+                            INSERT INTO mcp_servers (
+                                server_id, server_slug, server_name, provider_id, category_primary,
+                                deployment_type, auth_model, tool_agency,
+                                repo_url, docs_url, status, first_seen_at, last_seen_at
+                            ) VALUES (%s, %s, %s, %s, %s, %s, 'Unknown', 'Unknown', %s, %s, %s, %s, %s)
+                            ON CONFLICT (server_id)
+                            DO UPDATE SET
+                                last_seen_at = EXCLUDED.last_seen_at,
+                                deployment_type = COALESCE(EXCLUDED.deployment_type, mcp_servers.deployment_type),
+                                repo_url = COALESCE(EXCLUDED.repo_url, mcp_servers.repo_url),
+                                docs_url = COALESCE(EXCLUDED.docs_url, mcp_servers.docs_url),
+                                status = EXCLUDED.status,
+                                category_primary = COALESCE(EXCLUDED.category_primary, mcp_servers.category_primary),
+                                provider_id = CASE 
+                                    WHEN mcp_servers.provider_id = '0000000000000000' 
+                                    THEN EXCLUDED.provider_id 
+                                    ELSE mcp_servers.provider_id 
+                                END
+                        """, (
+                            server["server_id"],
+                            server_slug,
+                            server["server_name"],
+                            provider_id,  # Use proper provider_id
+                            category_primary,  # Set category
+                            deployment_type,
+                            server.get("repo_url"),
+                            server.get("docs_url"),
+                            status,
+                            datetime.utcnow(),
+                            datetime.utcnow()
+                        ))
+                    stored_count += 1
+                    if stored_count % 50 == 0:
+                        print(f"  Stored {stored_count}/{len(servers)} servers...", flush=True)
+                except Exception as e:
+                    error_count += 1
+                    server_id = server.get("server_id", "unknown")
+                    print(f"  ERROR storing server {server_id}: {e}", flush=True)
+                    if error_count == 1:  # Print first error with full traceback
+                        import traceback
+                        print("  FIRST ERROR TRACEBACK:", flush=True)
+                        traceback.print_exc()
+                        # Rollback and create new cursor for remaining servers
+                        db.rollback()
+                        cur = db.cursor()
+                        # Re-check metadata_json column
+                        cur.execute("""
+                            SELECT column_name 
+                            FROM information_schema.columns 
+                            WHERE table_name = 'mcp_servers' AND column_name = 'metadata_json'
+                        """)
+                        has_metadata_json = cur.fetchone() is not None
+                    elif error_count <= 5:
+                        print(f"  (Additional error, transaction already aborted)", flush=True)
             
-            # Get or create provider from publisher
-            publisher = metadata.get("publisher")
-            provider_id = get_or_create_provider(db, publisher, metadata) if publisher else default_provider_id
-            
-            if has_metadata_json:
-                cur.execute("""
-                    INSERT INTO mcp_servers (
-                        server_id, server_slug, server_name, provider_id,
-                        deployment_type, auth_model, tool_agency,
-                        repo_url, docs_url, metadata_json, first_seen_at, last_seen_at
-                    ) VALUES (%s, %s, %s, %s, %s, 'Unknown', 'Unknown', %s, %s, %s, %s, %s)
-                    ON CONFLICT (server_id)
-                    DO UPDATE SET
-                        last_seen_at = EXCLUDED.last_seen_at,
-                        deployment_type = COALESCE(EXCLUDED.deployment_type, mcp_servers.deployment_type),
-                        repo_url = COALESCE(EXCLUDED.repo_url, mcp_servers.repo_url),
-                        docs_url = COALESCE(EXCLUDED.docs_url, mcp_servers.docs_url),
-                        metadata_json = CASE 
-                            WHEN EXCLUDED.metadata_json != '{}'::jsonb 
-                            THEN EXCLUDED.metadata_json 
-                            ELSE mcp_servers.metadata_json 
-                        END
-                """, (
-                    server["server_id"],
-                    server["server_slug"],
-                    server["server_name"],
-                    provider_id,  # Use proper provider_id
-                    deployment_type,
-                    server.get("repo_url"),
-                    server.get("docs_url"),
-                    metadata_json,
-                    datetime.utcnow(),
-                    datetime.utcnow()
-                ))
-            else:
-                # Fallback for databases without metadata_json column
-                cur.execute("""
-                    INSERT INTO mcp_servers (
-                        server_id, server_slug, server_name, provider_id,
-                        deployment_type, auth_model, tool_agency,
-                        repo_url, docs_url, first_seen_at, last_seen_at
-                    ) VALUES (%s, %s, %s, %s, %s, 'Unknown', 'Unknown', %s, %s, %s, %s)
-                    ON CONFLICT (server_id)
-                    DO UPDATE SET
-                        last_seen_at = EXCLUDED.last_seen_at,
-                        deployment_type = COALESCE(EXCLUDED.deployment_type, mcp_servers.deployment_type),
-                        repo_url = COALESCE(EXCLUDED.repo_url, mcp_servers.repo_url),
-                        docs_url = COALESCE(EXCLUDED.docs_url, mcp_servers.docs_url)
-                """, (
-                    server["server_id"],
-                    server["server_slug"],
-                    server["server_name"],
-                    provider_id,  # Use proper provider_id
-                    deployment_type,
-                    server.get("repo_url"),
-                    server.get("docs_url"),
-                    datetime.utcnow(),
-                    datetime.utcnow()
-                ))
-        db.commit()
+            print(f"store_canonical_servers: Committing {stored_count} servers to database (errors: {error_count})...", flush=True)
+            db.commit()
+            print(f"store_canonical_servers: Commit complete. Stored {stored_count} servers, {error_count} errors.", flush=True)
+    except Exception as e:
+        print(f"store_canonical_servers: FATAL ERROR: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+        db.rollback()
+        raise
 
 
 def run_curator():
@@ -468,7 +716,15 @@ def run_curator():
         if review_log:
             print("Review queue:", [{"reason": r[0], "server_id": r[1], "name": r[2]} for r in review_log])
 
+        print(f"About to store {len(canonical_servers)} canonical servers...")
         store_canonical_servers(conn, canonical_servers, default_provider_id)
+        print(f"Finished storing canonical servers. Checking database...")
+        
+        # Verify servers were stored
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM mcp_servers")
+            total_after = cur.fetchone()[0]
+            print(f"Total servers in database after store: {total_after}")
 
         with conn.cursor() as cur:
             obs_ids = [obs[0] for obs in raw_obs]

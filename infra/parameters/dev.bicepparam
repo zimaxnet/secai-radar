@@ -11,3 +11,4 @@ param maximumElasticWorkerCount = 5
 param storageAccountName = 'secairadardevsa'
 param appInsightsDailyCapGb = 1
 param appInsightsSamplingPercentage = 5
+param postgresAdminPassword = 'SecureP@ssw0rd2024!' // IMPORTANT: Change this to a secure password in production
