@@ -341,22 +341,31 @@ export default function ServerDetail() {
             {/* Domain Breakdown */}
             <div>
               <h2 className="text-xl font-semibold text-white mb-4">Domain Breakdown</h2>
-              <div className="space-y-3">
-                {server.domainBreakdown?.map((domain, idx) => (
-                  <div key={idx}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-slate-300">{domain.domain}</span>
-                      <span className="text-sm font-semibold text-white">{domain.score.toFixed(0)}</span>
-                    </div>
-                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-blue-500 rounded-full"
-                        style={{ width: `${domain.score}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {server.domainBreakdown && server.domainBreakdown.length > 0 ? (
+                <div className="space-y-3">
+                  {server.domainBreakdown.map((domain, idx) => {
+                    const score = typeof domain.score === 'number' ? domain.score : 0
+                    return (
+                      <div key={idx}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-slate-300">{domain.domain}</span>
+                          <span className="text-sm font-semibold text-white">{Math.min(100, Math.max(0, score)).toFixed(0)}</span>
+                        </div>
+                        <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-blue-500 rounded-full"
+                            style={{ width: `${Math.min(100, Math.max(0, score))}%` }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-slate-400">
+                  No domain breakdown data available
+                </div>
+              )}
             </div>
 
             {/* Fail-Fast Checklist */}
@@ -389,25 +398,32 @@ export default function ServerDetail() {
             </div>
 
             {/* Key Flags & Mitigations */}
-            {server.flags.length > 0 && (
+            {server.flags && server.flags.length > 0 && (
               <div>
                 <h2 className="text-xl font-semibold text-white mb-4">Key Flags & Recommended Mitigations</h2>
                 <div className="space-y-3">
-                  {server.flags.map((flag, idx) => (
-                    <div key={idx} className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm font-medium text-white">{flag.name}</span>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          flag.severity === 'high' ? 'bg-red-500/20 text-red-400' :
-                          flag.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-blue-500/20 text-blue-400'
-                        }`}>
-                          {flag.severity}
-                        </span>
+                  {server.flags.map((flag, idx) => {
+                    // Ensure flag data is properly formatted
+                    const flagName = typeof flag.name === 'string' ? flag.name : JSON.stringify(flag.name || '')
+                    const flagSeverity = typeof flag.severity === 'string' ? flag.severity : 'medium'
+                    const flagMitigation = typeof flag.mitigation === 'string' ? flag.mitigation : 'Review configuration'
+                    
+                    return (
+                      <div key={idx} className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm font-medium text-white">{flagName}</span>
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            flagSeverity === 'high' ? 'bg-red-500/20 text-red-400' :
+                            flagSeverity === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-blue-500/20 text-blue-400'
+                          }`}>
+                            {flagSeverity}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-300">{flagMitigation}</p>
                       </div>
-                      <p className="text-sm text-slate-300">{flag.mitigation}</p>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )}
