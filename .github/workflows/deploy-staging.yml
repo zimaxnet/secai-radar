@@ -38,29 +38,29 @@ jobs:
     environment: staging
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
           cache-dependency-path: apps/public-web/package-lock.json
-      
+
       - name: Install and build public-web
         working-directory: apps/public-web
         env:
-          # Point at public-api Container App. Set secret VITE_API_BASE if your FQDN differs.
-          VITE_API_BASE: ${{ secrets.VITE_API_BASE || 'https://secai-radar-public-api.lemonriver-a8b248dc.centralus.azurecontainerapps.io/api' }}
+          # Point at public-api Container App via SWA proxy
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE || '/api' }}
         run: |
           npm ci
           npm run build
           cp staticwebapp.config.json dist/
-      
+
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -70,7 +70,7 @@ jobs:
           app_location: "apps/public-web/dist"
           output_location: "."
           skip_app_build: true
-      
+
       # Build and push to GitHub Container Registry (ghcr.io). Use GHCR_PAT because orgs often deny
       # "Create organization package" for the default GITHUB_TOKEN (see job annotation).
       - name: Log in to GitHub Container Registry
@@ -91,7 +91,7 @@ jobs:
           context: apps/registry-api
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/secai-radar-registry-api:latest
-      
+
       # Deploy public-api to Azure Container Apps (pulls from ghcr.io)
       - name: Deploy public-api to Container Apps
         env:
@@ -168,7 +168,7 @@ jobs:
               --output none
           fi
           echo "Public API FQDN: $(az containerapp show --name $APP_NAME -g $AZURE_RESOURCE_GROUP --query 'properties.configuration.ingress.fqdn' -o tsv)"
-      
+
       # Deploy registry-api to Container Apps (pulls from ghcr.io)
       - name: Deploy registry-api to Container Apps
         env:
