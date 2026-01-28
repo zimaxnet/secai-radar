@@ -15,6 +15,7 @@ export default function DailyBrief() {
   const { date } = useParams<{ date: string }>()
   const [brief, setBrief] = useState<DailyTrustBrief | null>(null)
   const [loading, setLoading] = useState(true)
+  const [currentStoryIndex, setCurrentStoryIndex] = useState(0)
 
   useEffect(() => {
     const briefDate = date || new Date().toISOString().split('T')[0]
@@ -63,6 +64,17 @@ export default function DailyBrief() {
 
     fetchBrief()
   }, [date])
+
+  // Cycle through server stories every 5 seconds
+  useEffect(() => {
+    if (!brief || brief.notableDrift.length === 0) return
+    
+    const interval = setInterval(() => {
+      setCurrentStoryIndex((prev) => (prev + 1) % brief.notableDrift.length)
+    }, 5000)
+    
+    return () => clearInterval(interval)
+  }, [brief])
 
   if (loading) {
     return (
@@ -125,69 +137,161 @@ export default function DailyBrief() {
         </ul>
       </div>
 
-      {/* Top Movers */}
-      {brief.topMovers.length > 0 && (
+      {/* Two-Column Layout: Top Movers & Downgrades/Stories */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column: Top Movers */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
           <h2 className="text-xl font-semibold text-white mb-4">Top Movers ↑</h2>
-          <div className="space-y-4">
-            {brief.topMovers.map((mover, idx) => (
-              <div key={idx} className="p-4 bg-slate-800/50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <Link to={mover.permalink} className="text-lg font-semibold text-white hover:text-blue-400">
-                    {mover.serverName}
-                  </Link>
-                  <div className="text-green-400 font-bold text-xl">+{mover.scoreDelta}</div>
+          {brief.topMovers.length > 0 ? (
+            <div className="space-y-4">
+              {brief.topMovers.map((mover, idx) => (
+                <div key={idx} className="p-4 bg-slate-800/50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Link to={mover.permalink} className="text-lg font-semibold text-white hover:text-blue-400">
+                      {mover.serverName}
+                    </Link>
+                    <div className="text-green-400 font-bold text-xl">+{mover.scoreDelta}</div>
+                  </div>
+                  <p className="text-sm text-slate-400 mb-2">{mover.providerName}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {mover.reasonCodes.map((reason, reasonIdx) => (
+                      <span key={reasonIdx} className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">
+                        {reason}
+                      </span>
+                    ))}
+                    {mover.evidenceConfidenceDelta > 0 && (
+                      <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">
+                        Evidence +{mover.evidenceConfidenceDelta}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <p className="text-sm text-slate-400 mb-2">{mover.providerName}</p>
-                <div className="flex flex-wrap gap-2">
-                  {mover.reasonCodes.map((reason, reasonIdx) => (
-                    <span key={reasonIdx} className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">
-                      {reason}
-                    </span>
-                  ))}
-                  {mover.evidenceConfidenceDelta > 0 && (
-                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">
-                      Evidence +{mover.evidenceConfidenceDelta}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-slate-400 text-center py-8">No movers today</p>
+          )}
         </div>
-      )}
 
-      {/* Top Downgrades */}
-      {brief.topDowngrades.length > 0 && (
+        {/* Right Column: Downgrades or Rotating Server Stories */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Biggest Downgrades ↓</h2>
-          <div className="space-y-4">
-            {brief.topDowngrades.map((downgrade, idx) => (
-              <div key={idx} className="p-4 bg-slate-800/50 rounded-lg border border-red-500/20">
-                <div className="flex items-center justify-between mb-2">
-                  <Link to={downgrade.permalink} className="text-lg font-semibold text-white hover:text-blue-400">
-                    {downgrade.serverName}
-                  </Link>
-                  <div className="text-red-400 font-bold text-xl">{downgrade.scoreDelta}</div>
-                </div>
-                <p className="text-sm text-slate-400 mb-2">{downgrade.providerName}</p>
-                <div className="flex flex-wrap gap-2">
-                  {downgrade.reasonCodes.map((reason, reasonIdx) => (
-                    <span key={reasonIdx} className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs">
-                      {reason}
-                    </span>
+          {brief.topDowngrades.length > 0 ? (
+            <>
+              <h2 className="text-xl font-semibold text-white mb-4">Biggest Downgrades ↓</h2>
+              <div className="space-y-4">
+                {brief.topDowngrades.map((downgrade, idx) => (
+                  <div key={idx} className="p-4 bg-slate-800/50 rounded-lg border border-red-500/20">
+                    <div className="flex items-center justify-between mb-2">
+                      <Link to={downgrade.permalink} className="text-lg font-semibold text-white hover:text-blue-400">
+                        {downgrade.serverName}
+                      </Link>
+                      <div className="text-red-400 font-bold text-xl">{downgrade.scoreDelta}</div>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-2">{downgrade.providerName}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {downgrade.reasonCodes.map((reason, reasonIdx) => (
+                        <span key={reasonIdx} className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs">
+                          {reason}
+                        </span>
+                      ))}
+                      {downgrade.flagChanges.added.length > 0 && (
+                        <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs">
+                          New flags: {downgrade.flagChanges.added.join(', ')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : brief.notableDrift.length > 0 ? (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-white">Server Stories</h2>
+                <div className="flex gap-2">
+                  {brief.notableDrift.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentStoryIndex(idx)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        idx === currentStoryIndex ? 'bg-blue-400' : 'bg-slate-600'
+                      }`}
+                      aria-label={`Go to story ${idx + 1}`}
+                    />
                   ))}
-                  {downgrade.flagChanges.added.length > 0 && (
-                    <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs">
-                      New flags: {downgrade.flagChanges.added.join(', ')}
-                    </span>
-                  )}
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="min-h-[300px]">
+                {brief.notableDrift[currentStoryIndex] && (
+                  <div className="space-y-4 animate-fade-in">
+                    <div className="p-6 bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-blue-500/30 rounded-lg">
+                      <div className="flex items-start justify-between mb-3">
+                        <Link 
+                          to={brief.notableDrift[currentStoryIndex].permalink} 
+                          className="text-2xl font-bold text-white hover:text-blue-400 transition-colors"
+                        >
+                          {brief.notableDrift[currentStoryIndex].serverName}
+                        </Link>
+                        <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-semibold">
+                          {brief.notableDrift[currentStoryIndex].eventType.replace(/([A-Z])/g, ' $1').trim()}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm text-slate-400">
+                          <span className="px-2 py-1 bg-slate-700/50 rounded">
+                            {brief.notableDrift[currentStoryIndex].providerName}
+                          </span>
+                          <span>•</span>
+                          <span>{new Date(brief.notableDrift[currentStoryIndex].detectedAt).toLocaleDateString()}</span>
+                        </div>
+                        
+                        <p className="text-lg text-slate-200 leading-relaxed">
+                          {brief.notableDrift[currentStoryIndex].summary}
+                        </p>
+                        
+                        <div className="pt-3 border-t border-slate-700">
+                          <p className="text-sm text-slate-400 mb-2">What happened:</p>
+                          <p className="text-slate-300">
+                            {brief.notableDrift[currentStoryIndex].eventType === 'ToolsAdded' && 
+                              `New tools have been added to this server, expanding its capabilities.`}
+                            {brief.notableDrift[currentStoryIndex].eventType === 'ToolsRemoved' && 
+                              `Tools were removed from this server, which may affect functionality.`}
+                            {brief.notableDrift[currentStoryIndex].eventType === 'AuthChanged' && 
+                              `Authentication method was updated, which could impact integration.`}
+                            {brief.notableDrift[currentStoryIndex].eventType === 'ScopeChanged' && 
+                              `The scope of available features or permissions has changed.`}
+                            {brief.notableDrift[currentStoryIndex].eventType === 'EndpointChanged' && 
+                              `Server endpoint configuration was modified.`}
+                            {brief.notableDrift[currentStoryIndex].eventType === 'DocsChanged' && 
+                              `Documentation was updated, potentially with important information.`}
+                          </p>
+                        </div>
+                        
+                        <Link 
+                          to={brief.notableDrift[currentStoryIndex].permalink}
+                          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium mt-2"
+                        >
+                          View full details →
+                        </Link>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center text-sm text-slate-500">
+                      Story {currentStoryIndex + 1} of {brief.notableDrift.length}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl font-semibold text-white mb-4">Biggest Downgrades ↓</h2>
+              <p className="text-slate-400 text-center py-8">No downgrades today</p>
+            </>
+          )}
         </div>
-      )}
+      </div>
 
       {/* New Entrants */}
       {brief.newEntrants.length > 0 && (
@@ -206,31 +310,6 @@ export default function DailyBrief() {
                   <span>Evidence: {entrant.evidenceConfidence}/3</span>
                   <span>Score: {entrant.trustScore}</span>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Notable Drift */}
-      {brief.notableDrift.length > 0 && (
-        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Notable Drift Events</h2>
-          <div className="space-y-3">
-            {brief.notableDrift.map((drift, idx) => (
-              <div key={idx} className="p-4 bg-slate-800/50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <Link to={drift.permalink} className="font-semibold text-white hover:text-blue-400">
-                    {drift.serverName}
-                  </Link>
-                  <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">
-                    {drift.eventType}
-                  </span>
-                </div>
-                <p className="text-sm text-slate-300">{drift.summary}</p>
-                <p className="text-xs text-slate-500 mt-1">
-                  Detected: {new Date(drift.detectedAt).toLocaleString()}
-                </p>
               </div>
             ))}
           </div>
