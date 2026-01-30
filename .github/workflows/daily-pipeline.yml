@@ -193,12 +193,6 @@ jobs:
       - name: Record pipeline failure
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: |
-          pip install psycopg2-binary>=2.9.0
-          cd apps/public-api
-          # Get the latest run_id from the database
-          RUN_ID=$(python -c "
-          import os, psycopg2
           RUN_ID: ${{ needs.record-start.outputs.run_id }}
         run: |
           pip install psycopg2-binary>=2.9.0
@@ -208,3 +202,4 @@ jobs:
             python scripts/record_pipeline_run.py --finish "$RUN_ID" --failed
           else
             echo "Warning: No run_id found, skipping record"
+          fi
