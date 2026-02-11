@@ -1,0 +1,52 @@
+properties:
+  template:
+    containers:
+      - name: zep
+        image: ghcr.io/getzep/zep:latest
+        command:
+          - /app/zep
+        args:
+          - --config
+          - /config/config.yaml
+        resources:
+          cpu: 0.5
+          memory: 1Gi
+          ephemeralStorage: 2Gi
+        env:
+          - name: ZEP_OPENAI_API_KEY
+            secretRef: azure-ai-key
+          - name: ZEP_API_KEY
+            secretRef: zep-api-key
+          - name: ZEP_STORE_TYPE
+            value: postgres
+        volumeMounts:
+          - volumeName: zep-config-volume
+            mountPath: /config
+        probes:
+          - type: Liveness
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 5
+          - type: Readiness
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          - type: Startup
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 18
+    volumes:
+      - name: zep-config-volume
+        storageType: Secret
+        secrets:
+          - secretRef: zep-config-yaml
+            path: config.yaml

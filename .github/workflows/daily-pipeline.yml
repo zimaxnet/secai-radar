@@ -177,9 +177,7 @@ jobs:
           else
             echo "Warning: No run_id found, skipping record"
           fi
-        if: success()
-
-  record-failure:
+        if: success()  record-failure:
     name: Record Pipeline Failure
     needs: [record-start, scout, curator, evidence-miner, scorer, drift-sentinel, sage-meridian, publisher]
     runs-on: ubuntu-latest
