@@ -60,8 +60,6 @@ def get_server_evidence(db, server_id: str, is_agent: bool = False) -> tuple[Lis
             
             for row in cur.fetchall():
                 claims.append(ExtractedClaim(
-                    claim_id=row[0],
-                    evidence_id=row[1],
                     claim_type=ClaimType(row[2]),
                     value=row[3],
                     confidence=row[4],
@@ -71,7 +69,7 @@ def get_server_evidence(db, server_id: str, is_agent: bool = False) -> tuple[Lis
     
     # Attach claims to evidence items
     for item in evidence_items:
-        item.claims = [c for c in claims if c.evidence_id == item.evidence_id]
+        item.claims = [c for c in claims if c.source_evidence_id == item.evidence_id]
     
     return evidence_items, claims
 
