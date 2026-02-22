@@ -69,14 +69,28 @@ export default function AgentDirectory() {
 
     return (
         <section aria-labelledby="agent-directory-title" className="space-y-6">
-            <AgentDisclaimer />
-
             <header className="flex items-center justify-between">
                 <div>
                     <h1 id="agent-directory-title" className="text-4xl font-bold text-white mb-2">Verified Agents Directory</h1>
                     <p className="text-slate-400">Trust-first exploration of third-party Agents</p>
                 </div>
             </header>
+
+            {/* Verification Mechanics */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
+                    <h3 className="text-sm font-semibold text-blue-400 mb-2 uppercase tracking-wider">Authentication Core</h3>
+                    <p className="text-sm text-slate-400">Agents are rigorously graded on their authentication models. Hardcoded keys decay rapidly, while OIDC/mTLS receive tier-A longevity.</p>
+                </div>
+                <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
+                    <h3 className="text-sm font-semibold text-blue-400 mb-2 uppercase tracking-wider">Temporal Decay</h3>
+                    <p className="text-sm text-slate-400">Trust scores incorporate a mathematical decay algorithm. Integrations that are unmaintained or lack observable security pulses slowly downgrade scores over time.</p>
+                </div>
+                <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
+                    <h3 className="text-sm font-semibold text-blue-400 mb-2 uppercase tracking-wider">Agentic First</h3>
+                    <p className="text-sm text-slate-400">Scoring heavily prefers machine-readable security policies, SBOMs, and native integrations that verify independently of human curation.</p>
+                </div>
+            </div>
 
             <div role="region" aria-label="Agent Rankings Table" className="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden mt-6">
                 <table className="w-full">
@@ -130,6 +144,8 @@ export default function AgentDirectory() {
                     </tbody>
                 </table>
             </div>
+
+            <AgentDisclaimer />
         </section>
     )
 }
