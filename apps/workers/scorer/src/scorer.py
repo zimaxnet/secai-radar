@@ -26,13 +26,13 @@ DATABASE_URL = os.getenv(
 METHODOLOGY_VERSION = "v1.0"
 
 
-def get_server_evidence(db, server_id: str) -> tuple[List[EvidenceItem], List[ExtractedClaim]]:
+def get_server_evidence(db, server_id: str, is_agent: bool = False) -> tuple[List[EvidenceItem], List[ExtractedClaim]]:
     """Get evidence items and claims for a server"""
     evidence_items = []
     claims = []
     
     with db.cursor() as cur:
-        # Get evidence items
+        # Get evidence items (evidence_items doesn't differentiate by is_agent in schema, it uses server_id column for both currently based on miner)
         cur.execute("""
             SELECT evidence_id, type, url, confidence, source_url, captured_at
             FROM evidence_items
@@ -76,16 +76,19 @@ def get_server_evidence(db, server_id: str) -> tuple[List[EvidenceItem], List[Ex
     return evidence_items, claims
 
 
-def store_score_snapshot(db, server_id: str, score_result) -> str:
+def store_score_snapshot(db, server_id: str, score_result, is_agent: bool = False) -> str:
     """Store score snapshot"""
     score_id = hashlib.sha256(
         f"{server_id}|{datetime.utcnow().isoformat()}".encode()
     ).hexdigest()[:16]
     
+    table_name = "agent_score_snapshots" if is_agent else "score_snapshots"
+    id_col = "agent_id" if is_agent else "server_id"
+    
     with db.cursor() as cur:
-        cur.execute("""
-            INSERT INTO score_snapshots (
-                score_id, server_id, methodology_version, assessed_at,
+        cur.execute(f"""
+            INSERT INTO {table_name} (
+                score_id, {id_col}, methodology_version, assessed_at,
                 d1, d2, d3, d4, d5, d6,
                 trust_score, tier, enterprise_fit, evidence_confidence,
                 fail_fast_flags, risk_flags, explainability_json
@@ -114,13 +117,16 @@ def store_score_snapshot(db, server_id: str, score_result) -> str:
     return score_id
 
 
-def update_latest_score(db, server_id: str, score_id: str):
+def update_latest_score(db, server_id: str, score_id: str, is_agent: bool = False):
     """Update latest_scores pointer (stable)."""
+    table_name = "agent_latest_scores" if is_agent else "latest_scores"
+    id_col = "agent_id" if is_agent else "server_id"
+    
     with db.cursor() as cur:
-        cur.execute("""
-            INSERT INTO latest_scores (server_id, score_id, updated_at)
+        cur.execute(f"""
+            INSERT INTO {table_name} ({id_col}, score_id, updated_at)
             VALUES (%s, %s, %s)
-            ON CONFLICT (server_id)
+            ON CONFLICT ({id_col})
             DO UPDATE SET score_id = EXCLUDED.score_id, updated_at = EXCLUDED.updated_at
         """, (server_id, score_id, datetime.utcnow()))
         db.commit()
@@ -138,13 +144,18 @@ def update_latest_score_staging(db, server_id: str, score_id: str):
         db.commit()
 
 
-def get_server_metadata(db, server_id: str) -> Optional[ServerMetadata]:
+def get_server_metadata(db, server_id: str, is_agent: bool = False) -> Optional[ServerMetadata]:
     """Get server metadata for scoring context"""
+    table = "agents" if is_agent else "mcp_servers"
+    id_col = "agent_id" if is_agent else "server_id"
+    # agents doesn't have deployment_type, substitute blank
+    dt_col = "'Unknown'" if is_agent else "deployment_type"
+    
     with db.cursor() as cur:
-        cur.execute("""
-            SELECT deployment_type, metadata_json
-            FROM mcp_servers
-            WHERE server_id = %s
+        cur.execute(f"""
+            SELECT {dt_col}, metadata_json
+            FROM {table}
+            WHERE {id_col} = %s
         """, (server_id,))
         row = cur.fetchone()
         if not row:
@@ -167,44 +178,46 @@ def get_server_metadata(db, server_id: str) -> Optional[ServerMetadata]:
             popularity_signals=metadata_dict.get("popularity_signals")
         )
 
-
-def score_server(db, server_id: str) -> Dict[str, Any]:
-    """Score a single server"""
+def score_server(db, server_id: str, is_agent: bool = False) -> Dict[str, Any]:
+    """Score a single server or agent"""
     try:
         # Get evidence
-        evidence_items, claims = get_server_evidence(db, server_id)
+        evidence_items, claims = get_server_evidence(db, server_id, is_agent)
         
         # Get metadata
-        metadata = get_server_metadata(db, server_id)
+        metadata = get_server_metadata(db, server_id, is_agent)
         
         # Calculate score
         score_result = calculate_trust_score(evidence_items, claims, METHODOLOGY_VERSION, metadata)
         
         # Store snapshot
-        score_id = store_score_snapshot(db, server_id, score_result)
+        score_id = store_score_snapshot(db, server_id, score_result, is_agent)
         
         # Update pointer: staging when WRITE_TO_STAGING=1 (pipeline), else stable (T-051)
         # Always use the highest-scoring snapshot, not just the latest
-        if os.getenv("WRITE_TO_STAGING", "").strip().lower() in ("1", "true", "yes"):
+        # Note: Skip staging logic for agents currently
+        if not is_agent and os.getenv("WRITE_TO_STAGING", "").strip().lower() in ("1", "true", "yes"):
             # For staging, we'll update to best score after all servers are scored
             # For now, update to this score_id (Publisher will validate and flip)
             update_latest_score_staging(db, server_id, score_id)
         else:
+            snapshot_table = "agent_score_snapshots" if is_agent else "score_snapshots"
+            id_col = "agent_id" if is_agent else "server_id"
             # For stable, find the best-scoring snapshot for this server
             with db.cursor() as cur:
-                cur.execute("""
+                cur.execute(f"""
                     SELECT score_id 
-                    FROM score_snapshots
-                    WHERE server_id = %s
+                    FROM {snapshot_table}
+                    WHERE {id_col} = %s
                     ORDER BY trust_score DESC, assessed_at DESC
                     LIMIT 1
                 """, (server_id,))
                 best_row = cur.fetchone()
                 if best_row:
                     best_score_id = best_row[0]
-                    update_latest_score(db, server_id, best_score_id)
+                    update_latest_score(db, server_id, best_score_id, is_agent)
                 else:
-                    update_latest_score(db, server_id, score_id)
+                    update_latest_score(db, server_id, score_id, is_agent)
         
         return {
             "success": True,
@@ -223,14 +236,13 @@ def score_server(db, server_id: str) -> Dict[str, Any]:
 
 def run_scorer():
     """
-    Main scorer function - score all active servers
+    Main scorer function - score all active servers and agents
     """
     conn = psycopg2.connect(DATABASE_URL)
     use_staging = os.getenv("WRITE_TO_STAGING", "").strip().lower() in ("1", "true", "yes")
     
     try:
-        # Get active servers with validation: must have repo_url, docs_url, or endpoint in metadata_json
-        # and name must not be "Unknown"
+        # Get active MCP servers
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT server_id, server_name, repo_url, docs_url, metadata_json
@@ -251,10 +263,20 @@ def run_scorer():
             """)
             valid_servers = cur.fetchall()
             server_ids = [row[0] for row in valid_servers]
+            
+            # Fetch agents
+            cur.execute("""
+                SELECT agent_id, agent_name, repo_url, docs_url, metadata_json
+                FROM agents
+                WHERE status = 'Active'
+                AND agent_name IS NOT NULL
+            """)
+            agent_servers = cur.fetchall()
+            agent_ids = [row[0] for row in agent_servers]
         
-        print(f"Found {len(server_ids)} valid active servers to score (filtered from all Active servers)...")
+        print(f"Found {len(server_ids)} MCPs and {len(agent_ids)} Agents to score...")
         
-        # Mark invalid servers as Unknown status (but don't mark ones with endpoint in metadata)
+        # Mark invalid servers as Unknown status
         with conn.cursor() as cur:
             cur.execute("""
                 UPDATE mcp_servers
@@ -277,19 +299,27 @@ def run_scorer():
             """)
             invalid_count = cur.rowcount
             if invalid_count > 0:
-                print(f"  Marked {invalid_count} invalid servers as 'Unknown' status")
+                print(f"  Marked {invalid_count} invalid MCPs as 'Unknown' status")
             conn.commit()
         
         results = []
+        # Score MCP servers
         for idx, server_id in enumerate(server_ids):
-            result = score_server(conn, server_id)
+            result = score_server(conn, server_id, is_agent=False)
             results.append(result)
             if (idx + 1) % 10 == 0:
-                print(f"  Scored {idx + 1}/{len(server_ids)} servers...")
+                print(f"  Scored {idx + 1}/{len(server_ids)} MCPs...")
+        
+        # Score Agents
+        for idx, agent_id in enumerate(agent_ids):
+            result = score_server(conn, agent_id, is_agent=True)
+            results.append(result)
+            if (idx + 1) % 10 == 0:
+                print(f"  Scored {idx + 1}/{len(agent_ids)} Agents...")
         
         successful = sum(1 for r in results if r.get("success"))
         
-        # If using staging, update all staging entries to point to best scores
+        # If using staging, update all staging entries to point to best scores (MCPs only for now)
         if use_staging:
             print("Updating latest_scores_staging to use best-scoring snapshots...")
             with conn.cursor() as cur:
@@ -314,7 +344,8 @@ def run_scorer():
         
         return {
             "success": True,
-            "serversScored": len(results),
+            "mcpScored": len(server_ids),
+            "agentsScored": len(agent_ids),
             "successful": successful,
             "failed": len(results) - successful,
             "completedAt": datetime.utcnow().isoformat()

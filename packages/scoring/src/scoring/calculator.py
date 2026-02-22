@@ -83,11 +83,12 @@ def _claim_value(claims: List[ExtractedClaim], claim_type: ClaimType) -> Optiona
 def calculate_domain_scores(
     evidence_items: List[EvidenceItem],
     claims: List[ExtractedClaim],
+    metadata: Optional[ServerMetadata] = None,
 ) -> DomainScore:
     """
     Deterministic domain subscores (D1-D6) from evidence and claims.
     D1=Auth, D2=Authz/Scopes, D3=Data/Hosting, D4=Audit, D5=Ops, D6=Compliance.
-    Uses claim values and evidence presence; scale 0-5.
+    Uses claim values, evidence presence, and real metric signals; scale 0-5.
     """
     auth = _claim_value(claims, ClaimType.AUTH_MODEL)
     tool_agency = _claim_value(claims, ClaimType.TOOL_CAPABILITIES) or _claim_value(
@@ -101,8 +102,45 @@ def calculate_domain_scores(
     d2 = 3.5 if tool_agency else base
     d3 = 3.0 if hosting else base
     d4 = min(5.0, base + 0.5 * n_evidence)
-    d5 = min(5.0, base + 0.3 * n_evidence)
+    
+    # Calculate D5 (Ops) algorithmically via authentic popularity metrics
+    d5 = base
+    if metadata and metadata.popularity_signals:
+        github = metadata.popularity_signals.get("github", {})
+        if github:
+            stars = github.get("stars", 0)
+            forks = github.get("forks", 0)
+            
+            # Algorithmic popularity tiering
+            if stars > 1000: d5 += 2.0
+            elif stars > 100: d5 += 1.0
+            elif stars > 10: d5 += 0.5
+            
+            if forks > 100: d5 += 0.5
+            
+            # Check for recency signals (within 90 days)
+            updated_str = github.get("updated_at")
+            if updated_str:
+                try:
+                    from datetime import datetime
+                    updated = datetime.strptime(updated_str[:10], "%Y-%m-%d")
+                    delta = (datetime.utcnow() - updated).days
+                    if delta <= 90:
+                        d5 += 1.0
+                except:
+                    pass
+
+    # Calculate D6 (Compliance) strictly based on claimed evidence
     d6 = base
+    has_sbom = _claim_value(claims, ClaimType.SBOM)
+    has_ir = _claim_value(claims, ClaimType.IR_POLICY)
+    has_vuln = _claim_value(claims, ClaimType.VULN_DISCLOSURE)
+    has_signing = _claim_value(claims, ClaimType.SIGNING)
+    
+    if has_sbom: d6 += 1.0
+    if has_ir: d6 += 1.0
+    if has_vuln: d6 += 0.5
+    if has_signing: d6 += 0.5
 
     return DomainScore(
         d1=min(5.0, max(0.0, d1)),
@@ -265,8 +303,8 @@ def calculate_trust_score(
             }
         )
     
-    # Calculate domain scores
-    domain_scores = calculate_domain_scores(evidence_items, claims)
+    # Calculate domain scores with real metadata signals
+    domain_scores = calculate_domain_scores(evidence_items, claims, metadata)
     
     # Calculate weighted trust score
     trust_score_value = calculate_weighted_trust_score(domain_scores)

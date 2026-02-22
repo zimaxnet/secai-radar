@@ -101,17 +101,20 @@ def _fetch_github_popularity(owner: str, repo: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def _update_server_popularity_signals(db, server_id: str, signals: Dict[str, Any]) -> None:
+def _update_server_popularity_signals(db, server_id: str, signals: Dict[str, Any], is_agent: bool = False) -> None:
     """
-    Update popularity signals in server's metadata_json.
+    Update popularity signals in server's or agent's metadata_json.
     Merges new signals with existing metadata.
     """
+    table = "agents" if is_agent else "mcp_servers"
+    id_column = "agent_id" if is_agent else "server_id"
+    
     with db.cursor() as cur:
         # Get current metadata
-        cur.execute("""
+        cur.execute(f"""
             SELECT metadata_json
-            FROM mcp_servers
-            WHERE server_id = %s
+            FROM {table}
+            WHERE {id_column} = %s
         """, (server_id,))
         row = cur.fetchone()
         
@@ -132,10 +135,10 @@ def _update_server_popularity_signals(db, server_id: str, signals: Dict[str, Any
         current_metadata["popularity_signals"]["last_updated"] = datetime.now(timezone.utc).isoformat()
         
         # Update metadata_json
-        cur.execute("""
-            UPDATE mcp_servers
+        cur.execute(f"""
+            UPDATE {table}
             SET metadata_json = %s
-            WHERE server_id = %s
+            WHERE {id_column} = %s
         """, (json.dumps(current_metadata), server_id))
         db.commit()
 
@@ -477,7 +480,7 @@ def run_evidence_miner() -> Dict[str, Any]:
                     if should_fetch:
                         github_signals = _fetch_github_popularity(owner, repo)
                         if github_signals:
-                            _update_server_popularity_signals(conn, server_id, {"github": github_signals})
+                            _update_server_popularity_signals(conn, server_id, {"github": github_signals}, is_agent=False)
                             popularity_signals_from_registry += 1
         
         # Second pass: Extract evidence from server.json
@@ -519,7 +522,7 @@ def run_evidence_miner() -> Dict[str, Any]:
             except Exception as e:
                 print(f"Error processing server.json for {server_id}: {e}")
         
-        # Then, extract from docs/repo URLs and collect popularity signals
+        # Then, extract from docs/repo URLs and collect popularity signals for MCPs
         with conn.cursor() as cur:
             cur.execute(
                 """
@@ -528,12 +531,27 @@ def run_evidence_miner() -> Dict[str, Any]:
                 WHERE repo_url IS NOT NULL OR docs_url IS NOT NULL
                 """
             )
-            servers = cur.fetchall()
+            mcp_servers = cur.fetchall()
+            
+            # Fetch agents
+            cur.execute(
+                """
+                SELECT agent_id, agent_name, repo_url, docs_url, metadata_json
+                FROM agents
+                WHERE repo_url IS NOT NULL OR docs_url IS NOT NULL
+                """
+            )
+            agent_servers = cur.fetchall()
+            
+        # Combine both datasets with a flag indicating if it's an agent
+        all_servers = [(row[0], row[1], row[2], row[3], row[4], False) for row in mcp_servers] + \
+                      [(row[0], row[1], row[2], row[3], row[4], True) for row in agent_servers]
+        
         evidence_created = 0
         popularity_signals_collected = 0
         errors: List[str] = []
-        for row in servers:
-            server_id, server_name, repo_url, docs_url, metadata_json_str = row
+        for row in all_servers:
+            server_id, server_name, repo_url, docs_url, metadata_json_str, is_agent = row
             
             # Collect popularity signals from GitHub (if repo_url is GitHub)
             if repo_url:
@@ -565,7 +583,7 @@ def run_evidence_miner() -> Dict[str, Any]:
                     if should_fetch:
                         github_signals = _fetch_github_popularity(owner, repo)
                         if github_signals:
-                            _update_server_popularity_signals(conn, server_id, {"github": github_signals})
+                            _update_server_popularity_signals(conn, server_id, {"github": github_signals}, is_agent)
                             popularity_signals_collected += 1
             
             # Extract evidence from docs/repo URLs
