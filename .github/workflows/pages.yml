@@ -3,12 +3,11 @@ name: Deploy Wiki to GitHub Pages
 on:
   push:
     branches:
-      - gh-pages
+      - main
     paths:
-      - '*.md'
-      - 'secai-radar/docs/wiki/**/*.md'
-      - '_config.yml'
-      - 'Gemfile'
+      - 'docs/wiki/**/*.md'
+      - 'docs/wiki/_config.yml'
+      - 'docs/wiki/Gemfile'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -43,23 +42,24 @@ jobs:
       
       - name: Copy wiki files to root for Jekyll
         run: |
-          # Copy wiki files from secai-radar/docs/wiki/ to root so Jekyll can process them
-          if [ -d "secai-radar/docs/wiki" ]; then
-            echo "Copying wiki files from secai-radar/docs/wiki/ to root"
-            cp secai-radar/docs/wiki/*.md . 2>/dev/null || true
-            if [ -f secai-radar/docs/wiki/CNAME ]; then
-              cp secai-radar/docs/wiki/CNAME CNAME
+          # Copy wiki files from docs/wiki/ to root so Jekyll can process them
+          if [ -d "docs/wiki" ]; then
+            echo "Copying wiki files from docs/wiki/ to root"
+            cp docs/wiki/*.md . 2>/dev/null || true
+            if [ -f docs/wiki/CNAME ]; then
+              cp docs/wiki/CNAME CNAME
             fi
             echo "Copied $(ls -1 *.md 2>/dev/null | wc -l) markdown files to root"
             ls -1 *.md | head -10
           fi
           # Remove unwanted files
-          rm -f README.md GITHUB-PAGES-SETUP.md DEPLOYMENT-READY.md 2>/dev/null || true
+          rm -f README.md 2>/dev/null || true
       
       - name: Build with Jekyll
         id: jekyll-build
         run: |
-          if [ -f Gemfile ]; then
+          if [ -f Gemfile ] || [ -f docs/wiki/Gemfile ]; then
+            if [ -f docs/wiki/Gemfile ]; then cp docs/wiki/Gemfile Gemfile; fi
             bundle install || true
             bundle exec jekyll build --destination _site || exit 1
             if [ -f CNAME ]; then

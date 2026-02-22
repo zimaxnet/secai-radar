@@ -1,211 +1,65 @@
----
-layout: default
-title: Readme
----
+<div align="center">
+  <img src="https://secairadar.cloud/vite.svg" alt="SecAI Radar Logo" width="120" />
+</div>
 
-# SecAI Radar Wiki Documentation
+<h1 align="center">SecAI Radar</h1>
 
-This directory contains comprehensive wiki documentation for SecAI Radar, ready for GitHub Pages or GitHub Wiki.
+<p align="center">
+  <strong>The Agentic-First Trust Verifier for Model Context Protocol (MCP) Servers and AI Agents.</strong>
+</p>
 
----
-
-## Using This Wiki
-
-### Option 1: GitHub Wiki
-
-1. **Enable GitHub Wiki** for your repository
-2. **Copy these files** to the GitHub Wiki repository
-3. **Edit in GitHub** or push directly to wiki repository
-
-**GitHub Wiki Structure**:
-- Files in `docs/wiki/` → GitHub Wiki pages
-- `Home.md` → Wiki homepage
-- Other pages → Linked from homepage
-
-### Option 2: GitHub Pages
-
-1. **Set up GitHub Pages** for your repository
-2. **Use a static site generator** (Jekyll, MkDocs, etc.)
-3. **Copy these files** to Pages source directory
-4. **Build and deploy** via GitHub Actions
-
-**Recommended**: Use [MkDocs](https://www.mkdocs.org/) or [GitBook](https://www.gitbook.com/) for better navigation.
+<p align="center">
+  <a href="https://github.com/zimaxnet/secai-radar/actions/workflows/ci.yml"><img src="https://github.com/zimaxnet/secai-radar/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
+  <a href="https://wiki.secai-radar.zimax.net"><img src="https://img.shields.io/badge/docs-wiki-blue" alt="Wiki"></a>
+  <a href="https://secairadar.cloud"><img src="https://img.shields.io/badge/platform-live-success" alt="Live Platform"></a>
+</p>
 
 ---
 
-## Wiki Pages
+## 🧭 Overview
 
-### User Documentation
+**SecAI Radar** is an enterprise-grade discovery and verification platform designed specifically for the rapidly expanding ecosystem of specialized AI Agents and Model Context Protocol (MCP) servers.
 
-- **[Home](Home.md)** - Wiki homepage and overview
-- **[Getting Started](Getting-Started.md)** - Quick start guide
-- **[User Guide](User-Guide.md)** - Complete user documentation
-- **[Dashboard Guide](Dashboard-Guide.md)** - Dashboard usage
-- **[Controls Guide](Controls-Guide.md)** - Controls management
-- **[Tools Guide](Tools-Guide.md)** - Tools configuration
-- **[Gaps Guide](Gaps-Guide.md)** - Gap analysis
+Rather than relying purely on human curation, SecAI Radar is built from the ground up to be **Agentic-First**. Our infrastructure leverages automated scouting agents and programmatic NLP analyzers to continuously crawl, verify, and score AI integrations for trust, security, and operational reliability.
 
-### Technical Documentation
+This platform isn't just *about* agents; it's heavily optimized *for* agents. Through rigorous semantic DOM structures, `llms.txt` directories, and JSON-LD schema injections, LLM engines are inherently guided to parse the platform's data programmatically.
 
-- **[Architecture](Architecture.md)** - System architecture
-- **[API Reference](API-Reference.md)** - API documentation
-- **[Installation](Installation.md)** - Installation guide
-- **[Configuration](Configuration.md)** - Configuration guide
+## ✨ Core Capabilities
 
-### Help & Support
+- 🔍 **Parallel Integration Tracking**: Discovers and monitors both MCP servers (from official and private registries) and third-party AI Agents natively.
+- 🧮 **Automated Trust Scoring**: Integrates a highly tuned Risk Matrix and Temporal Decay engine, evaluating integrations across Authentication, Data Protection, and Operational Security domains.
+- 🤖 **Agentic-First Architecture**: Exposes rigorous machine-readable interfaces (`/.well-known/llms.txt`) allowing Copilots to natively crawl API data and trust rankings.
+- 🏢 **Enterprise Ready**: Full support for authenticated Submissions Queues, multi-tenant Workspaces, and Private Registries.
 
-- **[FAQ](FAQ.md)** - Frequently asked questions
-- **[Troubleshooting](Troubleshooting.md)** - Common issues and solutions
-- **[Glossary](Glossary.md)** - Terms and definitions
+## 🚀 Quick Start (Local Development)
 
-### Contributing
+To run the full stack locally for development or testing, check out the [LOCAL-BUILD-GUIDE.md](LOCAL-BUILD-GUIDE.md).
 
-- **[Contributing](Contributing.md)** - Contributing guide
+At a high level:
 
----
+1. Ensure **Node.js 20+**, **Python 3.11+**, and **Docker** are installed.
+2. Clone the repository and configure your `.env` (see `.env.example`).
+3. Run the automated build script:
 
-## Wiki Structure
-
-```
-docs/wiki/
-├── Home.md                    # Homepage
-├── Getting-Started.md          # Quick start
-├── User-Guide.md              # User documentation
-├── Dashboard-Guide.md         # Dashboard usage
-├── Controls-Guide.md          # Controls management
-├── Tools-Guide.md             # Tools configuration
-├── Gaps-Guide.md              # Gap analysis
-├── Architecture.md            # Architecture
-├── API-Reference.md           # API docs
-├── Installation.md            # Installation
-├── Configuration.md           # Configuration
-├── FAQ.md                     # FAQ
-├── Troubleshooting.md         # Troubleshooting
-├── Glossary.md                # Glossary
-├── Contributing.md            # Contributing
-└── README.md                  # This file
-```
-
----
-
-## Navigation
-
-### Internal Links
-
-All wiki pages use internal links:
-- `[Home](Home.md)` - Links to Home page
-- `[Getting Started](Getting-Started.md)` - Links to Getting Started page
-- `[FAQ](FAQ.md)` - Links to FAQ page
-
-### Cross-References
-
-Pages reference each other:
-- User Guide → Dashboard Guide, Controls Guide, etc.
-- FAQ → Troubleshooting, Installation, etc.
-- Architecture → Data Model, Model Integration
-
----
-
-## Maintaining the Wiki
-
-### Adding New Pages
-
-1. **Create new `.md` file** in `docs/wiki/`
-2. **Add to Home.md** navigation
-3. **Link from related pages**
-4. **Update README.md** if needed
-
-### Updating Existing Pages
-
-1. **Edit the `.md` file**
-2. **Update links** if page renamed
-3. **Test navigation** works
-4. **Update related pages** if needed
-
-### Best Practices
-
-1. **Keep Updated**: Update wiki as application evolves
-2. **Link Related**: Link related pages together
-3. **Use Examples**: Include examples where helpful
-4. **Be Clear**: Write clearly and concisely
-5. **Test Links**: Verify all links work
-
----
-
-## Publishing to GitHub Wiki
-
-### Step 1: Enable Wiki
-
-1. Go to repository Settings
-2. Enable "Wikis" feature
-3. Wiki repository will be created
-
-### Step 2: Clone Wiki Repository
-
-```bash
-git clone https://github.com/your-org/secai-radar.wiki.git
-cd secai-radar.wiki
-```
-
-### Step 3: Copy Files
-
-```bash
-# Copy all wiki files
-cp -r ../secai-radar/docs/wiki/* .
-
-# Commit and push
-git add .
-git commit -m "Add wiki documentation"
-git push origin master
-```
-
-### Step 4: Verify
-
-1. Go to repository Wiki tab
-2. Verify all pages appear
-3. Test navigation links
-4. Check formatting
-
----
-
-## Publishing to GitHub Pages
-
-### Option 1: MkDocs
-
-1. **Install MkDocs**:
    ```bash
-   pip install mkdocs mkdocs-material
+   ./scripts/build-local.sh
    ```
 
-2. **Create `mkdocs.yml`**:
-   ```yaml
-   site_name: SecAI Radar Documentation
-   nav:
-     - Home: Home.md
-     - Getting Started: Getting-Started.md
-     - User Guide: User-Guide.md
-     # ... other pages
-   ```
+## 📚 Documentation & Wiki
 
-3. **Build and Deploy**:
-   ```bash
-   mkdocs build
-   mkdocs gh-deploy
-   ```
+For comprehensive system documentation, architecture diagrams, assessment workflows, and deployment guides, please visit our official Wiki:
 
-### Option 2: Jekyll
+🔗 **[SecAI Radar Documentation Wiki](https://zimaxnet.github.io/secai-radar/)**
 
-1. **Set up Jekyll** for GitHub Pages
-2. **Copy files** to `docs/` directory
-3. **Configure navigation** in `_config.yml`
-4. **Build and deploy** via GitHub Actions
+*(Note: Our documentation is uniquely auto-deployed from the `docs/wiki/` folder via GitHub Actions, prioritizing up-to-date structural knowledge.)*
+
+## 🤝 Contributing
+
+We welcome community contributions! Please review our [Contributing Guide](docs/wiki/Contributing.md) before submitting pull requests.
+
+Whether you're submitting a new integration or expanding our core logic, check the existing `task.md` checklists or submit a request directly through the platform.
 
 ---
-
-## Contributing
-
-See [Contributing](Contributing.md) for guidelines on contributing to the wiki.
-
----
-
-**Last Updated**: 2025-01-15
+<div align="center">
+  <i>Empowering safe AI expansion through zero-trust integration observability.</i>
+</div>

@@ -1,46 +1,36 @@
 ---
 layout: default
-title: SecAI Radar Documentation
+title: SecAI Radar Wiki
 permalink: /
 ---
 
-# SecAI Radar Documentation
+# SecAI Radar Documentation Wiki
 
-Welcome to the SecAI Radar knowledge base. This wiki provides comprehensive documentation for the unified security assessment platform.
+Welcome to the **SecAI Radar** documentation wiki! SecAI Radar is a next-generation platform designed to autonomously scout, verify, and quantify trust for **Model Context Protocol (MCP) servers** and **third-party AI Agents**.
 
-## Platform Overview
+## Table of Contents
 
-SecAI Radar v2.0 is a unified platform combining:
-- **Comprehensive Assessment Workflows** - Complete security assessment lifecycle
-- **Multi-Agent AI System** - 7 specialized AI agents for intelligent assistance
-- **Modern Web Interface** - Professional, responsive UI with seamless navigation
+### 1. Overview
 
-## Quick Links
+- [Home](index.md)
+- [Agentic-First Design](Agentic-First-Design.md)
 
-### Getting Started
-- [Platform Features](Platform-Features.md) - Overview of all platform features
-- [Getting Started Guide](Getting-Started.md) - Quick start guide
-- [User Guide](User-Guide.md) - Complete user documentation
+### 2. Architecture & Components
 
-### Core Features
-- [Dashboard Guide](Dashboard-Guide.md) - Dashboard overview and usage
-- [Controls Guide](Controls-Guide.md) - Control management and assessment
-- [Evidence Collection](Evidence-Collection.md) - Evidence upload and management
-- [Tools Guide](Tools-Guide.md) - Security tools inventory
-- [Gaps Guide](Gaps-Guide.md) - Gap analysis with AI recommendations
+- [System Architecture](Architecture.md)
+- [Trust Scoring Methodology](Trust-Scoring.md)
 
-### AI Features
-- [Multi-Agent System](Multi-Agent-System.md) - Agent architecture and capabilities
-- [Agent Integration](Agent-Integration.md) - How agents integrate with workflows
+### 3. Developer Guides
 
-### Workflows
-- [Assessment Workflow](Assessment-Workflow.md) – End-to-end pipeline for staging sanitized inputs, building CSVs, collecting Azure evidence, and generating questionnaires/reports before import.
-- [Development Workflow](Development-Workflow.md) - Development and deployment processes
-- [Branch Structure](BRANCH-STRUCTURE.md) - Git branching strategy
+- [Local Development & Deploy](Local-Development.md)
+- [API Reference](API-Reference.md)
 
-### Reference
-- [API Reference](API-Reference.md) - API documentation
-- [Architecture](Architecture.md) - System architecture
-- [Configuration](Configuration.md) - Configuration guide
-- [FAQ](FAQ.md) - Frequently asked questions
-- [Troubleshooting](Troubleshooting.md) - Common issues and solutions
+---
+
+## What makes SecAI Radar unique?
+
+Unlike traditional directories, this platform natively surfaces its state to AI tools. Our semantic `llms.txt`, specialized `JSON-LD` schemas, and dynamic ARIA mappings ensure that Copilots and standalone agents can directly query our rankings.
+
+- **Parallel Verification**: MCP integrations and direct AI Agent connections are scouted, ingested, and evaluated uniformly.
+- **Continuous Monitoring**: Verification happens via automated workers on a schedule.
+- **Trust-first**: Integrations don't just get listed—they get scored on a 1-100 scale based on Authentication, Authorization, Logging, and robust Evidence collection.
