@@ -20,7 +20,11 @@ METHODOLOGY_VERSION = "v1.0"
 BASE_URL = "https://secairadar.cloud"
 
 
+# Serve at both root paths AND API-prefixed paths
+# Root paths work when hitting the API directly
+# API-prefixed paths work through the Azure SWA proxy
 @router.get("/llms.txt", response_class=PlainTextResponse)
+@router.get("/api/v1/public/llms.txt", response_class=PlainTextResponse)
 async def llms_txt():
     """
     LLMs.txt — Markdown cheat-sheet for AI agents.
@@ -69,6 +73,7 @@ Generated at: {now}
 
 
 @router.get("/.well-known/trust-scores.json", response_class=JSONResponse)
+@router.get("/api/v1/public/discovery", response_class=JSONResponse)
 async def well_known_trust_scores():
     """
     Machine-readable discovery manifest for AI agents.
