@@ -3,6 +3,7 @@
 @layer base {
   body {
     @apply antialiased;
+    font-family: 'Outfit', sans-serif;
   }
 }
 
@@ -132,5 +133,19 @@
       opacity: 1;
       transform: scale(1);
     }
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-slate-900/60 backdrop-blur-md border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.2)];
+  }
+  
+  .glass-card {
+    @apply bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl hover:bg-slate-800/50 hover:border-slate-700 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1;
+  }
+
+  .text-glow-primary {
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
   }
 }

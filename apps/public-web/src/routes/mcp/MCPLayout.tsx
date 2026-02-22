@@ -25,10 +25,12 @@ export default function MCPLayout() {
 
   const navLinks = [
     { to: '/mcp', label: 'Verified MCP', exact: true },
+    { to: '/agents/directory', label: 'Verified Agents' },
     { to: '/mcp/rankings', label: 'Rankings' },
     { to: '/mcp/daily', label: 'Daily Brief' },
     { to: '/mcp/methodology', label: 'Methodology' },
-    { to: '/mcp/submit', label: 'Submit Evidence', cta: true },
+    { to: '/mcp/submit', label: 'Submit Evidence' },
+    { to: '/mcp/submit-integration', label: 'Submit App', cta: true },
   ]
 
   const isActive = (to: string, exact?: boolean) => {
@@ -63,13 +65,12 @@ export default function MCPLayout() {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                      active
-                        ? 'bg-blue-500/10 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.1)] border border-blue-500/20'
-                        : link.cta
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${active
+                      ? 'bg-blue-500/10 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.1)] border border-blue-500/20'
+                      : link.cta
                         ? 'text-white bg-blue-600 hover:bg-blue-700'
                         : 'text-slate-400 hover:text-white hover:bg-white/5'
-                    }`}
+                      }`}
                   >
                     {link.label}
                   </Link>
@@ -88,14 +89,14 @@ export default function MCPLayout() {
               </button>
 
               {/* Time Window Filter */}
-              <select className="hidden lg:block px-3 py-2 rounded-lg text-sm bg-slate-800/50 border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors">
+              <select title="Time Window Filter" aria-label="Time Window Filter" className="hidden lg:block px-3 py-2 rounded-lg text-sm bg-slate-800/50 border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors">
                 <option value="24h">Updated in last: 24h</option>
                 <option value="7d">Updated in last: 7d</option>
                 <option value="30d">Updated in last: 30d</option>
               </select>
 
               {/* Evidence Confidence Filter */}
-              <select className="hidden xl:block px-3 py-2 rounded-lg text-sm bg-slate-800/50 border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors">
+              <select title="Evidence Confidence Filter" aria-label="Evidence Confidence Filter" className="hidden xl:block px-3 py-2 rounded-lg text-sm bg-slate-800/50 border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors">
                 <option value="all">Evidence: All</option>
                 <option value="3">Evidence: High (3)</option>
                 <option value="2">Evidence: Medium (2)</option>

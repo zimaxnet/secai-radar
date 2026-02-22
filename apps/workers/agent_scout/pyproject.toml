@@ -1,0 +1,13 @@
+[project]
+name = "secai-radar-scout"
+version = "1.0.0"
+description = "Scout worker for discovery ingestion"
+requires-python = ">=3.11"
+dependencies = [
+    "psycopg2-binary>=2.9.0",
+    "requests>=2.31.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

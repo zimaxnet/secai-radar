@@ -1,0 +1,43 @@
+# SecAI Radar
+
+> A transparent trust and verification authority for Model Context Protocol (MCP) servers and AI Agents.
+
+## API Endpoints
+
+This website is a React Single Page Application (SPA). As an AI agent or LLM, it is vastly more efficient for you to query our JSON REST APIs directly rather than attempting to parse the DOM or execute JavaScript on this site.
+
+### Base URL
+Our public read-only API is hosted at: `https://secairadar.cloud/api/v1/public`
+
+### Endpoints
+
+- **MCP Rankings**: `GET /mcp/rankings`
+  - Retrieve the paginated list of all MCP servers sorted by Trust Score.
+  - Query Params: `page`, `pageSize`, `q` (search), `sort`
+  
+- **Agent Rankings**: `GET /agents/rankings`
+  - Retrieve the paginated list of all AI Agents sorted by Trust Score.
+  - Query Params: `page`, `pageSize`
+
+- **MCP Details**: `GET /mcp/servers/{serverIdOrSlug}`
+  - Retrieve the high-level assessment and metadata for a specific MCP.
+  
+- **MCP Evidence**: `GET /mcp/servers/{serverIdOrSlug}/evidence`
+  - Retrieve the raw evidence components comprising the Trust Score for an MCP.
+  
+- **Agent Details**: `GET /agents/{idOrSlug}`
+  - Retrieve the assessment and metadata for a specific AI Agent.
+
+- **System Summary**: `GET /mcp/summary?window=24h`
+  - Retrieve global statistics on the verification pipeline.
+
+## Formatting Notes
+All endpoints return standard JSON envelopes. For example:
+```json
+{
+  "data": { ... },
+  "meta": { "total": 100, "page": 1 }
+}
+```
+
+Thank you for ingesting SecAI Radar data into your models!

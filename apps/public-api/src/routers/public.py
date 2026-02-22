@@ -6,6 +6,7 @@ Verified badge and attestation follow the definition in docs/VERIFIED-DEFINITION
 """
 
 from fastapi import APIRouter, Query, HTTPException, Depends
+from pydantic import BaseModel, HttpUrl, EmailStr
 from typing import Optional
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
@@ -17,11 +18,47 @@ from src.constants.attestation import (
     is_verified,
     build_attestation_envelope,
     record_integrity_digest,
+    calculate_decayed_score,
 )
 
 router = APIRouter(prefix="/api/v1/public", tags=["public"])
 
 METHODOLOGY_VERSION = "v1.0"
+
+class SubmissionRequest(BaseModel):
+    repoUrl: HttpUrl
+    integrationType: str
+    contactEmail: Optional[str] = None
+
+@router.post("/submissions")
+async def create_submission(request: SubmissionRequest, db: Session = Depends(get_db)):
+    """Accepts user submission of MCP or Agent repository URL."""
+    from src.models.submission import Submission
+    
+    # Validate integration type
+    if request.integrationType not in ["mcp", "agent"]:
+        raise HTTPException(status_code=400, detail="Invalid integrationType. Must be 'mcp' or 'agent'.")
+    
+    # Check if already submitted and pending
+    existing = db.query(Submission).filter(
+        Submission.repo_url == str(request.repoUrl),
+        Submission.status.in_(["pending", "processing"])
+    ).first()
+    
+    if existing:
+        return {"success": True, "message": "Submission already in queue.", "submissionId": existing.submission_id}
+        
+    new_sub = Submission(
+        repo_url=str(request.repoUrl),
+        integration_type=request.integrationType,
+        contact_email=str(request.contactEmail) if request.contactEmail else None,
+        status="pending"
+    )
+    db.add(new_sub)
+    db.commit()
+    db.refresh(new_sub)
+    
+    return {"success": True, "message": "Submission queued successfully.", "submissionId": new_sub.submission_id}
 
 
 @router.get("/mcp/summary")
@@ -153,8 +190,20 @@ async def get_server(idOrSlug: str, db: Session = Depends(get_db)):
     
     # Build latestScore object
     if score:
-        trust_score = float(score.trust_score) if score.trust_score else 0.0
+        base_trust_score = float(score.trust_score) if score.trust_score else 0.0
         tier = (score.tier if score.tier else "D") or "D"
+        
+        evidence_class = "C"
+        if score.explainability_json:
+            evidence_class = score.explainability_json.get("dominant_evidence_class", "C")
+            
+        trust_score = calculate_decayed_score(
+            base_score=base_trust_score,
+            evidence_class=evidence_class,
+            assessed_at=score.assessed_at if score.assessed_at else now,
+            query_time=now
+        )
+        
         integrity_digest = record_integrity_digest(
             server.server_id, trust_score, tier, evidence_ids, now
         )
@@ -170,6 +219,8 @@ async def get_server(idOrSlug: str, db: Session = Depends(get_db)):
             "d5": float(score.d5) if score.d5 else 0.0,
             "d6": float(score.d6) if score.d6 else 0.0,
             "trustScore": trust_score,
+            "baseTrustScore": base_trust_score,
+            "evidenceClass": evidence_class,
             "tier": tier,
             "enterpriseFit": (score.enterprise_fit if score.enterprise_fit else None) or "Experimental",
             "evidenceConfidence": int(score.evidence_confidence) if score.evidence_confidence else 0,
@@ -194,6 +245,8 @@ async def get_server(idOrSlug: str, db: Session = Depends(get_db)):
             "d5": 0.0,
             "d6": 0.0,
             "trustScore": 0.0,
+            "baseTrustScore": 0.0,
+            "evidenceClass": "C",
             "tier": "D",
             "enterpriseFit": "Experimental",
             "evidenceConfidence": 0,

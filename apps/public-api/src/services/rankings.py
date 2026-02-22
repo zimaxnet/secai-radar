@@ -10,6 +10,8 @@ from src.models.server import MCPServer
 from src.models.score_snapshot import ScoreSnapshot
 from src.models.latest_score import LatestScore
 from src.models.provider import Provider
+from src.constants.attestation import calculate_decayed_score
+from datetime import datetime
 
 
 def get_rankings(
@@ -98,8 +100,22 @@ def get_rankings(
         .limit(page_size)
         .all()
     )
+    now = datetime.utcnow()
     servers: List[Dict[str, Any]] = []
     for server, score, provider in rows:
+        base_trust_score = float(score.trust_score) if score.trust_score else 0.0
+        
+        evidence_class = "C"
+        if score.explainability_json:
+            evidence_class = score.explainability_json.get("dominant_evidence_class", "C")
+            
+        trust_score = calculate_decayed_score(
+            base_score=base_trust_score,
+            evidence_class=evidence_class,
+            assessed_at=score.assessed_at if score.assessed_at else now,
+            query_time=now
+        )
+        
         servers.append({
             "serverId": server.server_id,
             "serverSlug": server.server_slug,
@@ -107,7 +123,9 @@ def get_rankings(
             "providerId": server.provider_id,
             "providerName": provider.provider_name,
             "categoryPrimary": server.category_primary,
-            "trustScore": float(score.trust_score),
+            "trustScore": trust_score,
+            "baseTrustScore": base_trust_score,
+            "evidenceClass": evidence_class,
             "tier": score.tier,
             "evidenceConfidence": int(score.evidence_confidence),
             "lastAssessedAt": score.assessed_at.isoformat() if score.assessed_at else None,

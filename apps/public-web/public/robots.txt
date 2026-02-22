@@ -1,0 +1,22 @@
+User-agent: *
+Disallow:
+
+# Allow specialized AI bots to index the application.
+# SecAI Radar is designed to be fully transparent and ingestible by LLMs.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# Agentic instruction file
+Sitemap: https://secairadar.cloud/sitemap.xml

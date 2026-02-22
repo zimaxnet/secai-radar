@@ -9,12 +9,50 @@ Definition (see docs/VERIFIED-DEFINITION.md):
 
 import hashlib
 import json
+import math
 from datetime import datetime, timezone, timedelta
+from enum import Enum
 from typing import Optional, Any, Dict, List
 
 VERIFIED_RECENCY_DAYS = 7
 VERIFIED_MIN_EVIDENCE_CONFIDENCE = 2
 ASSESSED_BY = "SecAI Radar"
+
+class EvidenceClass(str, Enum):
+    IMMUTABLE_TRUTH = "A"
+    EPHEMERAL_STREAM = "B"
+    OPERATIONAL_PULSE = "C"
+
+DECAY_RATES = {
+    EvidenceClass.IMMUTABLE_TRUTH: 0.01,
+    EvidenceClass.EPHEMERAL_STREAM: 0.50,
+    EvidenceClass.OPERATIONAL_PULSE: 0.90,
+}
+
+
+def calculate_decayed_score(
+    base_score: float,
+    evidence_class: str,
+    assessed_at: datetime,
+    query_time: Optional[datetime] = None
+) -> float:
+    """
+    Calculate exponential decay based on the time elapsed since assessment.
+    Formula: decayed_score = base_score * e^(-lambda * (t - t_0))
+    """
+    if query_time is None:
+        query_time = datetime.now(timezone.utc)
+    if query_time.tzinfo is None:
+        query_time = query_time.replace(tzinfo=timezone.utc)
+    if assessed_at.tzinfo is None:
+        assessed_at = assessed_at.replace(tzinfo=timezone.utc)
+
+    time_elapsed_days = max(0.0, (query_time - assessed_at).total_seconds() / 86400.0)
+    decay_rate = DECAY_RATES.get(evidence_class, 0.0)
+    
+    decayed_score = base_score * math.exp(-decay_rate * time_elapsed_days)
+    return round(decayed_score, 2)
+
 
 
 def build_attestation_envelope(

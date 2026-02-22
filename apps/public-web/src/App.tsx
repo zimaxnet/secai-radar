@@ -12,7 +12,11 @@ const MCPDailyBrief = lazy(() => import('./routes/mcp/DailyBrief'))
 const MCPMethodology = lazy(() => import('./routes/mcp/Methodology'))
 const MCPChangelog = lazy(() => import('./routes/mcp/Changelog'))
 const MCPSubmit = lazy(() => import('./routes/mcp/Submit'))
+const MCPSubmitIntegration = lazy(() => import('./routes/mcp/SubmitIntegration'))
 const MCPAbout = lazy(() => import('./routes/mcp/About'))
+
+// Verified Agents
+const AgentDirectory = lazy(() => import('./routes/agents/AgentDirectory'))
 
 // Loading spinner component
 function LoadingSpinner() {
@@ -31,7 +35,12 @@ function App() {
         <Routes>
           {/* Root redirects to Verified MCP dashboard */}
           <Route path="/" element={<Navigate to="/mcp" replace />} />
-          
+
+          {/* Verified Agents Routes */}
+          <Route path="/agents" element={<MCPLayout />}>
+            <Route path="directory" element={<AgentDirectory />} />
+          </Route>
+
           {/* Verified MCP Public Routes */}
           <Route path="/mcp" element={<MCPLayout />}>
             <Route index element={<MCPOverview />} />
@@ -43,9 +52,10 @@ function App() {
             <Route path="methodology" element={<MCPMethodology />} />
             <Route path="changelog" element={<MCPChangelog />} />
             <Route path="submit" element={<MCPSubmit />} />
+            <Route path="submit-integration" element={<MCPSubmitIntegration />} />
             <Route path="about" element={<MCPAbout />} />
           </Route>
-          
+
           {/* Catch-all: redirect to MCP dashboard */}
           <Route path="*" element={<Navigate to="/mcp" replace />} />
         </Routes>

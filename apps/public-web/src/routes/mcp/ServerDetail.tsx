@@ -6,6 +6,7 @@
 
 import { useParams, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { getServerDetail } from '../../api/public'
 import { trackPageView } from '../../utils/analytics'
 import type { ServerStory } from '../../types/dataModel'
@@ -51,45 +52,45 @@ export default function ServerDetail() {
     if (tier === 'A' && trustScore >= 85) {
       title = `Why ${serverName} Sets the Standard for MCP Security`
       narrative = `${serverName} from ${providerName} represents the gold standard in MCP server security and trustworthiness. With a Trust Score of ${trustScore} and Tier A rating, this server demonstrates exceptional security practices across all six security domains. Our research shows that ${serverName} consistently maintains high evidence confidence (${evidenceConfidence}/3), meaning its security claims are well-documented and verifiable.`
-      
+
       highlights.push(`Tier A rating with ${trustScore} Trust Score`)
       highlights.push(`Evidence Confidence: ${evidenceConfidence}/3 (High)`)
       highlights.push(`Enterprise-ready for regulated environments`)
-      
+
       benefits.push('Strong authentication and authorization controls')
       benefits.push('Comprehensive audit logging and compliance')
       benefits.push('Proven track record of security best practices')
-      
+
       researchPoints.push('Verified through multiple evidence sources')
       researchPoints.push('Regular security assessments and updates')
       researchPoints.push('Transparent security documentation')
     } else if (tier === 'B' && trustScore >= 70) {
       title = `${serverName}: A Reliable Choice for MCP Integration`
       narrative = `${serverName} from ${providerName} offers a solid security foundation with a Trust Score of ${trustScore} and Tier B rating. This server provides good security coverage across key domains and is suitable for most enterprise use cases. With evidence confidence of ${evidenceConfidence}/3, ${serverName} demonstrates commitment to security transparency.`
-      
+
       highlights.push(`Tier B rating with ${trustScore} Trust Score`)
       highlights.push(`Evidence Confidence: ${evidenceConfidence}/3`)
       highlights.push(`Suitable for standard enterprise deployments`)
-      
+
       benefits.push('Good security posture with room for improvement')
       benefits.push('Active development and maintenance')
       benefits.push('Growing evidence base')
-      
+
       researchPoints.push('Regular security assessments')
       researchPoints.push('Ongoing security improvements')
       researchPoints.push('Community and vendor support')
     } else {
       title = `Exploring ${serverName}: An Emerging MCP Server`
       narrative = `${serverName} from ${providerName} is an emerging MCP server with a Trust Score of ${trustScore} and Tier ${tier} rating. While still building its security foundation, this server shows promise and active development. With evidence confidence of ${evidenceConfidence}/3, there's opportunity for growth in security transparency and practices.`
-      
+
       highlights.push(`Tier ${tier} rating with ${trustScore} Trust Score`)
       highlights.push(`Evidence Confidence: ${evidenceConfidence}/3`)
       highlights.push(`Early stage with development potential`)
-      
+
       benefits.push('Active development community')
       benefits.push('Innovative features and capabilities')
       benefits.push('Growing security awareness')
-      
+
       researchPoints.push('Limited evidence base')
       researchPoints.push('Opportunities for security improvements')
       researchPoints.push('Community-driven development')
@@ -123,10 +124,10 @@ export default function ServerDetail() {
       setLoading(true)
       try {
         const serverData = await getServerDetail(serverSlug)
-        
+
         if (serverData && serverData.server && serverData.latestScore) {
           const score = serverData.latestScore
-          
+
           const serverObj = {
             id: serverData.server.serverId,
             name: serverData.server.serverName,
@@ -146,23 +147,23 @@ export default function ServerDetail() {
               { domain: 'D5: Operational Security', score: (score.d5 || 0) * 20 },
               { domain: 'D6: Compliance', score: (score.d6 || 0) * 20 },
             ],
-            failFastChecklist: Array.isArray(score.failFastFlags) 
+            failFastChecklist: Array.isArray(score.failFastFlags)
               ? score.failFastFlags.map((flag: string) => ({
-                  item: flag,
-                  pass: false,
-                }))
+                item: flag,
+                pass: false,
+              }))
               : [],
             flags: Array.isArray(score.riskFlags)
               ? score.riskFlags.map((flag: string) => ({
-                  name: flag,
-                  severity: 'Medium',
-                  mitigation: 'Review configuration',
-                }))
+                name: flag,
+                severity: 'Medium',
+                mitigation: 'Review configuration',
+              }))
               : [],
           }
-          
+
           setServer(serverObj)
-          
+
           // Generate story for this server
           const story = generateStory(serverObj)
           setServerStory(story)
@@ -212,9 +213,41 @@ export default function ServerDetail() {
   }
 
   return (
-    <div className="space-y-6">
+    <article className="space-y-6">
+      <Helmet>
+        <title>{server.name} - SecAI Radar Trust Verification</title>
+        <meta name="description" content={`Security assessment and trust metrics for the ${server.name} Model Context Protocol (MCP) integration provided by ${server.provider}.`} />
+
+        {/* Schema.org SoftwareApplication JSON-LD */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": server.name,
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Any",
+            "provider": {
+              "@type": "Organization",
+              "name": server.provider
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": server.trustScore,
+              "bestRating": "100",
+              "worstRating": "0",
+              "reviewCount": "1",
+              "description": "SecAI Radar Trust Score"
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "0"
+            }
+          })}
+        </script>
+      </Helmet>
+
       {/* Hero Header */}
-      <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+      <header className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -247,11 +280,11 @@ export default function ServerDetail() {
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Tabs */}
       <div className="border-b border-slate-800">
-        <nav className="flex gap-1">
+        <nav aria-label="Server Details Navigation" className="flex gap-1">
           {[
             { id: 'story', label: 'Story' },
             { id: 'overview', label: 'Overview' },
@@ -263,11 +296,10 @@ export default function ServerDetail() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-slate-400 hover:text-white hover:border-slate-600'
-              }`}
+              className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === tab.id
+                ? 'border-blue-500 text-blue-400'
+                : 'border-transparent text-slate-400 hover:text-white hover:border-slate-600'
+                }`}
             >
               {tab.label}
             </button>
@@ -276,7 +308,7 @@ export default function ServerDetail() {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+      <section className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
         {activeTab === 'story' && serverStory && (
           <div className="space-y-6">
             <div>
@@ -300,7 +332,7 @@ export default function ServerDetail() {
                   ))}
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="text-xl font-semibold text-white mb-4">How You Can Benefit</h3>
                 <ul className="space-y-3">
@@ -407,16 +439,15 @@ export default function ServerDetail() {
                     const flagName = typeof flag.name === 'string' ? flag.name : JSON.stringify(flag.name || '')
                     const flagSeverity = typeof flag.severity === 'string' ? flag.severity : 'medium'
                     const flagMitigation = typeof flag.mitigation === 'string' ? flag.mitigation : 'Review configuration'
-                    
+
                     return (
                       <div key={idx} className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-sm font-medium text-white">{flagName}</span>
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            flagSeverity === 'high' ? 'bg-red-500/20 text-red-400' :
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${flagSeverity === 'high' ? 'bg-red-500/20 text-red-400' :
                             flagSeverity === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                            'bg-blue-500/20 text-blue-400'
-                          }`}>
+                              'bg-blue-500/20 text-blue-400'
+                            }`}>
                             {flagSeverity}
                           </span>
                         </div>
@@ -457,7 +488,7 @@ export default function ServerDetail() {
             <p className="text-sm text-slate-500 mt-2">Will show vendor right-to-respond statement and submission status</p>
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </article>
   )
 }

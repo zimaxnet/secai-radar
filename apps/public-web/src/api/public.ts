@@ -241,3 +241,56 @@ export async function getStatus(): Promise<StatusResponse | null> {
     return null
   }
 }
+
+/**
+ * Agent Rankings
+ * GET /api/v1/public/agents/rankings
+ */
+export async function getAgentRankings(page: number = 1, pageSize: number = 50): Promise<{
+  items: any[]
+  total: number
+  page: number
+  pageSize: number
+}> {
+  try {
+    const url = `${API_BASE}/v1/public/agents/rankings?page=${page}&pageSize=${pageSize}`
+    const response = await fetchWithTimeout(url, {
+      headers: { Accept: 'application/json' },
+    })
+
+    if (!response.ok) {
+      if (response.status === 404) return { items: [], total: 0, page: 1, pageSize: 50 };
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const parsed = await response.json();
+    return {
+      items: parsed?.data?.items || [],
+      total: parsed?.meta?.total || 0,
+      page: parsed?.meta?.page || 1,
+      pageSize: parsed?.meta?.pageSize || 50,
+    }
+  } catch (error) {
+    console.error('getAgentRankings Error:', error)
+    return { items: [], total: 0, page: 1, pageSize: 50 };
+  }
+}
+
+/**
+ * Submit Integration
+ * POST /api/v1/public/submissions
+ */
+export async function submitIntegration(data: { repoUrl: string; integrationType: 'mcp' | 'agent'; contactEmail?: string }): Promise<void> {
+  const url = `${API_BASE}/v1/public/submissions`
+  const response = await fetchWithTimeout(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: { message: response.statusText } }))
+    throw new Error(error.detail || error.error?.message || `API error: ${response.status}`)
+  }
+}
+
