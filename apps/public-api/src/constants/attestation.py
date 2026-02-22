@@ -29,6 +29,27 @@ DECAY_RATES = {
     EvidenceClass.OPERATIONAL_PULSE: 0.90,
 }
 
+REFRESH_CADENCE_HOURS = 24
+
+
+def build_decay_parameters() -> Dict[str, Any]:
+    """
+    Return the full decay mathematics for agent consumers.
+    Agents can use this to independently verify or predict score freshness.
+    """
+    return {
+        "formula": "decayed_score = base_score * exp(-lambda * elapsed_days)",
+        "lambdaRates": {
+            "A_ImmutableTruth": DECAY_RATES[EvidenceClass.IMMUTABLE_TRUTH],
+            "B_EphemeralStream": DECAY_RATES[EvidenceClass.EPHEMERAL_STREAM],
+            "C_OperationalPulse": DECAY_RATES[EvidenceClass.OPERATIONAL_PULSE],
+        },
+        "refreshCadenceHours": REFRESH_CADENCE_HOURS,
+        "description": "Exponential truth decay applied per evidence class. "
+                       "Class A (immutable on-chain/SBOM evidence) decays slowly. "
+                       "Class C (operational signals like GitHub stars) decays within days.",
+    }
+
 
 def calculate_decayed_score(
     base_score: float,

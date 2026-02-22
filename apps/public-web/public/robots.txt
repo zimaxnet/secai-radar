@@ -18,5 +18,15 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
+User-agent: Anthropic-AI
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+# Agent discovery endpoints
+# llms.txt — Markdown cheat-sheet for AI agents (llmstxt.org standard)
+# .well-known/trust-scores.json — machine-readable API manifest
+
 # Agentic instruction file
 Sitemap: https://secairadar.cloud/sitemap.xml

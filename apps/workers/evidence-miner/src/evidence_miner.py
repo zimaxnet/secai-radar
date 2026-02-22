@@ -75,11 +75,18 @@ def _fetch_github_popularity(owner: str, repo: str) -> Optional[Dict[str, Any]]:
     """
     # GitHub API: GET /repos/{owner}/{repo}
     # No auth required for public repos (rate limit: 60/hour per IP)
+    # With auth, rate limit increases to 5,000/hour
     api_url = f"https://api.github.com/repos/{owner}/{repo}"
     
     try:
         # Use Accept header for GitHub API v3
         headers = {"Accept": "application/vnd.github.v3+json"}
+        
+        # Add authentication if token is available
+        github_token = os.getenv("GITHUB_TOKEN")
+        if github_token:
+            headers["Authorization"] = f"Bearer {github_token}"
+            
         r = requests.get(api_url, headers=headers, timeout=10)
         
         if r.status_code == 404:

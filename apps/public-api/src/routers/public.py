@@ -19,6 +19,7 @@ from src.constants.attestation import (
     build_attestation_envelope,
     record_integrity_digest,
     calculate_decayed_score,
+    build_decay_parameters,
 )
 
 router = APIRouter(prefix="/api/v1/public", tags=["public"])
@@ -133,7 +134,16 @@ async def get_rankings(
         eids = it.get("evidenceIds") or it.get("evidence_ids") or []
         it["integrityDigest"] = record_integrity_digest(sid, ts, t, eids, now)
     return {
+        "@context": {
+            "@vocab": "https://schema.org/",
+            "secai": "https://secairadar.cloud/ontology/",
+            "trustScore": "secai:trustScore",
+            "domainScores": "secai:domainScores",
+            "integrityDigest": "secai:integrityDigest",
+            "evidenceClass": "secai:evidenceClass",
+        },
         "attestation": build_attestation_envelope(METHODOLOGY_VERSION, as_of=now),
+        "decayParameters": build_decay_parameters(),
         "methodologyVersion": METHODOLOGY_VERSION,
         "generatedAt": now.isoformat(),
         "data": {"items": items},

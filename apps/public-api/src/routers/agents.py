@@ -16,6 +16,7 @@ from src.constants.attestation import (
     build_attestation_envelope,
     record_integrity_digest,
     calculate_decayed_score,
+    build_decay_parameters,
 )
 
 from src.models.agent import Agent
@@ -77,13 +78,30 @@ async def get_agent_rankings(
             "baseTrustScore": base_trust_score,
             "evidenceClass": evidence_class,
             "tier": tier,
+            "domainScores": {
+                "d1_authentication": float(score.d1) if score and score.d1 else 0.0,
+                "d2_authorization": float(score.d2) if score and score.d2 else 0.0,
+                "d3_dataProtection": float(score.d3) if score and hasattr(score, 'd3') and score.d3 else 0.0,
+                "d4_auditTrail": float(score.d4) if score and hasattr(score, 'd4') and score.d4 else 0.0,
+                "d5_operationalSecurity": float(score.d5) if score and hasattr(score, 'd5') and score.d5 else 0.0,
+                "d6_compliance": float(score.d6) if score and hasattr(score, 'd6') and score.d6 else 0.0,
+            },
             "evidenceConfidence": int(score.evidence_confidence) if score and score.evidence_confidence else 0,
             "lastAssessedAt": score.assessed_at.isoformat() if score and score.assessed_at else None,
             "integrityDigest": integrity_digest
         })
 
     return {
+        "@context": {
+            "@vocab": "https://schema.org/",
+            "secai": "https://secairadar.cloud/ontology/",
+            "trustScore": "secai:trustScore",
+            "domainScores": "secai:domainScores",
+            "integrityDigest": "secai:integrityDigest",
+            "evidenceClass": "secai:evidenceClass",
+        },
         "attestation": build_attestation_envelope(METHODOLOGY_VERSION, as_of=now),
+        "decayParameters": build_decay_parameters(),
         "methodologyVersion": METHODOLOGY_VERSION,
         "generatedAt": now.isoformat(),
         "data": {"items": items},

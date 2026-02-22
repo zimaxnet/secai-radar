@@ -73,11 +73,12 @@ async def public_health():
 
 
 # Import routers
-from src.routers import public, status, pipeline, agents
+from src.routers import public, status, pipeline, agents, well_known
 
 # Include routers
 app.include_router(public.router)
 app.include_router(agents.router)
+app.include_router(well_known.router)
 app.include_router(status.router)
 app.include_router(pipeline.router)
 
