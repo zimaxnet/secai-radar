@@ -27,6 +27,7 @@ const FETCH_TIMEOUT_MS = 12_000
 export interface StatusResponse {
   status: string
   lastSuccessfulRun: string | null
+  lastPipelineRun?: string | null
   timestamp: string
 }
 
@@ -235,6 +236,7 @@ export async function getStatus(): Promise<StatusResponse | null> {
     return {
       status: data.status ?? 'operational',
       lastSuccessfulRun: data.lastSuccessfulRun ?? null,
+      lastPipelineRun: data.lastPipelineRun ?? null,
       timestamp: data.timestamp ?? new Date().toISOString(),
     }
   } catch {

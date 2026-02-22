@@ -11,17 +11,27 @@ const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000
  */
 export default function MCPLayout() {
   const location = useLocation()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [lastSuccessfulRun, setLastSuccessfulRun] = useState<string | null | undefined>(undefined)
+  const [lastPipelineRun, setLastPipelineRun] = useState<string | null>(null)
 
   useEffect(() => {
-    getStatus().then((s) => setLastSuccessfulRun(s?.lastSuccessfulRun ?? null))
+    getStatus().then((s) => {
+      setLastSuccessfulRun(s?.lastSuccessfulRun ?? null)
+      setLastPipelineRun(s?.lastPipelineRun ?? null)
+    })
   }, [])
+
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [location.pathname])
 
   const isStale =
     lastSuccessfulRun === null ||
     lastSuccessfulRun === undefined ||
     (lastSuccessfulRun !== null && Date.now() - new Date(lastSuccessfulRun).getTime() > STALE_THRESHOLD_MS)
   const showStaleBanner = lastSuccessfulRun !== undefined && isStale
+  const displayedLastRun = lastPipelineRun ?? lastSuccessfulRun
 
   const navLinks = [
     { to: '/mcp', label: 'Verified MCP', exact: true },
@@ -78,6 +88,15 @@ export default function MCPLayout() {
               })}
             </nav>
 
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              className="md:hidden inline-flex items-center justify-center rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5"
+              aria-label="Toggle mobile navigation"
+            >
+              Menu
+            </button>
+
             {/* Global Controls (Right Side) */}
             <div className="flex items-center gap-4">
               {/* Search */}
@@ -114,12 +133,39 @@ export default function MCPLayout() {
             </div>
           </div>
         </div>
+
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-white/5 px-4 py-3">
+            <div className="grid grid-cols-2 gap-2">
+              {navLinks.map(link => {
+                const active = isActive(link.to, link.exact)
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors text-center ${active
+                      ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                      : link.cta
+                        ? 'text-white bg-blue-600 hover:bg-blue-700'
+                        : 'text-slate-300 hover:text-white hover:bg-white/5'
+                      }`}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </header>
 
       {/* T-081: Stale-data banner when last pipeline run > 24h or never run */}
       {showStaleBanner && (
         <div className="bg-amber-500/10 border-b border-amber-500/30 text-amber-200 px-4 py-2 text-center text-sm">
-          Data may be outdated. Last pipeline run: {lastSuccessfulRun ? new Date(lastSuccessfulRun).toLocaleString() : 'never'}.
+          Data may be outdated. Last pipeline run: {displayedLastRun ? new Date(displayedLastRun).toLocaleString() : 'never'}.
+          <span className="block text-xs text-amber-300/90 mt-1">
+            Last successful run: {lastSuccessfulRun ? new Date(lastSuccessfulRun).toLocaleString() : 'never'}.
+          </span>
         </div>
       )}
 

@@ -208,6 +208,7 @@ export async function getCurrentDailyBrief(): Promise<DailyBrief | null> {
 export interface StatusResponse {
   status: string
   lastSuccessfulRun: string | null
+  lastPipelineRun?: string | null
   timestamp: string
 }
 
@@ -223,6 +224,7 @@ export async function getStatus(): Promise<StatusResponse | null> {
     return {
       status: data.status ?? 'operational',
       lastSuccessfulRun: data.lastSuccessfulRun ?? null,
+      lastPipelineRun: data.lastPipelineRun ?? null,
       timestamp: data.timestamp ?? new Date().toISOString(),
     }
   } catch {
